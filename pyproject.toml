@@ -1,7 +1,66 @@
 [build-system]
-requires = ["setuptools", "cython"]
+requires = [
+    "setuptools >= 69.2",
+    "cython",
+]
+build-backend = "setuptools.build_meta"
 
-[tool.isort]
-profile = "black"
-known_first_party = ["av"]
-skip = ["av/__init__.py"]
+[project]
+name = "pylibav"
+dynamic = ["version"]
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+]
+authors = [
+    {name = "Mike Boers"}
+]
+description = "Pythonic bindings for FFmpeg's libav."
+readme = "README.md"
+license = {text = "BSD"}
+keywords = ["pylibav"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: Unix",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Cython",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Video :: Conversion",
+]
+
+[project.urls]
+Homepage = "https://github.com/adegerard/pylibav"
+
+[project.optional-dependencies]
+build = ["build", "cython"]
+test = ["pillow"]
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+# packages = ["pylibav"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pylibav.__version__"}
+
+[tool.setuptools.packages.find]
+# where = ["pylibav"]
+include = ["pylibav"]
+
+
+# [tool.hatch.build]
+# include = [
+#     "pylibav.libs",
+# ]
+
+
+# [tool.isort]
+# profile = "black"
+# known_first_party = ["pylibav"]
+# skip = ["pylibav/__init__.py"]
+

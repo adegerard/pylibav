@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Make sure this is sourced.
+if [[ "$0" == "${BASH_SOURCE[0]}" ]]; then
+    echo This must be sourced.
+    exit 1
+fi
+
+export PYLIBAV_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.."; pwd)"
+
+
+# Pull from command line argument.
+# if [[ "$1" ]]; then
+#     PYLIBAV_LIBRARY="$1"
+# else
+#     PYLIBAV_LIBRARY="./pyav"
+#     echo "No \$PYLIBAV_LIBRARY provided; force to $PYLIBAV_LIBRARY"
+# fi
+echo
+export PYLIBAV_LIBRARY="$PYLIBAV_ROOT/tmp/ffmpeg"
+# export PYLIBAV_LIBRARY_ROOT="${PYLIBAV_LIBRARY_ROOT-$PYLIBAV_ROOT/}"
+# export PYLIBAV_LIBRARY_ROOT="${PYLIBAV_LIBRARY}"
+# export PYLIBAV_LIBRARY_BUILD="${PYLIBAV_ROOT/build}"
+# export PYLIBAV_LIBRARY_PREFIX="$PYLIBAV_LIBRARY"
+
+
+export PKG_CONFIG_PATH="$PYLIBAV_LIBRARY/lib/pkgconfig:$PKG_CONFIG_PATH"
+export LD_LIBRARY_PATH="$PYLIBAV_LIBRARY/lib:$LD_LIBRARY_PATH"
+export PATH="$PYLIBAV_LIBRARY/bin:$PATH"
+
+export DYLD_LIBRARY_PATH="$PYLIBAV_LIBRARY/lib:$DYLD_LIBRARY_PATH"
+
+# Set flag to indicate that the env has been set
+
+# Build
+cd "$PYLIBAV_ROOT"
+env | grep PYAV | sort
+echo
+echo PKG_CONFIG_PATH: $PKG_CONFIG_PATH
+echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
+echo
+
+
+which ffmpeg
+ffmpeg -version
+echo
+
+# create source: python setup.py sdist
+# python setup.py config build_ext --inplace || exit 1
+# --fmpeg-dir=$PYLIBAV_LIBRARY_ROOT
