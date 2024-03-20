@@ -20,16 +20,15 @@
 /*.sdf
 /*.sln
 /*.suo
-/av/**/*.exp
-/av/**/*.lib
-/av/**/*.pdb
-/av/**/*.pyd
+# /pylibav/**/*.exp
+# /pylibav/**/*.lib
+# /pylibav/**/*.pdb
+# /pylibav/**/*.pyd
 /build
 /dist
 /docs/_build
 /ipch
 /msvc-projects
-/src
 /docs/_ffmpeg
 
 # Testing.

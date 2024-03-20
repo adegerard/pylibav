@@ -4,7 +4,7 @@ import sys
 
 # MUST import the core before anything else in order to initalize the underlying
 # library that is being wrapped.
-from ._core import time_base, library_versions
+from pylibav._core import time_base, library_versions
 
 # Capture logging (by importing it).
 from logging import logging

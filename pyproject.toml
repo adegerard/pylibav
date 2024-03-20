@@ -43,15 +43,19 @@ test = ["pillow"]
 
 [tool.setuptools]
 license-files = ["LICENSE"]
-# packages = ["pylibav"]
 
 [tool.setuptools.dynamic]
 version = {attr = "pylibav.__version__"}
 
-[tool.setuptools.packages.find]
-# where = ["pylibav"]
-include = ["pylibav"]
+# [tool.setuptools.package-dir]
+# pylibav = "pylibav"
 
+
+# [tool.setuptools.packages.find]
+# where = ["."]
+# include = ["pylibav"]
+# exclude = ["build", "patches"]
+# namespaces = false
 
 # [tool.hatch.build]
 # include = [
