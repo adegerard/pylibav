@@ -2,6 +2,7 @@
 requires = [
     "setuptools >= 69.2",
     "cython",
+    "numpy",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -47,8 +48,19 @@ license-files = ["LICENSE"]
 [tool.setuptools.dynamic]
 version = {attr = "pylibav.__version__"}
 
-# [tool.setuptools.package-dir]
-# pylibav = "pylibav"
+
+[tool.setuptools.package-data]
+pylibav = ["*.so*"]
+
+# exclude = [
+#   "tests/**",
+# ]
+
+
+
+# [tool.setuptools]
+# packages = "pylibav"
+# package-dir = {"" = "src"}
 
 
 # [tool.setuptools.packages.find]

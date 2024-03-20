@@ -247,33 +247,6 @@ cdef class VideoFrame(Frame):
         """
         return self.reformat(format="rgb24", **kwargs)
 
-    def to_image(self, **kwargs):
-        """Get an RGB ``PIL.Image`` of this frame.
-
-        Any ``**kwargs`` are passed to :meth:`.VideoReformatter.reformat`.
-
-        .. note:: PIL or Pillow must be installed.
-
-        """
-        from PIL import Image
-        cdef VideoPlane plane = self.reformat(format="rgb24", **kwargs).planes[0]
-
-        cdef const uint8_t[:] i_buf = plane
-        cdef size_t i_pos = 0
-        cdef size_t i_stride = plane.line_size
-
-        cdef size_t o_pos = 0
-        cdef size_t o_stride = plane.width * 3
-        cdef size_t o_size = plane.height * o_stride
-        cdef bytearray o_buf = bytearray(o_size)
-
-        while o_pos < o_size:
-            o_buf[o_pos:o_pos + o_stride] = i_buf[i_pos:i_pos + o_stride]
-            i_pos += i_stride
-            o_pos += o_stride
-
-        return Image.frombytes("RGB", (plane.width, plane.height), bytes(o_buf), "raw", "RGB", 0, 1)
-
     def to_ndarray(self, **kwargs):
         """Get a numpy array of this frame.
 

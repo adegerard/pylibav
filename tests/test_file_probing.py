@@ -1,115 +1,10 @@
 import warnings
 from fractions import Fraction
 
-import av
+import pylibav
 
 from .common import TestCase, fate_suite
 
-
-class TestAudioProbe(TestCase):
-    def setUp(self):
-        self.file = av.open(fate_suite("aac/latm_stereo_to_51.ts"))
-
-    def test_container_probing(self):
-        self.assertEqual(self.file.bit_rate, 269558)
-        self.assertEqual(self.file.duration, 6165333)
-        self.assertEqual(str(self.file.format), "<av.ContainerFormat 'mpegts'>")
-        self.assertEqual(self.file.format.name, "mpegts")
-        self.assertEqual(
-            self.file.format.long_name, "MPEG-TS (MPEG-2 Transport Stream)"
-        )
-        self.assertEqual(self.file.metadata, {})
-        self.assertEqual(self.file.size, 207740)
-        self.assertEqual(self.file.start_time, 1400000)
-        self.assertEqual(len(self.file.streams), 1)
-
-    def test_stream_probing(self):
-        stream = self.file.streams[0]
-
-        # check __repr__
-        self.assertTrue(
-            str(stream).startswith(
-                "<av.AudioStream #0 aac_latm at 48000Hz, stereo, fltp at "
-            )
-        )
-
-        # actual stream properties
-        self.assertEqual(stream.duration, 554880)
-        self.assertEqual(stream.frames, 0)
-        self.assertEqual(stream.id, 256)
-        self.assertEqual(stream.index, 0)
-        self.assertEqual(stream.language, "eng")
-        self.assertEqual(stream.metadata, {"language": "eng"})
-        self.assertEqual(stream.profile, "LC")
-        self.assertEqual(stream.start_time, 126000)
-        self.assertEqual(stream.time_base, Fraction(1, 90000))
-        self.assertEqual(stream.type, "audio")
-
-        # codec context properties
-        self.assertEqual(stream.bit_rate, None)
-        self.assertEqual(stream.channels, 2)
-        self.assertEqual(stream.codec.name, "aac_latm")
-        self.assertEqual(
-            stream.codec.long_name, "AAC LATM (Advanced Audio Coding LATM syntax)"
-        )
-        self.assertEqual(stream.format.bits, 32)
-        self.assertEqual(stream.format.name, "fltp")
-        self.assertEqual(stream.layout.name, "stereo")
-        self.assertEqual(stream.max_bit_rate, None)
-        self.assertEqual(stream.sample_rate, 48000)
-
-
-class TestAudioProbeCorrupt(TestCase):
-    def setUp(self):
-        # write an empty file
-        path = self.sandboxed("empty.flac")
-        with open(path, "wb"):
-            pass
-
-        self.file = av.open(path)
-
-    def test_container_probing(self):
-        self.assertEqual(self.file.bit_rate, 0)
-        self.assertEqual(self.file.duration, None)
-        self.assertEqual(str(self.file.format), "<av.ContainerFormat 'flac'>")
-        self.assertEqual(self.file.format.name, "flac")
-        self.assertEqual(self.file.format.long_name, "raw FLAC")
-        self.assertEqual(self.file.metadata, {})
-        self.assertEqual(self.file.size, 0)
-        self.assertEqual(self.file.start_time, None)
-        self.assertEqual(len(self.file.streams), 1)
-
-    def test_stream_probing(self):
-        stream = self.file.streams[0]
-
-        # ensure __repr__ does not crash
-        self.assertTrue(
-            str(stream).startswith(
-                "<av.AudioStream #0 flac at 0Hz, 0 channels, None at "
-            )
-        )
-
-        # actual stream properties
-        self.assertEqual(stream.duration, None)
-        self.assertEqual(stream.frames, 0)
-        self.assertEqual(stream.id, 0)
-        self.assertEqual(stream.index, 0)
-        self.assertEqual(stream.language, None)
-        self.assertEqual(stream.metadata, {})
-        self.assertEqual(stream.profile, None)
-        self.assertEqual(stream.start_time, None)
-        self.assertEqual(stream.time_base, Fraction(1, 90000))
-        self.assertEqual(stream.type, "audio")
-
-        # codec context properties
-        self.assertEqual(stream.bit_rate, None)
-        self.assertEqual(stream.codec.name, "flac")
-        self.assertEqual(stream.codec.long_name, "FLAC (Free Lossless Audio Codec)")
-        self.assertEqual(stream.channels, 0)
-        self.assertEqual(stream.format, None)
-        self.assertEqual(stream.layout.name, "0 channels")
-        self.assertEqual(stream.max_bit_rate, None)
-        self.assertEqual(stream.sample_rate, 0)
 
 
 class TestDataProbe(TestCase):
@@ -193,62 +88,6 @@ class TestDataProbe(TestCase):
         # codec context properties
         self.assertEqual(stream.codec, None)
 
-
-class TestSubtitleProbe(TestCase):
-    def setUp(self):
-        self.file = av.open(fate_suite("sub/MovText_capability_tester.mp4"))
-
-    def test_container_probing(self):
-        self.assertEqual(self.file.bit_rate, 810)
-        self.assertEqual(self.file.duration, 8140000)
-        self.assertEqual(
-            str(self.file.format), "<av.ContainerFormat 'mov,mp4,m4a,3gp,3g2,mj2'>"
-        )
-        self.assertEqual(self.file.format.name, "mov,mp4,m4a,3gp,3g2,mj2")
-        self.assertEqual(self.file.format.long_name, "QuickTime / MOV")
-        self.assertEqual(
-            self.file.metadata,
-            {
-                "compatible_brands": "isom",
-                "creation_time": "2012-07-04T05:10:41.000000Z",
-                "major_brand": "isom",
-                "minor_version": "1",
-            },
-        )
-        self.assertEqual(self.file.size, 825)
-        self.assertEqual(self.file.start_time, None)
-        self.assertEqual(len(self.file.streams), 1)
-
-    def test_stream_probing(self):
-        stream = self.file.streams[0]
-
-        # check __repr__
-        self.assertTrue(
-            str(stream).startswith("<av.SubtitleStream #0 subtitle/mov_text at ")
-        )
-
-        # actual stream properties
-        self.assertEqual(stream.duration, 8140)
-        self.assertEqual(stream.frames, 6)
-        self.assertEqual(stream.id, 1)
-        self.assertEqual(stream.index, 0)
-        self.assertEqual(stream.language, "und")
-        self.assertEqual(
-            stream.metadata,
-            {
-                "creation_time": "2012-07-04T05:10:41.000000Z",
-                "handler_name": "reference.srt - Imported with GPAC 0.4.6-DEV-rev4019",
-                "language": "und",
-            },
-        )
-        self.assertEqual(stream.profile, None)
-        self.assertEqual(stream.start_time, None)
-        self.assertEqual(stream.time_base, Fraction(1, 1000))
-        self.assertEqual(stream.type, "subtitle")
-
-        # codec context properties
-        self.assertEqual(stream.codec.name, "mov_text")
-        self.assertEqual(stream.codec.long_name, "3GPP Timed Text subtitle")
 
 
 class TestVideoProbe(TestCase):

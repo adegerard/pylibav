@@ -1,12 +1,12 @@
 {
     "files.exclude": {
         "build": true,
-        "source": true,
         "av.egg-info": true,
         "dist": true,
-        "sandbox": true,
-        "tmp": true,
         "venvs": true,
-        "src/av": true,
-    }
+        "src/pylibav/lib": true
+    },
+    // "python.analysis.extraPaths": [
+    //     "src/pylibav",
+    // ],
 }

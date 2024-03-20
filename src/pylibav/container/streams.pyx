@@ -30,8 +30,6 @@ cdef class StreamContainer:
     def __cinit__(self):
         self._streams = []
         self.video = ()
-        self.audio = ()
-        self.subtitles = ()
         self.data = ()
         self.other = ()
 
@@ -42,10 +40,6 @@ cdef class StreamContainer:
 
         if stream.ptr.codecpar.codec_type == lib.AVMEDIA_TYPE_VIDEO:
             self.video = self.video + (stream, )
-        elif stream.ptr.codecpar.codec_type == lib.AVMEDIA_TYPE_AUDIO:
-            self.audio = self.audio + (stream, )
-        elif stream.ptr.codecpar.codec_type == lib.AVMEDIA_TYPE_SUBTITLE:
-            self.subtitles = self.subtitles + (stream, )
         elif stream.ptr.codecpar.codec_type == lib.AVMEDIA_TYPE_DATA:
             self.data = self.data + (stream, )
         else:
@@ -65,7 +59,7 @@ cdef class StreamContainer:
             return self.get(index)
 
     def get(self, *args, **kwargs):
-        """get(streams=None, video=None, audio=None, subtitles=None, data=None)
+        """get(streams=None, video=None, data=None)
 
         Get a selection of :class:`.Stream` as a ``list``.
 

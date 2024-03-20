@@ -318,11 +318,11 @@ def main() -> None:
             libraries = glob.glob(os.path.join(deploy_dir, "lib", "*.dylib"))
 
         # strip libraries
-        if IS_PLATFORM_DARWIN:
-            run(["strip", "-S"] + libraries)
-            run(["otool", "-L"] + libraries)
-        else:
-            run(["strip", "-s"] + libraries)
+        # if IS_PLATFORM_DARWIN:
+        #     run(["strip", "-S"] + libraries)
+        #     run(["otool", "-L"] + libraries)
+        # else:
+        #     run(["strip", "-s"] + libraries)
 
         # build output tarball
         if build_stage is None or build_stage == 2:

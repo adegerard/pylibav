@@ -3,14 +3,14 @@ Contributors
 
 All contributors (by number of commits):
 
-- Mike Boers <github@mikeboers.com>; `@mikeboers <https://github.com/mikeboers>`_
+- Mike Boers <github@mikeboers.com>
 
-* Jeremy Lainé <jeremy.laine@m4x.org>; `@jlaine <https://github.com/jlaine>`_
+* Jeremy Lainé <jeremy.laine@m4x.org>
 
-- Mark Reid <mindmark@gmail.com>; `@markreidvfx <https://github.com/markreidvfx>`_
+- Mark Reid <mindmark@gmail.com>
 
-* Vidar Tonaas Fauske <vidartf@gmail.com>; `@vidartf <https://github.com/vidartf>`_
-* Billy Shambrook <billy.shambrook@gmail.com>; `@billyshambrook <https://github.com/billyshambrook>`_
+* Vidar Tonaas Fauske <vidartf@gmail.com>
+* Billy Shambrook <billy.shambrook@gmail.com>
 * Casper van der Wel <caspervdw@gmail.com>
 * Philip de Nier <philipn@rd.bbc.co.uk>
 * Tadas Dailyda <tadas@dailyda.com>
@@ -18,18 +18,18 @@ All contributors (by number of commits):
 * Justin Wong <46082645+uvjustin@users.noreply.github.com>
 
 - Alba Mendez <me@alba.sh>
-- Xinran Xu <xxr@megvii.com>; `@xxr3376 <https://github.com/xxr3376>`_
-- Dan Allan <daniel.b.allan@gmail.com>; `@danielballan <https://github.com/danielballan>`_
+- Xinran Xu <xxr@megvii.com>
+- Dan Allan <daniel.b.allan@gmail.com>
 - Dave Johansen <davejohansen@gmail.com>
 - Mark Harfouche <mark.harfouche@gmail.com>
 - Christoph Rackwitz <christoph.rackwitz@gmail.com>
-- Alireza Davoudi <davoudialireza@gmail.com>; `@adavoudi <https://github.com/adavoudi>`_
+- Alireza Davoudi <davoudialireza@gmail.com>
 - Jonathan Drolet <jonathan.drolet@riedel.net>
-- Moritz Kassner <moritzkassner@gmail.com>; `@mkassner <https://github.com/mkassner>`_
-- Thomas A Caswell <tcaswell@gmail.com>; `@tacaswell <https://github.com/tacaswell>`_
-- Ulrik Mikaelsson <ulrik.mikaelsson@magine.com>; `@rawler <https://github.com/rawler>`_
+- Moritz Kassner <moritzkassner@gmail.com>
+- Thomas A Caswell <tcaswell@gmail.com>
+- Ulrik Mikaelsson <ulrik.mikaelsson@magine.com>
 - Wel C. van der <wel@Physics.LeidenUniv.nl>
-- Will Patera <willpatera@gmail.com>; `@willpatera <https://github.com/willpatera>`_
+- Will Patera <willpatera@gmail.com>
 
 * rutsh <Eugene.Krokhalev@gmail.com>
 * Felix Vollmer <FelixVollmer@gmail.com>
@@ -37,13 +37,13 @@ All contributors (by number of commits):
 * Christian Clauss <cclauss@me.com>
 * Ihor Liubymov <ihor.liubymov@ring.com>
 * Johannes Erdfelt <johannes@erdfelt.com>
-* Karl Litterfeldt <kalle.litterfeldt@gmail.com>; `@litterfeldt <https://github.com/litterfeldt>`_
+* Karl Litterfeldt <kalle.litterfeldt@gmail.com>
 * Martin Larralde <martin.larralde@ens-cachan.fr>
 * Simon-Martin Schröder <martin.schroeder@nerdluecht.de>
 * mephi42 <mephi42@gmail.com>
 * Miles Kaufmann <mkfmnn@gmail.com>
 * Pablo Prietz <pablo@prietz.org>
-* Radek Senfeld <rush@logic.cz>; `@radek-senfeld <https://github.com/radek-senfeld>`_
+* Radek Senfeld <rush@logic.cz>
 * Benjamin Chrétien <2742231+bchretien@users.noreply.github.com>
 * Marc Mueller <30130371+cdce8p@users.noreply.github.com>
 * zzjjbb <31069326+zzjjbb@users.noreply.github.com>
@@ -70,7 +70,7 @@ All contributors (by number of commits):
 * Santiago Castro <sacastro@umich.edu>
 * Kengo Sawatsu <seattleserv0@gmail.com>
 * FirefoxMetzger <sebastian@wallkoetter.net>
-* Brendan Long <self@brendanlong.com>; `@brendanlong <https://github.com/brendanlong>`_
+* Brendan Long <self@brendanlong.com>
 * Семён Марьясин <simeon@maryasin.name>
 * Stephen.Y <stepheny@users.noreply.github.com>
 * Tom Flanagan <theknio@gmail.com>

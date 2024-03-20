@@ -1,6 +1,3 @@
-include *.txt *.md
-recursive-include pylibav *.pyx *.pxd
-recursive-include examples *.py
+include pyproject.toml
+include *.md
 recursive-include include *.pxd *.h
-recursive-include src/av *.c
-recursive-include tests *.py

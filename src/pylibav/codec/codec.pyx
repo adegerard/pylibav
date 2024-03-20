@@ -1,4 +1,3 @@
-from pylibav.audio.format cimport get_audio_format
 from pylibav.descriptor cimport wrap_avclass
 from pylibav.enum cimport define_enum
 from pylibav.utils cimport avrational_to_fraction

@@ -112,7 +112,7 @@ class Builder:
         self.dl_dir = os.path.abspath(os.path.join(build_dir, "downloads"))
         self.host_package_dir = os.path.abspath(os.path.join(build_dir, "host"))
         self.package_work_dir = os.path.abspath(
-            os.path.join(build_dir, "tmp", "deploy", package_name)
+            os.path.join(self.workdir, f"{package_name}-{get_platform_tag()}")
         )
 
         print(f"- downloads directory: {self.dl_dir}")

@@ -1,4 +1,4 @@
-from av import error, logging
+from error import error, logging
 
 from .audio.format import *
 from .audio.frame import *

@@ -1,4 +1,5 @@
-from pylibav.filter.link cimport wrap_filter_link
+cimport include.libav as lib
+from .link cimport wrap_filter_link
 
 
 cdef object _cinit_sentinel = object()

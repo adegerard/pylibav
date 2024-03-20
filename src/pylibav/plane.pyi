@@ -1,5 +1,5 @@
-from .buffer import Buffer
-from .frame import Frame
+from pylibav.buffer import Buffer
+from pylibav.frame import Frame
 
 class Plane(Buffer):
     frame: Frame

@@ -1,7 +1,6 @@
 from fractions import Fraction
 from typing import Literal
 
-from pylibav.audio.format import AudioFormat
 from pylibav.descriptor import Descriptor
 from pylibav.enum import EnumFlag
 from pylibav.video.format import VideoFormat
