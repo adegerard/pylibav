@@ -1,4 +1,4 @@
-from av.enum import EnumItem
+from pylibav.enum import EnumItem
 
 from .frame import VideoFrame
 

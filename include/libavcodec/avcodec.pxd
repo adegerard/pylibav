@@ -22,26 +22,27 @@ cdef extern from "libavcodec/avcodec.h" nogil:
     cdef int64_t AV_NOPTS_VALUE
 
     # AVCodecDescriptor.props
+    # codec_desc.h
     cdef enum:
         AV_CODEC_PROP_INTRA_ONLY
         AV_CODEC_PROP_LOSSY
         AV_CODEC_PROP_LOSSLESS
         AV_CODEC_PROP_REORDER
+        AV_CODEC_PROP_FIELDS
         AV_CODEC_PROP_BITMAP_SUB
         AV_CODEC_PROP_TEXT_SUB
 
     # AVCodec.capabilities
+    # codec.h
     cdef enum:
         AV_CODEC_CAP_DRAW_HORIZ_BAND
         AV_CODEC_CAP_DR1
         # AV_CODEC_CAP_HWACCEL
         AV_CODEC_CAP_DELAY
         AV_CODEC_CAP_SMALL_LAST_FRAME
-        # AV_CODEC_CAP_HWACCEL_VDPAU
         AV_CODEC_CAP_SUBFRAMES
         AV_CODEC_CAP_EXPERIMENTAL
         AV_CODEC_CAP_CHANNEL_CONF
-        # AV_CODEC_CAP_NEG_LINESIZES
         AV_CODEC_CAP_FRAME_THREADS
         AV_CODEC_CAP_SLICE_THREADS
         AV_CODEC_CAP_PARAM_CHANGE
@@ -51,11 +52,14 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AV_CODEC_CAP_HARDWARE
         AV_CODEC_CAP_HYBRID
         AV_CODEC_CAP_ENCODER_REORDERED_OPAQUE
+        AV_CODEC_CAP_ENCODER_FLUSH
+        AV_CODEC_CAP_ENCODER_RECON_FRAME
 
     cdef enum:
         FF_THREAD_FRAME
         FF_THREAD_SLICE
 
+    # avcodec.h
     cdef enum:
         AV_CODEC_FLAG_UNALIGNED
         AV_CODEC_FLAG_QSCALE
@@ -63,6 +67,9 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AV_CODEC_FLAG_OUTPUT_CORRUPT
         AV_CODEC_FLAG_QPEL
         AV_CODEC_FLAG_DROPCHANGED
+        AV_CODEC_FLAG_RECON_FRAME
+        AV_CODEC_FLAG_COPY_OPAQUE
+        AV_CODEC_FLAG_FRAME_DURATION
         AV_CODEC_FLAG_PASS1
         AV_CODEC_FLAG_PASS2
         AV_CODEC_FLAG_LOOP_FILTER
@@ -76,6 +83,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AV_CODEC_FLAG_INTERLACED_ME
         AV_CODEC_FLAG_CLOSED_GOP
 
+    # avcodec.h
     cdef enum:
         AV_CODEC_FLAG2_FAST
         AV_CODEC_FLAG2_NO_OUTPUT
@@ -86,7 +94,9 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AV_CODEC_FLAG2_EXPORT_MVS
         AV_CODEC_FLAG2_SKIP_MANUAL
         AV_CODEC_FLAG2_RO_FLUSH_NOOP
+        AV_CODEC_FLAG2_ICC_PROFILES
 
+    # packet.h
     cdef enum:
         AV_PKT_FLAG_KEY
         AV_PKT_FLAG_CORRUPT
@@ -119,7 +129,6 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AVDISCARD_ALL
 
     cdef struct AVCodec:
-
         char *name
         char *long_name
         AVMediaType type
@@ -147,7 +156,6 @@ cdef extern from "libavcodec/avcodec.h" nogil:
     AVCodecDescriptor* avcodec_descriptor_get(AVCodecID)
 
     cdef struct AVCodecContext:
-
         AVClass *av_class
 
         AVMediaType codec_type
@@ -339,7 +347,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         int linesize[4]
         uint8_t **extended_data
 
-        int format  # Should be AVPixelFormat or AVSampleFormat
+        # Values correspond to enum AVPixelFormat or AVSampleFormat
         int key_frame  # 0 or 1.
         AVPictureType pict_type
 

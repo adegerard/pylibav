@@ -14,6 +14,7 @@ ENV_SEP: str = ";" if IS_PLATFORM_WINDOWS else ":"
 
 def get_platform_tag() -> str:
     """return platform tag"""
+    machine = platform.machine()
     if IS_PLATFORM_LINUX:
         return f"manylinux_{machine}"
 

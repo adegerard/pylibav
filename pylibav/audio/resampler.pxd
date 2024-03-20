@@ -1,7 +1,7 @@
-from av.audio.format cimport AudioFormat
-from av.audio.frame cimport AudioFrame
-from av.audio.layout cimport AudioLayout
-from av.filter.graph cimport Graph
+from pylibav.audio.format cimport AudioFormat
+from pylibav.audio.frame cimport AudioFrame
+from pylibav.audio.layout cimport AudioLayout
+from pylibav.filter.graph cimport Graph
 
 
 cdef class AudioResampler:

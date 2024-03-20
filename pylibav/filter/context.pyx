@@ -1,11 +1,11 @@
-from av.audio.frame cimport alloc_audio_frame
-from av.dictionary cimport _Dictionary
-from av.dictionary import Dictionary
-from av.error cimport err_check
-from av.filter.pad cimport alloc_filter_pads
-from av.frame cimport Frame
-from av.utils cimport avrational_to_fraction
-from av.video.frame cimport alloc_video_frame
+from pylibav.audio.frame cimport alloc_audio_frame
+from pylibav.dictionary cimport _Dictionary
+from pylibav.dictionary import Dictionary
+from pylibav.error cimport err_check
+from pylibav.filter.pad cimport alloc_filter_pads
+from pylibav.frame cimport Frame
+from pylibav.utils cimport avrational_to_fraction
+from pylibav.video.frame cimport alloc_video_frame
 
 
 cdef object _cinit_sentinel = object()
@@ -31,7 +31,7 @@ cdef class FilterContext:
             name = "None"
 
         parent = self.filter.ptr.name if self.filter and self.filter.ptr != NULL else None
-        return f"<av.FilterContext {name} of {parent!r} at 0x{id(self):x}>"
+        return f"<pylibav.FilterContext {name} of {parent!r} at 0x{id(self):x}>"
 
     @property
     def name(self):

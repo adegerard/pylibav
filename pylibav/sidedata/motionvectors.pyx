@@ -13,7 +13,7 @@ cdef class _MotionVectors(SideData):
         self._len = self.ptr.size // sizeof(lib.AVMotionVector)
 
     def __repr__(self):
-        return f"<av.sidedata.MotionVectors {self.ptr.size} bytes of {len(self)} vectors at 0x{<unsigned int>self.ptr.data:0x}"
+        return f"<pylibav.sidedata.MotionVectors {self.ptr.size} bytes of {len(self)} vectors at 0x{<unsigned int>self.ptr.data:0x}"
 
     def __getitem__(self, int index):
 
@@ -61,7 +61,7 @@ cdef class MotionVector:
         self.ptr = base + index
 
     def __repr__(self):
-        return f"<av.sidedata.MotionVector {self.w}x{self.h} from {self.src_x},{self.src_y} to {self.dst_x},{self.dst_y}>"
+        return f"<pylibav.sidedata.MotionVector {self.w}x{self.h} from {self.src_x},{self.src_y} to {self.dst_x},{self.dst_y}>"
 
     @property
     def source(self):

@@ -3,15 +3,15 @@ import warnings
 cimport libav as lib
 from libc.stdint cimport int64_t
 
-from av.codec.context cimport CodecContext
-from av.frame cimport Frame
-from av.packet cimport Packet
-from av.utils cimport avrational_to_fraction, to_avrational
-from av.video.format cimport VideoFormat, get_pix_fmt, get_video_format
-from av.video.frame cimport VideoFrame, alloc_video_frame
-from av.video.reformatter cimport VideoReformatter
+from pylibav.codec.context cimport CodecContext
+from pylibav.frame cimport Frame
+from pylibav.packet cimport Packet
+from pylibav.utils cimport avrational_to_fraction, to_avrational
+from pylibav.video.format cimport VideoFormat, get_pix_fmt, get_video_format
+from pylibav.video.frame cimport VideoFrame, alloc_video_frame
+from pylibav.video.reformatter cimport VideoReformatter
 
-from av.deprecation import AVDeprecationWarning
+from pylibav.deprecation import AVDeprecationWarning
 
 
 cdef class VideoCodecContext(CodecContext):
@@ -103,11 +103,11 @@ cdef class VideoCodecContext(CodecContext):
         The number of bits per sample in the codedwords. It's mandatory for this to be set for some formats to decode properly.
 
         Wraps :ffmpeg:`AVCodecContext.bits_per_coded_sample`.
-        
+
         :type: int
         """
         return self.ptr.bits_per_coded_sample
-      
+
     @bits_per_coded_sample.setter
     def bits_per_coded_sample(self, int value):
         if self.is_encoder:
@@ -156,7 +156,7 @@ cdef class VideoCodecContext(CodecContext):
     def gop_size(self):
         """
         Sets the number of frames between keyframes. Used only for encoding.
-        
+
         :type: int
         """
         if self.is_decoder:

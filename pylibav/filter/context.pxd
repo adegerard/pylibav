@@ -1,7 +1,7 @@
 cimport libav as lib
 
-from av.filter.filter cimport Filter
-from av.filter.graph cimport Graph
+from pylibav.filter.filter cimport Filter
+from pylibav.filter.graph cimport Graph
 
 
 cdef class FilterContext:

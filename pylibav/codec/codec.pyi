@@ -1,10 +1,10 @@
 from fractions import Fraction
 from typing import Literal
 
-from av.audio.format import AudioFormat
-from av.descriptor import Descriptor
-from av.enum import EnumFlag
-from av.video.format import VideoFormat
+from pylibav.audio.format import AudioFormat
+from pylibav.descriptor import Descriptor
+from pylibav.enum import EnumFlag
+from pylibav.video.format import VideoFormat
 
 from .context import CodecContext
 

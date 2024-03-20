@@ -91,7 +91,7 @@ cdef class AudioLayout:
         self.channels = tuple(AudioChannel(self, i) for i in range(self.nb_channels))
 
     def __repr__(self):
-        return f"<av.{self.__class__.__name__} {self.name!r}>"
+        return f"<pylibav.{self.__class__.__name__} {self.name!r}>"
 
     @property
     def name(self):
@@ -107,7 +107,7 @@ cdef class AudioChannel:
         self.channel = lib.av_channel_layout_extract_channel(layout.layout, index)
 
     def __repr__(self):
-        return f"<av.{self.__class__.__name__} {self.name!r} ({self.description})>"
+        return f"<pylibav.{self.__class__.__name__} {self.name!r} ({self.description})>"
 
     @property
     def name(self):

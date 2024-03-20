@@ -131,9 +131,9 @@ cdef class EnumItem:
     they are represented as integers in the FFmpeg API. We associate names with each
     value that are easier to operate with.
 
-    Consider :data:`av.codec.context.SkipType`, which is the type of the :attr:`CodecContext.skip_frame` attribute::
+    Consider :data:`pylibav.codec.context.SkipType`, which is the type of the :attr:`CodecContext.skip_frame` attribute::
 
-        >>> fh = av.open(video_path)
+        >>> fh = pylibav.open(video_path)
         >>> cc = fh.streams.video[0].codec_context
 
         >>> # The skip_frame attribute has a name and value:
@@ -238,17 +238,17 @@ cdef class EnumFlag(EnumItem):
     Consider :data:`CodecContextFlags`, whis is the type of the :attr:`CodecContext.flags`
     attribute, and the set of boolean properties::
 
-        >>> fh = av.open(video_path)
+        >>> fh = pylibav.open(video_path)
         >>> cc = fh.streams.video[0].codec_context
 
         >>> cc.flags
-        <av.codec.context.Flags:NONE(0x0)>
+        <pylibav.codec.context.Flags:NONE(0x0)>
 
         >>> # You can set flags via bitwise operations with the objects, names, or values:
         >>> cc.flags |= cc.flags.OUTPUT_CORRUPT
         >>> cc.flags |= 'GLOBAL_HEADER'
         >>> cc.flags
-        <av.codec.context.Flags:OUTPUT_CORRUPT|GLOBAL_HEADER(0x400008)>
+        <pylibav.codec.context.Flags:OUTPUT_CORRUPT|GLOBAL_HEADER(0x400008)>
 
         >>> # You can test flags via bitwise operations with objects, names, or values:
         >>> bool(cc.flags & cc.flags.OUTPUT_CORRUPT)
@@ -265,7 +265,7 @@ cdef class EnumFlag(EnumItem):
         >>> # You can set them:
         >>> cc.qscale = True
         >>> cc.flags
-        <av.codec.context.Flags:QSCALE|OUTPUT_CORRUPT|GLOBAL_HEADER(0x40000a)>
+        <pylibav.codec.context.Flags:QSCALE|OUTPUT_CORRUPT|GLOBAL_HEADER(0x40000a)>
 
     """
 

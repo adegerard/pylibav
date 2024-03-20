@@ -195,12 +195,12 @@ def main() -> None:
             ),
             Package(
                 name="fribidi",
-                source_url="https://github.com/fribidi/fribidi/releases/download/v1.0.11/fribidi-1.0.11.tar.xz",
+                source_url="https://github.com/fribidi/fribidi/releases/download/v1.0.13/fribidi-1.0.13.tar.xz",
             ),
             Package(
                 name="harfbuzz",
                 requires=["freetype"],
-                source_url="https://github.com/harfbuzz/harfbuzz/releases/download/4.1.0/harfbuzz-4.1.0.tar.xz",
+                source_url="https://github.com/harfbuzz/harfbuzz/releases/download/8.3.1/harfbuzz-8.3.1.tar.xz",
                 build_arguments=[
                     "--with-cairo=no",
                     "--with-chafa=no",
@@ -230,7 +230,7 @@ def main() -> None:
                 Package(
                     name="gnutls",
                     requires=["nettle", "unistring"],
-                    source_url="https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.1.tar.xz",
+                    source_url="https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.3.tar.xz",
                     build_arguments=[
                         "--disable-cxx",
                         "--disable-doc",
@@ -309,12 +309,13 @@ def main() -> None:
                 shutil.copy(os.path.join(mingw_bindir, name), os.path.join(tmp_dir, "bin"))
 
         # find libraries
+        deploy_dir = builder.deploy_dir()
         if IS_PLATFORM_LINUX:
-            libraries = glob.glob(os.path.join(tmp_dir, "lib", "*.so"))
+            libraries = glob.glob(os.path.join(deploy_dir, "lib", "*.so"))
         elif IS_PLATFORM_WINDOWS:
-            libraries = glob.glob(os.path.join(tmp_dir, "bin", "*.dll"))
+            libraries = glob.glob(os.path.join(deploy_dir, "bin", "*.dll"))
         elif IS_PLATFORM_DARWIN:
-            libraries = glob.glob(os.path.join(tmp_dir, "lib", "*.dylib"))
+            libraries = glob.glob(os.path.join(deploy_dir, "lib", "*.dylib"))
 
         # strip libraries
         if IS_PLATFORM_DARWIN:
@@ -326,7 +327,7 @@ def main() -> None:
         # build output tarball
         if build_stage is None or build_stage == 2:
             os.makedirs(deploy_dir, exist_ok=True)
-            run(["tar", "czvf", output_package, "-C", tmp_dir, "bin", "include", "lib"])
+            run(["tar", "czvf", output_package, "-C", deploy_dir, "bin", "include", "lib"])
 
 
 if __name__ == "__main__":

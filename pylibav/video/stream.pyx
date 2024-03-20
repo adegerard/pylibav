@@ -1,7 +1,7 @@
 cimport libav as lib
 
-from av.packet cimport Packet
-from av.utils cimport avrational_to_fraction, to_avrational
+from pylibav.packet cimport Packet
+from pylibav.utils cimport avrational_to_fraction, to_avrational
 
 from .frame cimport VideoFrame
 
@@ -9,7 +9,7 @@ from .frame cimport VideoFrame
 cdef class VideoStream(Stream):
     def __repr__(self):
         return (
-            f"<av.VideoStream #{self.index} {self.name}, "
+            f"<pylibav.VideoStream #{self.index} {self.name}, "
             f"{self.format.name if self.format else None} {self.codec_context.width}x"
             f"{self.codec_context.height} at 0x{id(self):x}>"
         )

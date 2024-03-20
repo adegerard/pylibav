@@ -1,9 +1,9 @@
 cimport libav as lib
 from libc.stdint cimport uint8_t
 
-from av.frame cimport Frame
-from av.video.format cimport VideoFormat
-from av.video.reformatter cimport VideoReformatter
+from pylibav.frame cimport Frame
+from pylibav.video.format cimport VideoFormat
+from pylibav.video.reformatter cimport VideoReformatter
 
 
 cdef class VideoFrame(Frame):

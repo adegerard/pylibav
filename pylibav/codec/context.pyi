@@ -1,7 +1,7 @@
 from typing import Any, Literal
 
-from av.enum import EnumFlag, EnumItem
-from av.packet import Packet
+from pylibav.enum import EnumFlag, EnumItem
+from pylibav.packet import Packet
 
 from .codec import Codec
 

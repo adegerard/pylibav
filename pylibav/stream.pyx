@@ -3,17 +3,17 @@ import warnings
 cimport libav as lib
 from libc.stdint cimport int32_t
 
-from av.enum cimport define_enum
-from av.error cimport err_check
-from av.packet cimport Packet
-from av.utils cimport (
+from pylibav.enum cimport define_enum
+from pylibav.error cimport err_check
+from pylibav.packet cimport Packet
+from pylibav.utils cimport (
     avdict_to_dict,
     avrational_to_fraction,
     dict_to_avdict,
     to_avrational,
 )
 
-from av.deprecation import AVDeprecationWarning
+from pylibav.deprecation import AVDeprecationWarning
 
 
 cdef object _cinit_bypass_sentinel = object()
@@ -26,7 +26,7 @@ SideData = define_enum("SideData", __name__, (
 ))
 
 cdef Stream wrap_stream(Container container, lib.AVStream *c_stream, CodecContext codec_context):
-    """Build an av.Stream for an existing AVStream.
+    """Build an pylibav.Stream for an existing AVStream.
 
     The AVStream MUST be fully constructed and ready for use before this is
     called.
@@ -39,16 +39,16 @@ cdef Stream wrap_stream(Container container, lib.AVStream *c_stream, CodecContex
     cdef Stream py_stream
 
     if c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_VIDEO:
-        from av.video.stream import VideoStream
+        from pylibav.video.stream import VideoStream
         py_stream = VideoStream.__new__(VideoStream, _cinit_bypass_sentinel)
     elif c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_AUDIO:
-        from av.audio.stream import AudioStream
+        from pylibav.audio.stream import AudioStream
         py_stream = AudioStream.__new__(AudioStream, _cinit_bypass_sentinel)
     elif c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_SUBTITLE:
-        from av.subtitles.stream import SubtitleStream
+        from pylibav.subtitles.stream import SubtitleStream
         py_stream = SubtitleStream.__new__(SubtitleStream, _cinit_bypass_sentinel)
     elif c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_DATA:
-        from av.data.stream import DataStream
+        from pylibav.data.stream import DataStream
         py_stream = DataStream.__new__(DataStream, _cinit_bypass_sentinel)
     else:
         py_stream = Stream.__new__(Stream, _cinit_bypass_sentinel)
@@ -63,10 +63,10 @@ cdef class Stream:
 
     ::
 
-        >>> fh = av.open(video_path)
+        >>> fh = pylibav.open(video_path)
         >>> stream = fh.streams.video[0]
         >>> stream
-        <av.VideoStream #0 h264, yuv420p 1280x720 at 0x...>
+        <pylibav.VideoStream #0 h264, yuv420p 1280x720 at 0x...>
 
     This encapsulates a :class:`.CodecContext`, located at :attr:`Stream.codec_context`.
     Attribute access is passed through to that context when attributes are missing
@@ -88,7 +88,7 @@ cdef class Stream:
             self.codec_context.stream_index = stream.index
 
         self.nb_side_data, self.side_data = self._get_side_data(stream)
-        
+
         self.metadata = avdict_to_dict(
             stream.metadata,
             encoding=self.container.metadata_encoding,
@@ -97,7 +97,7 @@ cdef class Stream:
 
     def __repr__(self):
         return (
-            f"<av.{self.__class__.__name__} #{self.index} {self.type or '<notype>'}/"
+            f"<pylibav.{self.__class__.__name__} #{self.index} {self.type or '<notype>'}/"
             f"{self.name or '<nocodec>'} at 0x{id(self):x}>"
         )
 
@@ -152,7 +152,7 @@ cdef class Stream:
 
         nb_side_data = stream.nb_side_data
         side_data = {}
-        
+
         for i in range(nb_side_data):
             # Based on: https://www.ffmpeg.org/doxygen/trunk/dump_8c_source.html#l00430
             if stream.side_data[i].type == lib.AV_PKT_DATA_DISPLAYMATRIX:

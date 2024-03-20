@@ -1,5 +1,5 @@
-from av.packet cimport Packet
-from av.stream cimport Stream
+from pylibav.packet cimport Packet
+from pylibav.stream cimport Stream
 
 from .frame cimport VideoFrame
 

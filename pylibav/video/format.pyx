@@ -54,9 +54,9 @@ cdef class VideoFormat:
 
     def __repr__(self):
         if self.width or self.height:
-            return f"<av.{self.__class__.__name__} {self.name}, {self.width}x{self.height}>"
+            return f"<pylibav.{self.__class__.__name__} {self.name}, {self.width}x{self.height}>"
         else:
-            return f"<av.{self.__class__.__name__} {self.name}>"
+            return f"<pylibav.{self.__class__.__name__} {self.name}>"
 
     def __int__(self):
         return int(self.pix_fmt)

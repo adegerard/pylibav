@@ -1,10 +1,10 @@
 cimport libav as lib
 
-from av.filter.context cimport FilterContext
+from pylibav.filter.context cimport FilterContext
 
 import errno
 
-import av.filter
+import pylibav.filter
 
 
 cdef class AudioResampler:
@@ -71,7 +71,7 @@ cdef class AudioResampler:
 
             # handle resampling with aformat filter
             # (similar to configure_output_audio_filter from ffmpeg)
-            self.graph = av.filter.Graph()
+            self.graph = pylibav.filter.Graph()
             extra_args = {}
             if frame.time_base is not None:
                 extra_args["time_base"] = str(frame.time_base)
@@ -110,7 +110,7 @@ cdef class AudioResampler:
                 output.append(self.graph.pull())
             except EOFError:
                 break
-            except av.AVError as e:
+            except pylibav.AVError as e:
                 if e.errno != errno.EAGAIN:
                     raise
                 break

@@ -1,7 +1,7 @@
 from cpython cimport PyBUF_WRITABLE, PyBuffer_FillInfo
 from libc.string cimport memcpy
 
-from av.bytesource cimport ByteSource, bytesource
+from pylibav.bytesource cimport ByteSource, bytesource
 
 
 cdef class Buffer:

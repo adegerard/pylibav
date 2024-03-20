@@ -2,7 +2,7 @@ from typing import Any, Union
 
 import numpy as np
 
-from av.frame import Frame
+from pylibav.frame import Frame
 
 from .plane import AudioPlane
 

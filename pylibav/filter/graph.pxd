@@ -1,6 +1,6 @@
 cimport libav as lib
 
-from av.filter.context cimport FilterContext
+from pylibav.filter.context cimport FilterContext
 
 
 cdef class Graph:

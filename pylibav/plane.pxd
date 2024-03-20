@@ -1,5 +1,5 @@
-from av.buffer cimport Buffer
-from av.frame cimport Frame
+from pylibav.buffer cimport Buffer
+from pylibav.frame cimport Frame
 
 
 cdef class Plane(Buffer):

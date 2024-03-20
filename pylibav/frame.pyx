@@ -1,13 +1,13 @@
-from av.utils cimport avrational_to_fraction, to_avrational
+from pylibav.utils cimport avrational_to_fraction, to_avrational
 
-from av.sidedata.sidedata import SideDataContainer
+from pylibav.sidedata.sidedata import SideDataContainer
 
 
 cdef class Frame:
     """
     Base class for audio and video frames.
 
-    See also :class:`~av.audio.frame.AudioFrame` and :class:`~av.video.frame.VideoFrame`.
+    See also :class:`~pylibav.audio.frame.AudioFrame` and :class:`~pylibav.video.frame.VideoFrame`.
     """
 
     def __cinit__(self, *args, **kwargs):
@@ -21,7 +21,7 @@ cdef class Frame:
             lib.av_frame_free(&self.ptr)
 
     def __repr__(self):
-        return f"av.{self.__class__.__name__} #{self.index} pts={self.pts} at 0x{id(self):x}>"
+        return f"pylibav.{self.__class__.__name__} #{self.index} pts={self.pts} at 0x{id(self):x}>"
 
     cdef _copy_internal_attributes(self, Frame source, bint data_layout=True):
         """Mimic another frame."""
@@ -58,7 +58,7 @@ cdef class Frame:
     @property
     def dts(self):
         """
-        The decoding timestamp copied from the :class:`~av.packet.Packet` that triggered returning this frame in :attr:`time_base` units.
+        The decoding timestamp copied from the :class:`~pylibav.packet.Packet` that triggered returning this frame in :attr:`time_base` units.
 
         (if frame threading isn't used) This is also the Presentation time of this frame calculated from only :attr:`.Packet.dts` values without pts values.
 

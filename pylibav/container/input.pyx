@@ -1,15 +1,15 @@
 from libc.stdint cimport int64_t
 from libc.stdlib cimport free, malloc
 
-from av.codec.context cimport CodecContext, wrap_codec_context
-from av.container.streams cimport StreamContainer
-from av.dictionary cimport _Dictionary
-from av.error cimport err_check
-from av.packet cimport Packet
-from av.stream cimport Stream, wrap_stream
-from av.utils cimport avdict_to_dict
+from pylibav.codec.context cimport CodecContext, wrap_codec_context
+from pylibav.container.streams cimport StreamContainer
+from pylibav.dictionary cimport _Dictionary
+from pylibav.error cimport err_check
+from pylibav.packet cimport Packet
+from pylibav.stream cimport Stream, wrap_stream
+from pylibav.utils cimport avdict_to_dict
 
-from av.dictionary import Dictionary
+from pylibav.dictionary import Dictionary
 
 
 cdef close_input(InputContainer self):
@@ -217,7 +217,7 @@ cdef class InputContainer(Container):
         Seek to a (key)frame nearsest to the given timestamp.
 
         :param int offset: Time to seek to, expressed in``stream.time_base`` if ``stream``
-            is given, otherwise in :data:`av.time_base`.
+            is given, otherwise in :data:`pylibav.time_base`.
         :param bool backward: If there is not a (key)frame at the given offset,
             look backwards for it.
         :param bool any_frame: Seek to any frame, not just a keyframe.

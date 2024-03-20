@@ -3,8 +3,8 @@ from typing import Any, Union
 import numpy as np
 from PIL import Image
 
-from av.enum import EnumItem
-from av.frame import Frame
+from pylibav.enum import EnumItem
+from pylibav.frame import Frame
 
 from .format import VideoFormat
 from .plane import VideoPlane

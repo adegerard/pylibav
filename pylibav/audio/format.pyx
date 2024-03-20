@@ -39,7 +39,7 @@ cdef class AudioFormat:
         self.sample_fmt = sample_fmt
 
     def __repr__(self):
-        return f"<av.AudioFormat {self.name}>"
+        return f"<pylibav.AudioFormat {self.name}>"
 
     @property
     def name(self):

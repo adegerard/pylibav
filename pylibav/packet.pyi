@@ -1,7 +1,7 @@
 from fractions import Fraction
 from typing import Iterator
 
-from av.subtitles.subtitle import SubtitleSet
+from pylibav.subtitles.subtitle import SubtitleSet
 
 from .stream import Stream
 

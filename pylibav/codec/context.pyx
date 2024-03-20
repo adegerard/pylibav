@@ -5,35 +5,35 @@ from libc.errno cimport EAGAIN
 from libc.stdint cimport uint8_t
 from libc.string cimport memcpy
 
-from av.bytesource cimport ByteSource, bytesource
-from av.codec.codec cimport Codec, wrap_codec
-from av.dictionary cimport _Dictionary
-from av.enum cimport define_enum
-from av.error cimport err_check
-from av.packet cimport Packet
-from av.utils cimport avrational_to_fraction, to_avrational
+from pylibav.bytesource cimport ByteSource, bytesource
+from pylibav.codec.codec cimport Codec, wrap_codec
+from pylibav.dictionary cimport _Dictionary
+from pylibav.enum cimport define_enum
+from pylibav.error cimport err_check
+from pylibav.packet cimport Packet
+from pylibav.utils cimport avrational_to_fraction, to_avrational
 
-from av.deprecation import AVDeprecationWarning
-from av.dictionary import Dictionary
+from pylibav.deprecation import AVDeprecationWarning
+from pylibav.dictionary import Dictionary
 
 
 cdef object _cinit_sentinel = object()
 
 
 cdef CodecContext wrap_codec_context(lib.AVCodecContext *c_ctx, const lib.AVCodec *c_codec):
-    """Build an av.CodecContext for an existing AVCodecContext."""
+    """Build an pylibav.CodecContext for an existing AVCodecContext."""
 
     cdef CodecContext py_ctx
 
     # TODO: This.
     if c_ctx.codec_type == lib.AVMEDIA_TYPE_VIDEO:
-        from av.video.codeccontext import VideoCodecContext
+        from pylibav.video.codeccontext import VideoCodecContext
         py_ctx = VideoCodecContext(_cinit_sentinel)
     elif c_ctx.codec_type == lib.AVMEDIA_TYPE_AUDIO:
-        from av.audio.codeccontext import AudioCodecContext
+        from pylibav.audio.codeccontext import AudioCodecContext
         py_ctx = AudioCodecContext(_cinit_sentinel)
     elif c_ctx.codec_type == lib.AVMEDIA_TYPE_SUBTITLE:
-        from av.subtitles.codeccontext import SubtitleCodecContext
+        from pylibav.subtitles.codeccontext import SubtitleCodecContext
         py_ctx = SubtitleCodecContext(_cinit_sentinel)
     else:
         py_ctx = CodecContext(_cinit_sentinel)
@@ -303,7 +303,7 @@ cdef class CodecContext:
     def __repr__(self):
         _type = self.type or "<notype>"
         name = self.name or "<nocodec>"
-        return f"<av.{self.__class__.__name__} {_type}/{name} at 0x{id(self):x}>"
+        return f"<pylibav.{self.__class__.__name__} {_type}/{name} at 0x{id(self):x}>"
 
     def parse(self, raw_input=None):
         """Split up a byte stream into list of :class:`.Packet`.

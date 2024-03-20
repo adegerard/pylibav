@@ -1,8 +1,8 @@
 
-from av.codec.context cimport CodecContext
-from av.video.format cimport VideoFormat
-from av.video.frame cimport VideoFrame
-from av.video.reformatter cimport VideoReformatter
+from pylibav.codec.context cimport CodecContext
+from pylibav.video.format cimport VideoFormat
+from pylibav.video.frame cimport VideoFrame
+from pylibav.video.reformatter cimport VideoReformatter
 
 
 cdef class VideoCodecContext(CodecContext):

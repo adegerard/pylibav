@@ -1,12 +1,12 @@
-from av.audio.format cimport get_audio_format
-from av.audio.layout cimport get_audio_layout
-from av.audio.plane cimport AudioPlane
-from av.error cimport err_check
-from av.utils cimport check_ndarray, check_ndarray_shape
+from pylibav.audio.format cimport get_audio_format
+from pylibav.audio.layout cimport get_audio_layout
+from pylibav.audio.plane cimport AudioPlane
+from pylibav.error cimport err_check
+from pylibav.utils cimport check_ndarray, check_ndarray_shape
 
 import warnings
 
-from av.deprecation import AVDeprecationWarning
+from pylibav.deprecation import AVDeprecationWarning
 
 
 cdef object _cinit_bypass_sentinel
@@ -94,7 +94,7 @@ cdef class AudioFrame(Frame):
 
     def __repr__(self):
         return (
-           f"<av.{self.__class__.__name__} {self.index} pts={self.pts}, {self.samples} "
+           f"<pylibav.{self.__class__.__name__} {self.index} pts={self.pts}, {self.samples} "
            f"samples at {self.rate}Hz, {self.layout.name}, {self.format.name} at 0x{id(self):x}"
         )
 
@@ -131,7 +131,7 @@ cdef class AudioFrame(Frame):
     @property
     def planes(self):
         """
-        A tuple of :class:`~av.audio.plane.AudioPlane`.
+        A tuple of :class:`~pylibav.audio.plane.AudioPlane`.
 
         :type: tuple
         """

@@ -1,6 +1,6 @@
 from collections.abc import MutableMapping
 
-from av.error cimport err_check
+from pylibav.error cimport err_check
 
 
 cdef class _Dictionary:
@@ -39,7 +39,7 @@ cdef class _Dictionary:
             yield element.key
 
     def __repr__(self):
-        return f"av.Dictionary({dict(self)!r})"
+        return f"pylibav.Dictionary({dict(self)!r})"
 
     cpdef _Dictionary copy(self):
         cdef _Dictionary other = Dictionary()

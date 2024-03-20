@@ -1,5 +1,5 @@
-from av.descriptor import Descriptor
-from av.option import Option
+from pylibav.descriptor import Descriptor
+from pylibav.option import Option
 
 from .pad import FilterPad
 

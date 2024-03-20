@@ -1,5 +1,5 @@
-from av.audio.frame cimport alloc_audio_frame
-from av.error cimport err_check
+from pylibav.audio.frame cimport alloc_audio_frame
+from pylibav.error cimport err_check
 
 
 cdef class AudioFifo:
@@ -8,12 +8,12 @@ cdef class AudioFifo:
     def __repr__(self):
         try:
             result = (
-                f"<av.{self.__class__.__name__} {self.samples} samples of "
+                f"<pylibav.{self.__class__.__name__} {self.samples} samples of "
                 f"{self.sample_rate}hz {self.layout} {self.format} at 0x{id(self):x}>"
             )
         except AttributeError:
             result = (
-                f"<av.{self.__class__.__name__} uninitialized, use fifo.write(frame),"
+                f"<pylibav.{self.__class__.__name__} uninitialized, use fifo.write(frame),"
                 f" at 0x{id(self):x}>"
             )
         return result

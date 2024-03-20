@@ -4,7 +4,7 @@ cimport libav as lib
 cdef class DataStream(Stream):
     def __repr__(self):
         return (
-            f"<av.{self.__class__.__name__} #{self.index} {self.type or '<notype>'}/"
+            f"<pylibav.{self.__class__.__name__} #{self.index} {self.type or '<notype>'}/"
             f"{self.name or '<nocodec>'} at 0x{id(self):x}>"
         )
 

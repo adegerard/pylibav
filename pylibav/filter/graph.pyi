@@ -1,13 +1,13 @@
 from fractions import Fraction
 from typing import Any
 
-from av.audio.format import AudioFormat
-from av.audio.frame import AudioFrame
-from av.audio.layout import AudioLayout
-from av.audio.stream import AudioStream
-from av.video.format import VideoFormat
-from av.video.frame import VideoFrame
-from av.video.stream import VideoStream
+from pylibav.audio.format import AudioFormat
+from pylibav.audio.frame import AudioFrame
+from pylibav.audio.layout import AudioLayout
+from pylibav.audio.stream import AudioStream
+from pylibav.video.format import VideoFormat
+from pylibav.video.frame import VideoFrame
+from pylibav.video.stream import VideoStream
 
 from .context import FilterContext
 from .filter import Filter

@@ -1,4 +1,4 @@
-from av.stream cimport Stream
+from pylibav.stream cimport Stream
 
 
 cdef class DataStream(Stream):

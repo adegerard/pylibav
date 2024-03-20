@@ -117,6 +117,6 @@ def curated(name):
 
     """
     return cached_download(
-        "https://pyav.org/datasets/" + name,
+        "https://pypylibav.org/datasets/" + name,
         os.path.join("pyav-curated", name.replace("/", os.path.sep)),
     )

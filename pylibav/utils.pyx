@@ -4,7 +4,7 @@ from fractions import Fraction
 
 cimport libav as lib
 
-from av.error cimport err_check
+from pylibav.error cimport err_check
 
 # === DICTIONARIES ===
 # ====================

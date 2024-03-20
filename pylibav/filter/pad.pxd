@@ -1,8 +1,8 @@
 cimport libav as lib
 
-from av.filter.context cimport FilterContext
-from av.filter.filter cimport Filter
-from av.filter.link cimport FilterLink
+from pylibav.filter.context cimport FilterContext
+from pylibav.filter.filter cimport Filter
+from pylibav.filter.link cimport FilterLink
 
 
 cdef class FilterPad:

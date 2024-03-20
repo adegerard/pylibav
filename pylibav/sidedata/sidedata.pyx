@@ -1,8 +1,8 @@
-from av.enum cimport define_enum
+from pylibav.enum cimport define_enum
 
 from collections.abc import Mapping
 
-from av.sidedata.motionvectors import MotionVectors
+from pylibav.sidedata.motionvectors import MotionVectors
 
 
 cdef object _cinit_bypass_sentinel = object()
@@ -55,7 +55,7 @@ cdef class SideData(Buffer):
         return False
 
     def __repr__(self):
-        return f"<av.sidedata.{self.__class__.__name__} {self.ptr.size} bytes of {self.type} at 0x{<unsigned int>self.ptr.data:0x}>"
+        return f"<pylibav.sidedata.{self.__class__.__name__} {self.ptr.size} bytes of {self.type} at 0x{<unsigned int>self.ptr.data:0x}>"
 
     @property
     def type(self):

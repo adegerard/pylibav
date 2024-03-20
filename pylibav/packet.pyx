@@ -1,13 +1,13 @@
 cimport libav as lib
 
-from av.bytesource cimport bytesource
-from av.error cimport err_check
-from av.utils cimport avrational_to_fraction, to_avrational
+from pylibav.bytesource cimport bytesource
+from pylibav.error cimport err_check
+from pylibav.utils cimport avrational_to_fraction, to_avrational
 
 
 cdef class Packet(Buffer):
 
-    """A packet of encoded data within a :class:`~av.format.Stream`.
+    """A packet of encoded data within a :class:`~pylibav.format.Stream`.
 
     This may, or may not include a complete object within a stream.
     :meth:`decode` must be called to extract encoded data.
@@ -47,7 +47,7 @@ cdef class Packet(Buffer):
     def __repr__(self):
         stream = self._stream.index if self._stream else 0
         return (
-            f"<av.{self.__class__.__name__} of #{stream}, dts={self.dts},"
+            f"<pylibav.{self.__class__.__name__} of #{stream}, dts={self.dts},"
             f" pts={self.pts}; {self.ptr.size} bytes at 0x{id(self):x}>"
         )
 
@@ -200,7 +200,7 @@ cdef class Packet(Buffer):
             self.ptr.flags &= ~(lib.AV_PKT_FLAG_CORRUPT)
 
     @property
-    def is_discard(self): 
+    def is_discard(self):
         return bool(self.ptr.flags & lib.AV_PKT_FLAG_DISCARD)
 
     @property

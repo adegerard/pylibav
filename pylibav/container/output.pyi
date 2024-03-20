@@ -1,8 +1,8 @@
 from fractions import Fraction
 from typing import Sequence
 
-from av.packet import Packet
-from av.stream import Stream
+from pylibav.packet import Packet
+from pylibav.stream import Stream
 
 from .core import Container
 

@@ -1,6 +1,6 @@
 cimport libav as lib
 
-from av.logging cimport get_last_error
+from pylibav.logging cimport get_last_error
 
 import errno
 import os
@@ -8,7 +8,7 @@ import sys
 import traceback
 from threading import local
 
-from av.enum import define_enum
+from pylibav.enum import define_enum
 
 # Will get extended with all of the exceptions.
 __all__ = [
@@ -65,11 +65,11 @@ class FFmpegError(Exception):
 
     .. attribute:: type
 
-        The :class:`av.error.ErrorType` enum value for the error type.
+        The :class:`pylibav.error.ErrorType` enum value for the error type.
 
     .. attribute:: log
 
-        The tuple from :func:`av.logging.get_last_log`, or ``None``.
+        The tuple from :func:`pylibav.logging.get_last_log`, or ``None``.
 
     """
 

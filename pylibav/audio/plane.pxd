@@ -1,4 +1,4 @@
-from av.plane cimport Plane
+from pylibav.plane cimport Plane
 
 
 cdef class AudioPlane(Plane):

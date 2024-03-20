@@ -1,6 +1,6 @@
 cimport libav as lib
 
-from av.video.frame cimport VideoFrame
+from pylibav.video.frame cimport VideoFrame
 
 
 cdef class VideoReformatter:

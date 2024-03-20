@@ -1,14 +1,14 @@
 import warnings
 from fractions import Fraction
 
-from av.audio.format cimport AudioFormat
-from av.audio.frame cimport AudioFrame
-from av.audio.layout cimport AudioLayout
-from av.error cimport err_check
-from av.filter.context cimport FilterContext, wrap_filter_context
-from av.filter.filter cimport Filter, wrap_filter
-from av.video.format cimport VideoFormat
-from av.video.frame cimport VideoFrame
+from pylibav.audio.format cimport AudioFormat
+from pylibav.audio.frame cimport AudioFrame
+from pylibav.audio.layout cimport AudioLayout
+from pylibav.error cimport err_check
+from pylibav.filter.context cimport FilterContext, wrap_filter_context
+from pylibav.filter.filter cimport Filter, wrap_filter
+from pylibav.video.format cimport VideoFormat
+from pylibav.video.frame cimport VideoFrame
 
 
 cdef class Graph:

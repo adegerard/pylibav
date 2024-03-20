@@ -39,7 +39,7 @@ cdef class SubtitleSet:
 
 
 cdef Subtitle build_subtitle(SubtitleSet subtitle, int index):
-    """Build an av.Stream for an existing AVStream.
+    """Build an pylibav.Stream for an existing AVStream.
 
     The AVStream MUST be fully constructed and ready for use before this is
     called.

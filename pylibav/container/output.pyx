@@ -1,16 +1,16 @@
 import logging
 import os
 
-from av.codec.codec cimport Codec
-from av.codec.context cimport CodecContext, wrap_codec_context
-from av.container.streams cimport StreamContainer
-from av.dictionary cimport _Dictionary
-from av.error cimport err_check
-from av.packet cimport Packet
-from av.stream cimport Stream, wrap_stream
-from av.utils cimport dict_to_avdict, to_avrational
+from pylibav.codec.codec cimport Codec
+from pylibav.codec.context cimport CodecContext, wrap_codec_context
+from pylibav.container.streams cimport StreamContainer
+from pylibav.dictionary cimport _Dictionary
+from pylibav.error cimport err_check
+from pylibav.packet cimport Packet
+from pylibav.stream cimport Stream, wrap_stream
+from pylibav.utils cimport dict_to_avdict, to_avrational
 
-from av.dictionary import Dictionary
+from pylibav.dictionary import Dictionary
 
 log = logging.getLogger(__name__)
 
@@ -50,10 +50,10 @@ cdef class OutputContainer(Container):
             Examples for video include ``24``, ``23.976``, and
             ``Fraction(30000,1001)``. Examples for audio include ``48000``
             and ``44100``.
-        :param template: Copy codec from another :class:`~av.stream.Stream` instance.
+        :param template: Copy codec from another :class:`~pylibav.stream.Stream` instance.
         :param dict options: Stream options.
         :param \\**kwargs: Set attributes of the stream.
-        :returns: The new :class:`~av.stream.Stream`.
+        :returns: The new :class:`~pylibav.stream.Stream`.
 
         """
 

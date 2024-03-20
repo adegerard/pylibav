@@ -1,10 +1,10 @@
 from typing import Iterator, overload
 
-from av.audio.stream import AudioStream
-from av.data.stream import DataStream
-from av.stream import Stream
-from av.subtitles.stream import SubtitleStream
-from av.video.stream import VideoStream
+from pylibav.audio.stream import AudioStream
+from pylibav.data.stream import DataStream
+from pylibav.stream import Stream
+from pylibav.subtitles.stream import SubtitleStream
+from pylibav.video.stream import VideoStream
 
 class StreamContainer:
     video: tuple[VideoStream, ...]

@@ -1,4 +1,4 @@
-from av.frame import Frame
+from pylibav.frame import Frame
 
 from .pad import FilterContextPad
 

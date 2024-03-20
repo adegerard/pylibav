@@ -1,7 +1,7 @@
 cimport libav as lib
 
-from av.descriptor cimport wrap_avclass
-from av.enum cimport define_enum
+from pylibav.descriptor cimport wrap_avclass
+from pylibav.enum cimport define_enum
 
 
 cdef object _cinit_bypass_sentinel = object()
@@ -79,7 +79,7 @@ cdef class ContainerFormat:
             raise ValueError(f"no container format {name!r}")
 
     def __repr__(self):
-        return f"<av.{self.__class__.__name__} {self.name!r}>"
+        return f"<pylibav.{self.__class__.__name__} {self.name!r}>"
 
     @property
     def descriptor(self):

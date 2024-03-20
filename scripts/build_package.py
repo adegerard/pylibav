@@ -107,13 +107,12 @@ def run(cmd, env=None):
 
 class Builder:
     def __init__(self, build_dir: str, package_name: str) -> None:
-
         self.workdir = os.path.abspath(os.path.join(build_dir, "tmp", "work"))
         self.patch_dir = os.path.abspath("patches")
         self.dl_dir = os.path.abspath(os.path.join(build_dir, "downloads"))
         self.host_package_dir = os.path.abspath(os.path.join(build_dir, "host"))
         self.package_work_dir = os.path.abspath(
-            os.path.join(build_dir, "tmp", "work", get_platform_tag(), package_name)
+            os.path.join(build_dir, "tmp", "deploy", package_name)
         )
 
         print(f"- downloads directory: {self.dl_dir}")
@@ -144,6 +143,9 @@ class Builder:
             separator=ENV_SEP,
         )
 
+
+    def deploy_dir(self) -> str:
+        return self.package_work_dir
 
     def build(self, package: Package, *, for_builder: bool = False):
         # if the package is already installed, do nothing

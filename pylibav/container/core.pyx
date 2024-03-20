@@ -7,17 +7,17 @@ from pathlib import Path
 
 cimport libav as lib
 
-from av.container.core cimport timeout_info
-from av.container.input cimport InputContainer
-from av.container.output cimport OutputContainer
-from av.container.pyio cimport pyio_close_custom_gil, pyio_close_gil
-from av.enum cimport define_enum
-from av.error cimport err_check, stash_exception
-from av.format cimport build_container_format
-from av.utils cimport avdict_to_dict
+from pylibav.container.core cimport timeout_info
+from pylibav.container.input cimport InputContainer
+from pylibav.container.output cimport OutputContainer
+from pylibav.container.pyio cimport pyio_close_custom_gil, pyio_close_gil
+from pylibav.enum cimport define_enum
+from pylibav.error cimport err_check, stash_exception
+from pylibav.format cimport build_container_format
+from pylibav.utils cimport avdict_to_dict
 
-from av.dictionary import Dictionary
-from av.logging import Capture as LogCapture
+from pylibav.dictionary import Dictionary
+from pylibav.logging import Capture as LogCapture
 
 
 cdef object _cinit_sentinel = object()
@@ -280,7 +280,7 @@ cdef class Container:
         self.close()
 
     def __repr__(self):
-        return f"<av.{self.__class__.__name__} {self.file or self.name!r}>"
+        return f"<pylibav.{self.__class__.__name__} {self.file or self.name!r}>"
 
     cdef int err_check(self, int value) except -1:
         return err_check(value, filename=self.name)
@@ -379,14 +379,14 @@ def open(
     e.g.::
 
         >>> # Open webcam on OS X.
-        >>> av.open(format='avfoundation', file='0') # doctest: +SKIP
+        >>> pylibav.open(format='avfoundation', file='0') # doctest: +SKIP
 
     For DASH and custom I/O using ``io_open``, add a protocol prefix to the ``file`` to
     prevent the DASH encoder defaulting to the file protocol and using temporary files.
     The custom I/O callable can be used to remove the protocol prefix to reveal the actual
     name for creating the file-like object. E.g.::
 
-        >>> av.open("customprotocol://manifest.mpd", "w", io_open=custom_io) # doctest: +SKIP
+        >>> pylibav.open("customprotocol://manifest.mpd", "w", io_open=custom_io) # doctest: +SKIP
 
     .. seealso:: :ref:`garbage_collection`
 

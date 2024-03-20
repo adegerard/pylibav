@@ -2,15 +2,15 @@ import sys
 
 from libc.stdint cimport uint8_t
 
-from av.enum cimport define_enum
-from av.error cimport err_check
-from av.utils cimport check_ndarray, check_ndarray_shape
-from av.video.format cimport get_pix_fmt, get_video_format
-from av.video.plane cimport VideoPlane
+from pylibav.enum cimport define_enum
+from pylibav.error cimport err_check
+from pylibav.utils cimport check_ndarray, check_ndarray_shape
+from pylibav.video.format cimport get_pix_fmt, get_video_format
+from pylibav.video.plane cimport VideoPlane
 
 import warnings
 
-from av.deprecation import AVDeprecationWarning
+from pylibav.deprecation import AVDeprecationWarning
 
 
 cdef object _cinit_bypass_sentinel
@@ -124,7 +124,7 @@ cdef class VideoFrame(Frame):
 
     def __repr__(self):
         return (
-            f"<av.{self.__class__.__name__} #{self.index}, pts={self.pts} "
+            f"<pylibav.{self.__class__.__name__} #{self.index}, pts={self.pts} "
             f"{self.format.name} {self.width}x{self.height} at 0x{id(self):x}>"
         )
 

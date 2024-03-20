@@ -1,9 +1,9 @@
 cimport libav as lib
 
-from av.codec.context cimport CodecContext
-from av.container.core cimport Container
-from av.frame cimport Frame
-from av.packet cimport Packet
+from pylibav.codec.context cimport CodecContext
+from pylibav.container.core cimport Container
+from pylibav.frame cimport Frame
+from pylibav.packet cimport Packet
 
 
 cdef class Stream:

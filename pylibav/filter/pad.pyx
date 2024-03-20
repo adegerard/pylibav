@@ -1,4 +1,4 @@
-from av.filter.link cimport wrap_filter_link
+from pylibav.filter.link cimport wrap_filter_link
 
 
 cdef object _cinit_sentinel = object()
@@ -13,7 +13,7 @@ cdef class FilterPad:
         _filter = self.filter.name
         _io = "inputs" if self.is_input else "outputs"
 
-        return f"<av.FilterPad {_filter}.{_io}[{self.index}]: {self.name} ({self.type})>"
+        return f"<pylibav.FilterPad {_filter}.{_io}[{self.index}]: {self.name} ({self.type})>"
 
     @property
     def is_output(self):
@@ -41,7 +41,7 @@ cdef class FilterContextPad(FilterPad):
         _io = "inputs" if self.is_input else "outputs"
         context = self.context.name
 
-        return f"<av.FilterContextPad {_filter}.{_io}[{self.index}] of {context}: {self.name} ({self.type})>"
+        return f"<pylibav.FilterContextPad {_filter}.{_io}[{self.index}] of {context}: {self.name} ({self.type})>"
 
     @property
     def link(self):

@@ -1,13 +1,13 @@
 from typing import Any, Iterator, overload
 
-from av.audio.frame import AudioFrame
-from av.audio.stream import AudioStream
-from av.packet import Packet
-from av.stream import Stream
-from av.subtitles.stream import SubtitleStream
-from av.subtitles.subtitle import SubtitleSet
-from av.video.frame import VideoFrame
-from av.video.stream import VideoStream
+from pylibav.audio.frame import AudioFrame
+from pylibav.audio.stream import AudioStream
+from pylibav.packet import Packet
+from pylibav.stream import Stream
+from pylibav.subtitles.stream import SubtitleStream
+from pylibav.subtitles.subtitle import SubtitleSet
+from pylibav.video.frame import VideoFrame
+from pylibav.video.stream import VideoStream
 
 from .core import Container
 

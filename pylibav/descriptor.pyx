@@ -16,7 +16,7 @@ cdef Descriptor wrap_avclass(const lib.AVClass *ptr):
 cdef class Descriptor:
     def __cinit__(self, sentinel):
         if sentinel is not _cinit_sentinel:
-            raise RuntimeError("Cannot construct av.Descriptor")
+            raise RuntimeError("Cannot construct pylibav.Descriptor")
 
     @property
     def name(self):

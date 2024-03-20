@@ -1,4 +1,4 @@
-from av.filter.graph import Graph
+from pylibav.filter.graph import Graph
 
 from .format import AudioFormat
 from .frame import AudioFrame

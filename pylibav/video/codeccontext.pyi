@@ -1,8 +1,8 @@
 from fractions import Fraction
 from typing import Iterator, Literal
 
-from av.codec.context import CodecContext
-from av.packet import Packet
+from pylibav.codec.context import CodecContext
+from pylibav.packet import Packet
 
 from .format import VideoFormat
 from .frame import VideoFrame

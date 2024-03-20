@@ -1,7 +1,7 @@
 
-from av.audio.frame cimport AudioFrame
-from av.audio.resampler cimport AudioResampler
-from av.codec.context cimport CodecContext
+from pylibav.audio.frame cimport AudioFrame
+from pylibav.audio.resampler cimport AudioResampler
+from pylibav.codec.context cimport CodecContext
 
 
 cdef class AudioCodecContext(CodecContext):

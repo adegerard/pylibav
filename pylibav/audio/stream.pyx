@@ -1,4 +1,4 @@
-from av.packet cimport Packet
+from pylibav.packet cimport Packet
 
 from .frame cimport AudioFrame
 
@@ -7,7 +7,7 @@ cdef class AudioStream(Stream):
     def __repr__(self):
         form = self.format.name if self.format else None
         return (
-            f"<av.AudioStream #{self.index} {self.name} at {self.rate}Hz,"
+            f"<pylibav.AudioStream #{self.index} {self.name} at {self.rate}Hz,"
             f" {self.layout.name}, {form} at 0x{id(self):x}>"
         )
 

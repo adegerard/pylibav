@@ -1,7 +1,7 @@
 cimport libav as lib
 
-from av.enum cimport define_enum
-from av.utils cimport flag_in_bitfield
+from pylibav.enum cimport define_enum
+from pylibav.utils cimport flag_in_bitfield
 
 
 cdef object _cinit_sentinel = object()
@@ -62,7 +62,7 @@ OptionFlags = define_enum("OptionFlags", __name__, (
 cdef class BaseOption:
     def __cinit__(self, sentinel):
         if sentinel is not _cinit_sentinel:
-            raise RuntimeError(f"Cannot construct av.{self.__class__.__name__}")
+            raise RuntimeError(f"Cannot construct pylibav.{self.__class__.__name__}")
 
     @property
     def name(self):
@@ -143,7 +143,7 @@ cdef class Option(BaseOption):
 
     def __repr__(self):
         return (
-            f"<av.{self.__class__.__name__} {self.name}"
+            f"<pylibav.{self.__class__.__name__} {self.name}"
             f" ({self.type} at *0x{self.offset:x}) at 0x{id(self):x}>"
         )
 
@@ -169,4 +169,4 @@ cdef class OptionChoice(BaseOption):
         return self.ptr.default_val.i64
 
     def __repr__(self):
-        return f"<av.{self.__class__.__name__} {self.name} at 0x{id(self):x}>"
+        return f"<pylibav.{self.__class__.__name__} {self.name} at 0x{id(self):x}>"

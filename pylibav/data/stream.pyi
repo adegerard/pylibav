@@ -1,6 +1,6 @@
-from av.frame import Frame
-from av.packet import Packet
-from av.stream import Stream
+from pylibav.frame import Frame
+from pylibav.packet import Packet
+from pylibav.stream import Stream
 
 class DataStream(Stream):
     def encode(self, frame: Frame | None = None) -> list[Packet]: ...

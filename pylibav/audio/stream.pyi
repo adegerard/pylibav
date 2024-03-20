@@ -1,7 +1,7 @@
 from typing import Literal
 
-from av.packet import Packet
-from av.stream import Stream
+from pylibav.packet import Packet
+from pylibav.stream import Stream
 
 from .codeccontext import AudioCodecContext
 from .format import AudioFormat

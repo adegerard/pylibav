@@ -1,8 +1,8 @@
-from av.audio.format cimport get_audio_format
-from av.descriptor cimport wrap_avclass
-from av.enum cimport define_enum
-from av.utils cimport avrational_to_fraction
-from av.video.format cimport get_video_format
+from pylibav.audio.format cimport get_audio_format
+from pylibav.descriptor cimport wrap_avclass
+from pylibav.enum cimport define_enum
+from pylibav.utils cimport avrational_to_fraction
+from pylibav.video.format cimport get_video_format
 
 
 cdef object _cinit_sentinel = object()
@@ -16,7 +16,7 @@ cdef Codec wrap_codec(const lib.AVCodec *ptr):
     return codec
 
 
-Properties = define_enum("Properties", "av.codec", (
+Properties = define_enum("Properties", "pylibav.codec", (
     ("NONE", 0),
     ("INTRA_ONLY", lib.AV_CODEC_PROP_INTRA_ONLY,
         """Codec uses only intra compression.
@@ -44,7 +44,7 @@ Properties = define_enum("Properties", "av.codec", (
         Decoded AVSubtitle data can be read from the AVSubtitleRect->ass field."""),
 ), is_flags=True)
 
-Capabilities = define_enum("Capabilities", "av.codec", (
+Capabilities = define_enum("Capabilities", "pylibav.codec", (
     ("NONE", 0),
     ("DRAW_HORIZ_BAND", lib.AV_CODEC_CAP_DRAW_HORIZ_BAND,
         """Decoder can use draw_horiz_band callback."""),

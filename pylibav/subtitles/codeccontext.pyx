@@ -1,8 +1,8 @@
 cimport libav as lib
 
-from av.error cimport err_check
-from av.packet cimport Packet
-from av.subtitles.subtitle cimport SubtitleProxy, SubtitleSet
+from pylibav.error cimport err_check
+from pylibav.packet cimport Packet
+from pylibav.subtitles.subtitle cimport SubtitleProxy, SubtitleSet
 
 
 cdef class SubtitleCodecContext(CodecContext):

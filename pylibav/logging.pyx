@@ -251,7 +251,7 @@ cdef void log_callback(void *ptr, int level, const char *format, lib.va_list arg
         name = cls.item_name(ptr)
 
     if not inited:
-        fprintf(stderr, "av.logging (after shutdown): %s[%d]: %s\n",
+        fprintf(stderr, "pylibav.logging (after shutdown): %s[%d]: %s\n",
                 name, level, message)
         return
 
@@ -260,7 +260,7 @@ cdef void log_callback(void *ptr, int level, const char *format, lib.va_list arg
             log_callback_gil(level, name, message)
 
         except Exception as e:
-            fprintf(stderr, "av.logging: exception while handling %s[%d]: %s\n",
+            fprintf(stderr, "pylibav.logging: exception while handling %s[%d]: %s\n",
                     name, level, message)
             # For some reason lib.PyErr_PrintEx(0) won't work.
             exc, type_, tb = sys.exc_info()
@@ -331,7 +331,7 @@ cdef log_callback_emit(log):
 
     py_level = adapt_level(lib_level)
 
-    logger_name = "libav." + name if name else "libav.generic"
+    logger_name = "libpylibav." + name if name else "libpylibav.generic"
     logger = logging.getLogger(logger_name)
     logger.log(py_level, message.strip())
 

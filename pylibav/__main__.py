@@ -9,12 +9,12 @@ def main():
 
     if args.version:
         import av
-        import av._core
+        import pylibav._core
 
-        print(f"PyAV v{av.__version__}")
+        print(f"PyAV v{pylibav.__version__}")
 
         by_config = {}
-        for libname, config in sorted(av._core.library_meta.items()):
+        for libname, config in sorted(pylibav._core.library_meta.items()):
             version = config["version"]
             if version[0] >= 0:
                 by_config.setdefault(
@@ -29,7 +29,7 @@ def main():
                 print(f"{libname:<13} {version[0]:3d}.{version[1]:3d}.{version[2]:3d}")
 
     if args.codecs:
-        from av.codec.codec import dump_codecs
+        from pylibav.codec.codec import dump_codecs
 
         dump_codecs()
 

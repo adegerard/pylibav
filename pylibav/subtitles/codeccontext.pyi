@@ -1,6 +1,6 @@
 from typing import Literal
 
-from av.codec.context import CodecContext
+from pylibav.codec.context import CodecContext
 
 class SubtitleCodecContext(CodecContext):
     type: Literal["subtitle"]
