@@ -8,13 +8,13 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        import av
-        import pylibav._core
+        import pylibav
+        import _core
 
         print(f"PyAV v{pylibav.__version__}")
 
         by_config = {}
-        for libname, config in sorted(pylibav._core.library_meta.items()):
+        for libname, config in sorted(_core.library_meta.items()):
             version = config["version"]
             if version[0] >= 0:
                 by_config.setdefault(
@@ -29,7 +29,7 @@ def main():
                 print(f"{libname:<13} {version[0]:3d}.{version[1]:3d}.{version[2]:3d}")
 
     if args.codecs:
-        from pylibav.codec.codec import dump_codecs
+        from codec.codec import dump_codecs
 
         dump_codecs()
 

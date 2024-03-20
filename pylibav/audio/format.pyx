@@ -95,7 +95,7 @@ cdef class AudioFormat:
 
         Is itself when planar:
 
-        >>> from av import AudioFormat as Format
+        >>> from pylibav import AudioFormat as Format
         >>> fmt = Format('s16p')
         >>> fmt.planar is fmt
         True
