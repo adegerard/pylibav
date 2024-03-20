@@ -1,37 +1,40 @@
-from pylibav.enum cimport define_enum
-
 from collections.abc import Mapping
-
-from pylibav.sidedata.motionvectors import MotionVectors
+from pylibav.enum cimport define_enum
+cimport pylibav.libav as libav
+from ..libav cimport (
+    AVFrameSideDataType,
+)
+from ..dictionary cimport wrap_dictionary
+from .motionvectors cimport MotionVectors
 
 
 cdef object _cinit_bypass_sentinel = object()
 
 
 Type = define_enum("Type", __name__, (
-    ("PANSCAN", lib.AV_FRAME_DATA_PANSCAN),
-    ("A53_CC", lib.AV_FRAME_DATA_A53_CC),
-    ("STEREO3D", lib.AV_FRAME_DATA_STEREO3D),
-    ("MATRIXENCODING", lib.AV_FRAME_DATA_MATRIXENCODING),
-    ("DOWNMIX_INFO", lib.AV_FRAME_DATA_DOWNMIX_INFO),
-    ("REPLAYGAIN", lib.AV_FRAME_DATA_REPLAYGAIN),
-    ("DISPLAYMATRIX", lib.AV_FRAME_DATA_DISPLAYMATRIX),
-    ("AFD", lib.AV_FRAME_DATA_AFD),
-    ("MOTION_VECTORS", lib.AV_FRAME_DATA_MOTION_VECTORS),
-    ("SKIP_SAMPLES", lib.AV_FRAME_DATA_SKIP_SAMPLES),
-    ("AUDIO_SERVICE_TYPE", lib.AV_FRAME_DATA_AUDIO_SERVICE_TYPE),
-    ("MASTERING_DISPLAY_METADATA", lib.AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
-    ("GOP_TIMECODE", lib.AV_FRAME_DATA_GOP_TIMECODE),
-    ("SPHERICAL", lib.AV_FRAME_DATA_SPHERICAL),
-    ("CONTENT_LIGHT_LEVEL", lib.AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
-    ("ICC_PROFILE", lib.AV_FRAME_DATA_ICC_PROFILE),
-    ("SEI_UNREGISTERED", lib.AV_FRAME_DATA_SEI_UNREGISTERED) if lib.AV_FRAME_DATA_SEI_UNREGISTERED != -1 else None,
+    ("PANSCAN", AVFrameSideDataType.AV_FRAME_DATA_PANSCAN),
+    ("A53_CC", libav.AV_FRAME_DATA_A53_CC),
+    ("STEREO3D", libav.AV_FRAME_DATA_STEREO3D),
+    ("MATRIXENCODING", libav.AV_FRAME_DATA_MATRIXENCODING),
+    ("DOWNMIX_INFO", libav.AV_FRAME_DATA_DOWNMIX_INFO),
+    ("REPLAYGAIN", libav.AV_FRAME_DATA_REPLAYGAIN),
+    ("DISPLAYMATRIX", libav.AV_FRAME_DATA_DISPLAYMATRIX),
+    ("AFD", libav.AV_FRAME_DATA_AFD),
+    ("MOTION_VECTORS", libav.AV_FRAME_DATA_MOTION_VECTORS),
+    ("SKIP_SAMPLES", libav.AV_FRAME_DATA_SKIP_SAMPLES),
+    ("AUDIO_SERVICE_TYPE", libav.AV_FRAME_DATA_AUDIO_SERVICE_TYPE),
+    ("MASTERING_DISPLAY_METADATA", libav.AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
+    ("GOP_TIMECODE", libav.AV_FRAME_DATA_GOP_TIMECODE),
+    ("SPHERICAL", libav.AV_FRAME_DATA_SPHERICAL),
+    ("CONTENT_LIGHT_LEVEL", libav.AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
+    ("ICC_PROFILE", libav.AV_FRAME_DATA_ICC_PROFILE),
+    ("SEI_UNREGISTERED", libav.AV_FRAME_DATA_SEI_UNREGISTERED) if libav.AV_FRAME_DATA_SEI_UNREGISTERED != -1 else None,
 ))
 
 
 cdef SideData wrap_side_data(Frame frame, int index):
-    cdef lib.AVFrameSideDataType type_ = frame.ptr.side_data[index].type
-    if type_ == lib.AV_FRAME_DATA_MOTION_VECTORS:
+    cdef AVFrameSideDataType type_ = frame.ptr.side_data[index].type
+    if type_ == libav.AV_FRAME_DATA_MOTION_VECTORS:
         return MotionVectors(_cinit_bypass_sentinel, frame, index)
     else:
         return SideData(_cinit_bypass_sentinel, frame, index)

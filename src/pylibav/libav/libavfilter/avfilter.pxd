@@ -1,3 +1,10 @@
+from libc.stdint cimport uint64_t
+from ..libavformat.avformat cimport (
+    AVClass,
+    AVMediaType,
+)
+from ..libavutil.dict cimport AVDictionary
+from ..libavutil.avutil cimport AVRational
 
 cdef extern from "libavfilter/avfilter.h" nogil:
     """
@@ -22,33 +29,8 @@ cdef extern from "libavfilter/avfilter.h" nogil:
 
     int pyav_get_num_pads "_avfilter_get_num_pads" (const AVFilter *filter, int is_output, const AVFilterPad *pads)
 
-    cdef struct AVFilter:
-
-        AVClass *priv_class
-
-        const char *name
-        const char *description
-
-        const int flags
-
-        const AVFilterPad *inputs
-        const AVFilterPad *outputs
-        int (*process_command)(AVFilterContext *, const char *cmd, const char *arg, char *res, int res_len, int flags)
-
-    cdef enum:
-        AVFILTER_FLAG_DYNAMIC_INPUTS
-        AVFILTER_FLAG_DYNAMIC_OUTPUTS
-        AVFILTER_FLAG_SLICE_THREADS
-        AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC
-        AVFILTER_FLAG_SUPPORT_TIMELINE_INTERNAL
-
-    cdef AVFilter* avfilter_get_by_name(const char *name)
-    cdef const AVFilter* av_filter_iterate(void **opaque)
-
-    cdef struct AVFilterLink  # Defined later.
 
     cdef struct AVFilterContext:
-
         AVClass *av_class
         AVFilter *filter
 
@@ -62,13 +44,8 @@ cdef extern from "libavfilter/avfilter.h" nogil:
         AVFilterPad *output_pads
         AVFilterLink **outputs
 
-    cdef int avfilter_init_str(AVFilterContext *ctx, const char *args)
-    cdef int avfilter_init_dict(AVFilterContext *ctx, AVDictionary **options)
-    cdef void avfilter_free(AVFilterContext*)
-    cdef AVClass* avfilter_get_class()
 
     cdef struct AVFilterLink:
-
         AVFilterContext *src
         AVFilterPad *srcpad
         AVFilterContext *dst
@@ -82,6 +59,36 @@ cdef extern from "libavfilter/avfilter.h" nogil:
         int sample_rate
         int format
         AVRational time_base
+
+
+    cdef struct AVFilter:
+        AVClass *priv_class
+
+        const char *name
+        const char *description
+
+        const int flags
+
+        const AVFilterPad *inputs
+        const AVFilterPad *outputs
+        int (*process_command)(AVFilterContext *, const char *cmd, const char *arg, char *res, int res_len, int flags)
+
+
+    cdef enum:
+        AVFILTER_FLAG_DYNAMIC_INPUTS
+        AVFILTER_FLAG_DYNAMIC_OUTPUTS
+        AVFILTER_FLAG_SLICE_THREADS
+        AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC
+        AVFILTER_FLAG_SUPPORT_TIMELINE_INTERNAL
+
+    cdef AVFilter* avfilter_get_by_name(const char *name)
+    cdef const AVFilter* av_filter_iterate(void **opaque)
+
+    cdef int avfilter_init_str(AVFilterContext *ctx, const char *args)
+    cdef int avfilter_init_dict(AVFilterContext *ctx, AVDictionary **options)
+    cdef void avfilter_free(AVFilterContext*)
+    cdef AVClass* avfilter_get_class()
+
 
     # custom
     cdef set pyav_get_available_filters()

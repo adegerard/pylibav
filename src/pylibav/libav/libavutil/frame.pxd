@@ -1,3 +1,9 @@
+from ..libavcodec.avcodec cimport (
+    AVFrame,
+    AVFrameSideData,
+    AVFrameSideDataType,
+)
+
 cdef extern from "libavutil/frame.h" nogil:
 
     cdef AVFrame* av_frame_alloc()

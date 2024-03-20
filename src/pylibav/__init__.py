@@ -1,8 +1,7 @@
 import os
 import sys
 
-__version__ = "0.1.8"
-
+__version__ = "0.0.1"
 
 # MUST import the core before anything else in order to initalize the underlying
 # library that is being wrapped.

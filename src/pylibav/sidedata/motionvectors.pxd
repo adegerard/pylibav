@@ -1,7 +1,5 @@
-cimport libav as lib
-
-from pylibav.frame cimport Frame
-from pylibav.sidedata.sidedata cimport SideData
+from ..libav cimport AVMotionVector
+from .sidedata cimport SideData
 
 
 cdef class _MotionVectors(SideData):
@@ -13,4 +11,4 @@ cdef class _MotionVectors(SideData):
 cdef class MotionVector:
 
     cdef _MotionVectors parent
-    cdef lib.AVMotionVector *ptr
+    cdef AVMotionVector *ptr

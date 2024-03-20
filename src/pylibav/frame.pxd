@@ -1,4 +1,7 @@
-cimport libav as lib
+from libav cimport (
+    AVFrame,
+    AVRational,
+)
 
 from pylibav.packet cimport Packet
 from pylibav.sidedata.sidedata cimport _SideDataContainer
@@ -6,11 +9,11 @@ from pylibav.sidedata.sidedata cimport _SideDataContainer
 
 cdef class Frame:
 
-    cdef lib.AVFrame *ptr
+    cdef AVFrame *ptr
 
     # We define our own time.
-    cdef lib.AVRational _time_base
-    cdef _rebase_time(self, lib.AVRational)
+    cdef AVRational _time_base
+    cdef _rebase_time(self, AVRational)
 
     cdef _SideDataContainer _side_data
 

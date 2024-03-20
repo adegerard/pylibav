@@ -30,9 +30,7 @@ API Reference
 
 """
 
-from __future__ import absolute_import
-
-cimport libav as lib
+# from __future__ import absolute_import
 from libc.stdio cimport fprintf, stderr
 from libc.stdlib cimport free, malloc
 
@@ -41,16 +39,28 @@ import os
 import sys
 from threading import Lock, get_ident
 
+cimport libav
+from libav cimport (
+    AVClass,
+    av_log_set_callback,
+    av_log_default_callback,
+    Py_IsInitialized,
+    PyErr_Display,
+    va_list,
+    vsnprintf,
+)
+
+
 # Library levels.
-# QUIET  = lib.AV_LOG_QUIET # -8; not really a level.
-PANIC = lib.AV_LOG_PANIC  # 0
-FATAL = lib.AV_LOG_FATAL  # 8
-ERROR = lib.AV_LOG_ERROR
-WARNING = lib.AV_LOG_WARNING
-INFO = lib.AV_LOG_INFO
-VERBOSE = lib.AV_LOG_VERBOSE
-DEBUG = lib.AV_LOG_DEBUG
-TRACE = lib.AV_LOG_TRACE
+# QUIET  = libav.AV_LOG_QUIET # -8; not really a level.
+PANIC = libav.AV_LOG_PANIC  # 0
+FATAL = libav.AV_LOG_FATAL  # 8
+ERROR = libav.AV_LOG_ERROR
+WARNING = libav.AV_LOG_WARNING
+INFO = libav.AV_LOG_INFO
+VERBOSE = libav.AV_LOG_VERBOSE
+DEBUG = libav.AV_LOG_DEBUG
+TRACE = libav.AV_LOG_TRACE
 
 # Mimicking stdlib.
 CRITICAL = FATAL
@@ -59,26 +69,26 @@ CRITICAL = FATAL
 cpdef adapt_level(int level):
     """Convert a library log level to a Python log level."""
 
-    if level <= lib.AV_LOG_FATAL:  # Includes PANIC
+    if level <= libav.AV_LOG_FATAL:  # Includes PANIC
         return 50  # logging.CRITICAL
-    elif level <= lib.AV_LOG_ERROR:
+    elif level <= libav.AV_LOG_ERROR:
         return 40  # logging.ERROR
-    elif level <= lib.AV_LOG_WARNING:
+    elif level <= libav.AV_LOG_WARNING:
         return 30  # logging.WARNING
-    elif level <= lib.AV_LOG_INFO:
+    elif level <= libav.AV_LOG_INFO:
         return 20  # logging.INFO
-    elif level <= lib.AV_LOG_VERBOSE:
+    elif level <= libav.AV_LOG_VERBOSE:
         return 10  # logging.DEBUG
-    elif level <= lib.AV_LOG_DEBUG:
+    elif level <= libav.AV_LOG_DEBUG:
         return 5  # Lower than any logging constant.
-    else:  # lib.AV_LOG_TRACE
+    else:  # AV_LOG_TRACE
         return 1  # ... yeah.
 
 
 # While we start with the level quite low, Python defaults to INFO, and so
 # they will not show. The logging system can add significant overhead, so
 # be wary of dropping this lower.
-cdef int level_threshold = lib.AV_LOG_VERBOSE
+cdef int level_threshold = libav.AV_LOG_VERBOSE
 
 # ... but lets limit ourselves to WARNING (assuming nobody already did this).
 if "libav" not in logging.Logger.manager.loggerDict:
@@ -117,7 +127,7 @@ def set_level(int level):
 
 def restore_default_callback():
     """Revert back to FFmpeg's log callback, which prints to the terminal."""
-    lib.av_log_set_callback(lib.av_log_default_callback)
+    av_log_set_callback(av_log_default_callback)
 
 
 cdef bint print_after_shutdown = False
@@ -202,14 +212,14 @@ cdef class Capture:
 
 
 cdef struct log_context:
-    lib.AVClass *class_
+    AVClass *class_
     const char *name
 
 cdef const char *log_context_name(void *ptr) noexcept nogil:
     cdef log_context *obj = <log_context*>ptr
     return obj.name
 
-cdef lib.AVClass log_class
+cdef AVClass log_class
 log_class.item_name = log_context_name
 
 cpdef log(int level, str name, str message):
@@ -222,29 +232,29 @@ cpdef log(int level, str name, str message):
     cdef log_context *obj = <log_context*>malloc(sizeof(log_context))
     obj.class_ = &log_class
     obj.name = name
-    lib.av_log(<void*>obj, level, "%s", message)
+    libav.av_log(<void*>obj, level, "%s", message)
     free(obj)
 
 
-cdef void log_callback(void *ptr, int level, const char *format, lib.va_list args) noexcept nogil:
+cdef void log_callback(void *ptr, int level, const char *format, va_list args) noexcept nogil:
 
-    cdef bint inited = lib.Py_IsInitialized()
+    cdef bint inited = Py_IsInitialized()
     if not inited and not print_after_shutdown:
         return
 
     # Fast path: avoid logging overhead. This should match the
     # log_callback_gil() checks that result in ignoring the message.
     with gil:
-        if level > level_threshold and level != lib.AV_LOG_ERROR:
+        if level > level_threshold and level != libav.AV_LOG_ERROR:
             return
 
     # Format the message.
     cdef char message[1024]
-    lib.vsnprintf(message, 1023, format, args)
+    vsnprintf(message, 1023, format, args)
 
     # Get the name.
     cdef const char *name = NULL
-    cdef lib.AVClass *cls = (<lib.AVClass**>ptr)[0] if ptr else NULL
+    cdef AVClass *cls = (<AVClass**>ptr)[0] if ptr else NULL
     if cls and cls.item_name:
         # I'm not 100% on this, but this should be static, and so
         # it doesn't matter if the AVClass that returned it vanishes or not.
@@ -262,9 +272,9 @@ cdef void log_callback(void *ptr, int level, const char *format, lib.va_list arg
         except Exception as e:
             fprintf(stderr, "pylibav.logging: exception while handling %s[%d]: %s\n",
                     name, level, message)
-            # For some reason lib.PyErr_PrintEx(0) won't work.
+            # For some reason PyErr_PrintEx(0) won't work.
             exc, type_, tb = sys.exc_info()
-            lib.PyErr_Display(exc, type_, tb)
+            PyErr_Display(exc, type_, tb)
 
 
 cdef log_callback_gil(int level, const char *c_name, const char *c_message):
@@ -310,7 +320,7 @@ cdef log_callback_gil(int level, const char *c_name, const char *c_message):
             last_log = log
 
         # Hold onto errors for err_check.
-        if level == lib.AV_LOG_ERROR:
+        if level == libav.AV_LOG_ERROR:
             error_count += 1
             last_error = log
 
@@ -321,17 +331,17 @@ cdef log_callback_gil(int level, const char *c_name, const char *c_message):
         log_callback_emit(log)
 
 
-cdef log_callback_emit(log):
+cdef log_callback_emit(log: tuple[int, str, str]):
     lib_level, name, message = log
 
-    captures = thread_captures.get(get_ident()) or global_captures
+    captures: list = thread_captures.get(get_ident()) or global_captures
     if captures:
         captures[-1].append(log)
         return
 
     py_level = adapt_level(lib_level)
 
-    logger_name = "libpylibav." + name if name else "libpylibav.generic"
+    logger_name = "pylibav." + name if name else "pylibav.generic"
     logger = logging.getLogger(logger_name)
     logger.log(py_level, message.strip())
 
@@ -340,4 +350,4 @@ cdef log_callback_emit(log):
 # We allow the user to fully disable the logging system as it will not play
 # nicely with subinterpreters due to FFmpeg-created threads.
 if os.environ.get("PYAV_LOGGING") != "off":
-    lib.av_log_set_callback(log_callback)
+    av_log_set_callback(log_callback)

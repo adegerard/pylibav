@@ -1,4 +1,8 @@
-cimport libav as lib
+from ..libav cimport (
+    AVCodec,
+    AVCodecContext,
+    AVCodecParserContext,
+)
 from libc.stdint cimport int64_t
 
 from pylibav.bytesource cimport ByteSource
@@ -9,7 +13,7 @@ from pylibav.packet cimport Packet
 
 cdef class CodecContext:
 
-    cdef lib.AVCodecContext *ptr
+    cdef AVCodecContext *ptr
 
     # Whether AVCodecContext.extradata should be de-allocated upon destruction.
     cdef bint extradata_set
@@ -19,9 +23,9 @@ cdef class CodecContext:
     # this object.
     cdef int stream_index
 
-    cdef lib.AVCodecParserContext *parser
+    cdef AVCodecParserContext *parser
 
-    cdef _init(self, lib.AVCodecContext *ptr, const lib.AVCodec *codec)
+    cdef _init(self, AVCodecContext *ptr, const AVCodec *codec)
 
     cdef readonly Codec codec
 
@@ -61,4 +65,4 @@ cdef class CodecContext:
     cdef Frame _alloc_next_frame(self)
 
 
-cdef CodecContext wrap_codec_context(lib.AVCodecContext*, const lib.AVCodec*)
+cdef CodecContext wrap_codec_context(AVCodecContext*, const AVCodec*)

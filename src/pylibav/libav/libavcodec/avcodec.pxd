@@ -22,6 +22,9 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         #define AV_FRAME_DATA_SEI_UNREGISTERED -1
     #endif
     """
+    ctypedef struct AVRational:
+        int num
+        int den
 
     # custom
     cdef set pyav_get_available_codecs()

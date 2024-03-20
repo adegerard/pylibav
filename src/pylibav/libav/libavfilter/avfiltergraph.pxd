@@ -1,3 +1,7 @@
+from avfilter cimport (
+    AVFilter,
+    AVFilterContext,
+)
 
 cdef extern from "libavfilter/avfilter.h" nogil:
 

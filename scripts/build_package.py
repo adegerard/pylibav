@@ -387,7 +387,7 @@ endian = 'little'
         prepend_env(
             env,
             "PKG_CONFIG_PATH",
-            self._mangle_path(os.path.join(prefix, "lib", "pkgconfig")),
+            os.path.join(prefix, "lib", "pkgconfig"),
             separator=ENV_SEP,
         )
 

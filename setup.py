@@ -45,11 +45,12 @@ if os.path.exists(package_lib_dir):
     shutil.rmtree(package_lib_dir)
 os.makedirs(package_lib_dir)
 
+lib_pattern = f"[^.]+.so.*" if IS_PLATFORM_LINUX else f"[^.]+.dll"
 for f in os.listdir(ffmpeg_lib_dir):
     fp: str = os.path.join(ffmpeg_lib_dir, f)
     if (
         not os.path.islink(fp)
-        and (match := re.match(re.compile(f"[^.]+.so.*"), f))
+        and (match := re.match(re.compile(lib_pattern), f))
     ):
         shutil.copy2(fp, package_lib_dir)
 

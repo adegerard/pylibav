@@ -71,10 +71,23 @@ What differs from the original branch
 - Windows  11, python 3.11.8, MSYS2(mingw64)
     ```sh
     pacman -Suy
-    pacman -S mingw-w64-x86_64-python mingw-w64-x86_64-python-pip
-    pacman -S mingw-w64-x86_64-zlib-devel
-    base-devel zlib-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake
-    pacman -S mingw-w64-x86_64-gperf mingw-w64-x86_64-nasm
+    pacman -S make
+    pacman -S diffutils
+    pacman -S yasm
+    pacman -S pkg-config
+    pacman -S mingw-w64-x86_64-python
+    pacman -S mingw-w64-x86_64-python-pip
+    ~~pacman -S mingw-w64-x86_64-zlib-devel~~
+    ~~base-devel zlib-devel~~
+    pacman -S base-devel
+    pacman -S mingw-w64-x86_64-gcc
+    pacman -S mingw-w64-x86_64-cmake
+    pacman -S mingw-w64-x86_64-gperf
+    pacman -S mingw-w64-x86_64-nasm
+    pacman -S mingw-w64-x86_64-libpng
+    pacman -S libxml2
+    pacman -S mingw-w64-x86_64-gmp
+
     python scripts/build-ffmpeg.py /a/tmp/pyav_ffmpeg_lite
     ```
 

@@ -1,4 +1,4 @@
-from cpython.buffer cimport Py_buffer
+from cpython cimport Py_buffer
 
 
 cdef class ByteSource:

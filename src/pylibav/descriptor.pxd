@@ -1,5 +1,4 @@
-cimport libav as lib
-
+cimport libav
 
 cdef class Descriptor:
 
@@ -12,9 +11,9 @@ cdef class Descriptor:
     # - AVInputFormat.priv_class
     # - AVFilter.priv_class
 
-    cdef const lib.AVClass *ptr
+    cdef const libav.AVClass *ptr
 
     cdef object _options  # Option list cache.
 
 
-cdef Descriptor wrap_avclass(const lib.AVClass*)
+cdef Descriptor wrap_avclass(const libav.AVClass*)

@@ -29,25 +29,24 @@ ffmpeg_build_args = [
     "--disable-videotoolbox",
     "--disable-audiotoolbox",
     "--enable-fontconfig",
-    "--enable-gmp",
+    # "--enable-gmp",
     # FFmpeg has native TLS backends for macOS and Windows
-    "--enable-gnutls" if IS_PLATFORM_LINUX else "--disable-gnutls",
+    "--disable-gnutls",
     "--disable-libaom",
     "--disable-libass",
     "--disable-libbluray",
     "--disable-libdav1d",
-    "--enable-libfreetype",
+    "--disable-libfreetype",
     "--disable-libmp3lame",
     "--disable-libopencore-amrnb",
     "--disable-libopencore-amrwb",
-    "--enable-libopenjpeg",
     "--disable-libopus",
     "--disable-libspeex",
     "--disable-libtwolame",
     "--disable-libvorbis",
     "--disable-libvpx",
     "--enable-libxcb" if IS_PLATFORM_LINUX else "--disable-libxcb",
-    "--enable-libxml2",
+    "--disable-libxml2",
     "--enable-lzma",
     "--enable-zlib",
     "--enable-version3",
@@ -145,116 +144,119 @@ def main() -> None:
         #         ),
         #         for_builder=True,
         #     )
-
-        library_group = [
-            Package(
-                name="xz",
-                source_url="https://github.com/tukaani-project/xz/releases/download/v5.6.1/xz-5.6.1.tar.xz",
-                build_arguments=[
-                    "--disable-doc",
-                    "--disable-lzma-links",
-                    "--disable-lzmadec",
-                    "--disable-lzmainfo",
-                    "--disable-nls",
-                    "--disable-scripts",
-                    "--disable-xz",
-                    "--disable-xzdec",
-                ],
-            ),
-            Package(
-                name="gmp",
-                source_url="https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
-                # out-of-tree builds fail on Windows
-                # build_dir=".",
-            ),
-            Package(
-                name="png",
-                source_url="http://deb.debian.org/debian/pool/main/libp/libpng1.6/libpng1.6_1.6.43.orig.tar.gz",
-                # avoid an assembler error on Windows
-                build_arguments=["PNG_COPTS=-fno-asynchronous-unwind-tables"],
-            ),
-            Package(
-                name="xml2",
-                requires=["xz"],
-                source_url="https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.6.tar.xz",
-                build_arguments=["--without-python"],
-            ),
-            Package(
-                name="freetype",
-                requires=["png"],
-                source_url="https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.xz",
-                # At this point we have not built our own harfbuzz and we do NOT want to
-                # pick up the system's harfbuzz.
-                build_arguments=["--with-harfbuzz=no"],
-            ),
-            Package(
-                name="fontconfig",
-                requires=["freetype", "xml2"],
-                source_url="https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.15.0.tar.xz",
-                build_arguments=["--disable-nls", "--enable-libxml2"],
-            ),
-            Package(
-                name="fribidi",
-                source_url="https://github.com/fribidi/fribidi/releases/download/v1.0.13/fribidi-1.0.13.tar.xz",
-            ),
-            Package(
-                name="harfbuzz",
-                requires=["freetype"],
-                source_url="https://github.com/harfbuzz/harfbuzz/releases/download/8.3.1/harfbuzz-8.3.1.tar.xz",
-                build_arguments=[
-                    "--with-cairo=no",
-                    "--with-chafa=no",
-                    "--with-freetype=yes",
-                    "--with-glib=no",
-                ],
-                # parallel build fails on Windows
-                build_parallel=False if IS_PLATFORM_WINDOWS else True,
-            ),
-        ]
-
-        # GNU tls
-        if True if IS_PLATFORM_LINUX else False:
-            library_group += [
+        library_group = []
+        # if not IS_PLATFORM_WINDOWS:
+        if True:
+            library_group = [
                 Package(
-                    name="unistring",
-                    source_url="https://ftp.gnu.org/gnu/libunistring/libunistring-1.2.tar.gz",
-                ),
-                Package(
-                    name="nettle",
-                    requires=["gmp"],
-                    source_url="https://ftp.gnu.org/gnu/nettle/nettle-3.9.1.tar.gz",
-                    build_arguments=["--disable-documentation"],
-                    # build randomly fails with "*** missing separator.  Stop."
-                    build_parallel=False,
-                ),
-                Package(
-                    name="gnutls",
-                    requires=["nettle", "unistring"],
-                    source_url="https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.3.tar.xz",
+                    name="xz",
+                    source_url="https://github.com/tukaani-project/xz/releases/download/v5.6.1/xz-5.6.1.tar.xz",
                     build_arguments=[
-                        "--disable-cxx",
                         "--disable-doc",
-                        "--disable-guile",
-                        "--disable-libdane",
+                        "--disable-lzma-links",
+                        "--disable-lzmadec",
+                        "--disable-lzmainfo",
                         "--disable-nls",
-                        "--disable-tests",
-                        "--disable-tools",
-                        "--with-included-libtasn1",
-                        "--without-p11-kit",
+                        "--disable-scripts",
+                        "--disable-xz",
+                        "--disable-xzdec",
                     ],
                 ),
+                # Package(
+                #     name="gmp",
+                #     source_url="https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz",
+                #     # out-of-tree builds fail on Windows
+                #     # build_dir=".",
+                # ),
+                # Package(
+                #     name="png",
+                #     source_url="http://deb.debian.org/debian/pool/main/libp/libpng1.6/libpng1.6_1.6.43.orig.tar.gz",
+                #     # avoid an assembler error on Windows
+                #     build_arguments=["PNG_COPTS=-fno-asynchronous-unwind-tables"],
+                # ),
+                # Package(
+                #     name="xml2",
+                #     requires=["xz"],
+                #     source_url="https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.6.tar.xz",
+                #     build_arguments=["--without-python"],
+                # ),
+                # Package(
+                #     name="freetype",
+                #     requires=["png"],
+                #     source_url="https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.xz",
+                #     # At this point we have not built our own harfbuzz and we do NOT want to
+                #     # pick up the system's harfbuzz.
+                #     build_arguments=["--with-harfbuzz=no"],
+                # ),
+                # Package(
+                #     name="fontconfig",
+                #     requires=["freetype", "xml2"],
+                #     source_url="https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.15.0.tar.xz",
+                #     build_arguments=["--disable-nls", "--enable-libxml2"],
+                # ),
+                # Package(
+                #     name="fribidi",
+                #     source_url="https://github.com/fribidi/fribidi/releases/download/v1.0.13/fribidi-1.0.13.tar.xz",
+                # ),
+                # Package(
+                #     name="harfbuzz",
+                #     requires=["freetype"],
+                #     source_url="https://github.com/harfbuzz/harfbuzz/releases/download/8.3.1/harfbuzz-8.3.1.tar.xz",
+                #     build_arguments=[
+                #         "--with-cairo=no",
+                #         "--with-chafa=no",
+                #         "--with-freetype=yes",
+                #         "--with-glib=no",
+                #     ],
+                #     # parallel build fails on Windows
+                #     build_parallel=False if IS_PLATFORM_WINDOWS else True,
+                # ),
             ]
 
+        # GNU tls
+        # if IS_PLATFORM_LINUX:
+        #     library_group += [
+        #         Package(
+        #             name="unistring",
+        #             source_url="https://ftp.gnu.org/gnu/libunistring/libunistring-1.2.tar.gz",
+        #         ),
+        #         Package(
+        #             name="nettle",
+        #             requires=["gmp"],
+        #             source_url="https://ftp.gnu.org/gnu/nettle/nettle-3.9.1.tar.gz",
+        #             build_arguments=["--disable-documentation"],
+        #             # build randomly fails with "*** missing separator.  Stop."
+        #             build_parallel=False,
+        #         ),
+        #         Package(
+        #             name="gnutls",
+        #             requires=["nettle", "unistring"],
+        #             source_url="https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.3.tar.xz",
+        #             build_arguments=[
+        #                 "--disable-cxx",
+        #                 "--disable-doc",
+        #                 "--disable-guile",
+        #                 "--disable-libdane",
+        #                 "--disable-nls",
+        #                 "--disable-tests",
+        #                 "--disable-tools",
+        #                 "--with-included-libtasn1",
+        #                 "--without-p11-kit",
+        #             ],
+        #         ),
+        #     ]
+
         # codecs
-        codec_group = [
-            Package(
-                name="openjpeg",
-                requires=["cmake"],
-                source_filename="openjpeg-2.5.2.tar.gz",
-                source_url="https://github.com/uclouvain/openjpeg/archive/v2.5.2.tar.gz",
-                build_system="cmake",
-            ),
-        ]
+        codec_group = []
+        # codec_group = [
+        #     Package(
+        #         name="openjpeg",
+        #         requires=["cmake"],
+        #         source_filename="openjpeg-2.5.2.tar.gz",
+        #         source_url="https://github.com/uclouvain/openjpeg/archive/v2.5.2.tar.gz",
+        #         build_system="cmake",
+        #     ),
+        # ]
 
         # FFmpeg
         ffmpeg_package = Package(
@@ -275,59 +277,63 @@ def main() -> None:
             builder.build(package)
 
 
-        if IS_PLATFORM_WINDOWS and (build_stage is None or build_stage == 2):
-            # fix .lib files being installed in the wrong directory
-            for name in [
-                "avcodec",
-                "avdevice",
-                "avfilter",
-                "avformat",
-                "avutil",
-                "postproc",
-                "swresample",
-                "swscale",
-            ]:
-                shutil.move(
-                    os.path.join(tmp_dir, "bin", name + ".lib"),
-                    os.path.join(tmp_dir, "lib"),
-                )
-
-            # copy some libraries provided by mingw
-            mingw_bindir = os.path.dirname(
-                subprocess.run(["where", "gcc"], check=True, stdout=subprocess.PIPE)
-                .stdout.decode()
-                .splitlines()[0]
-                .strip()
-            )
-            for name in [
-                "libgcc_s_seh-1.dll",
-                "libiconv-2.dll",
-                "libstdc++-6.dll",
-                "libwinpthread-1.dll",
-                "zlib1.dll",
-            ]:
-                shutil.copy(os.path.join(mingw_bindir, name), os.path.join(tmp_dir, "bin"))
-
-        # find libraries
+    if IS_PLATFORM_WINDOWS and (build_stage is None or build_stage == 2):
         deploy_dir = builder.deploy_dir()
-        if IS_PLATFORM_LINUX:
-            libraries = glob.glob(os.path.join(deploy_dir, "lib", "*.so"))
-        elif IS_PLATFORM_WINDOWS:
-            libraries = glob.glob(os.path.join(deploy_dir, "bin", "*.dll"))
-        elif IS_PLATFORM_DARWIN:
-            libraries = glob.glob(os.path.join(deploy_dir, "lib", "*.dylib"))
+        # fix .lib files being installed in the wrong directory
+        for name in [
+            "avcodec",
+            "avdevice",
+            "avfilter",
+            "avformat",
+            "avutil",
+            "postproc",
+            "swresample",
+            "swscale",
+        ]:
+            try:
+                shutil.move(
+                    os.path.join(deploy_dir, "bin", name + ".lib"),
+                    os.path.join(deploy_dir, "lib"),
+                )
+            except Exception as e:
+                print(e)
 
-        # strip libraries
-        # if IS_PLATFORM_DARWIN:
-        #     run(["strip", "-S"] + libraries)
-        #     run(["otool", "-L"] + libraries)
-        # else:
-        #     run(["strip", "-s"] + libraries)
+        # copy some libraries provided by mingw
+        mingw_bindir = os.path.dirname(
+            subprocess.run(["where", "gcc"], check=True, stdout=subprocess.PIPE)
+            .stdout.decode()
+            .splitlines()[0]
+            .strip()
+        )
+        for name in [
+            "libgcc_s_seh-1.dll",
+            "libiconv-2.dll",
+            "libstdc++-6.dll",
+            "libwinpthread-1.dll",
+            "zlib1.dll",
+        ]:
+            shutil.copy(os.path.join(mingw_bindir, name), os.path.join(deploy_dir, "bin"))
 
-        # build output tarball
-        if build_stage is None or build_stage == 2:
-            os.makedirs(deploy_dir, exist_ok=True)
-            run(["tar", "czvf", output_package, "-C", deploy_dir, "bin", "include", "lib"])
+    # find libraries
+    deploy_dir = builder.deploy_dir()
+    if IS_PLATFORM_LINUX:
+        libraries = glob.glob(os.path.join(deploy_dir, "lib", "*.so"))
+    elif IS_PLATFORM_WINDOWS:
+        libraries = glob.glob(os.path.join(deploy_dir, "bin", "*.dll"))
+    elif IS_PLATFORM_DARWIN:
+        libraries = glob.glob(os.path.join(deploy_dir, "lib", "*.dylib"))
+
+    # strip libraries
+    # if IS_PLATFORM_DARWIN:
+    #     run(["strip", "-S"] + libraries)
+    #     run(["otool", "-L"] + libraries)
+    # else:
+    #     run(["strip", "-s"] + libraries)
+
+    # build output tarball
+    if build_stage is None or build_stage == 2:
+        os.makedirs(deploy_dir, exist_ok=True)
+        run(["tar", "czvf", output_package, "-C", deploy_dir, "bin", "include", "lib"])
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 from collections.abc import Mapping
 from typing import Iterator, Sequence, overload
 
-from pylibav.buffer import Buffer
-from pylibav.enum import EnumItem
-from pylibav.frame import Frame
+from ..buffer import Buffer
+from ..enum import EnumItem
+from ..frame import Frame
 
 class Type(EnumItem):
     PANSCAN: int

@@ -1,3 +1,4 @@
+from ..libavutil.avutil cimport AVPixelFormat
 
 cdef extern from "libswscale/swscale.h" nogil:
 

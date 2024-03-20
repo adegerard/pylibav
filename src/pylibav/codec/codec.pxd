@@ -1,13 +1,16 @@
-cimport libav as lib
+from ..libav cimport (
+    AVCodec,
+    AVCodecDescriptor,
+)
 
 
 cdef class Codec:
 
-    cdef const lib.AVCodec *ptr
-    cdef const lib.AVCodecDescriptor *desc
+    cdef const AVCodec *ptr
+    cdef const AVCodecDescriptor *desc
     cdef readonly bint is_encoder
 
     cdef _init(self, name=?)
 
 
-cdef Codec wrap_codec(const lib.AVCodec *ptr)
+cdef Codec wrap_codec(const AVCodec *ptr)

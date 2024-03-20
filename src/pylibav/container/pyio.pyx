@@ -1,7 +1,13 @@
-cimport libav as lib
 from libc.string cimport memcpy
-
-from pylibav.error cimport stash_exception
+from ..error cimport stash_exception
+cimport pylibav.libav as libav
+from ..libav cimport (
+    av_malloc,
+    avio_alloc_context,
+    av_freep,
+    avio_flush,
+    avio_close,
+)
 
 ctypedef int64_t (*seek_func_t)(void *opaque, int64_t offset, int whence) noexcept nogil
 
@@ -44,9 +50,9 @@ cdef class PyIOFile:
         self.pos_is_valid = True
 
         # This is effectively the maximum size of reads.
-        self.buffer = <unsigned char*>lib.av_malloc(buffer_size)
+        self.buffer = <unsigned char*>av_malloc(buffer_size)
 
-        self.iocontext = lib.avio_alloc_context(
+        self.iocontext = avio_alloc_context(
             self.buffer, buffer_size,
             writeable,
             <void*>self,  # User data.
@@ -56,7 +62,7 @@ cdef class PyIOFile:
         )
 
         if seek_func:
-            self.iocontext.seekable = lib.AVIO_SEEKABLE_NORMAL
+            self.iocontext.seekable = libav.AVIO_SEEKABLE_NORMAL
         self.iocontext.max_packet_size = buffer_size
 
     def __dealloc__(self):
@@ -64,13 +70,13 @@ cdef class PyIOFile:
             # FFmpeg will not release custom input, so it's up to us to free it.
             # Do not touch our original buffer as it may have been freed and replaced.
             if self.iocontext:
-                lib.av_freep(&self.iocontext.buffer)
-                lib.av_freep(&self.iocontext)
+                av_freep(&self.iocontext.buffer)
+                av_freep(&self.iocontext)
 
             # We likely errored badly if we got here, and so are still
             # responsible for our buffer.
             else:
-                lib.av_freep(&self.buffer)
+                av_freep(&self.buffer)
 
 
 cdef int pyio_read(void *opaque, uint8_t *buf, int buf_size) noexcept nogil:
@@ -86,7 +92,7 @@ cdef int pyio_read_gil(void *opaque, uint8_t *buf, int buf_size) noexcept:
         memcpy(buf, <void*><char*>res, len(res))
         self.pos += len(res)
         if not res:
-            return lib.AVERROR_EOF
+            return libav.AVERROR_EOF
         return len(res)
     except Exception as e:
         return stash_exception()
@@ -115,7 +121,7 @@ cdef int64_t pyio_seek(void *opaque, int64_t offset, int whence) noexcept nogil:
     # Seek takes the standard flags, but also a ad-hoc one which means that
     # the library wants to know how large the file is. We are generally
     # allowed to ignore this.
-    if whence == lib.AVSEEK_SIZE:
+    if whence == libav.AVSEEK_SIZE:
         return -1
     with gil:
         return pyio_seek_gil(opaque, offset, whence)
@@ -143,21 +149,21 @@ cdef int64_t pyio_seek_gil(void *opaque, int64_t offset, int whence):
         return stash_exception()
 
 
-cdef void pyio_close_gil(lib.AVIOContext *pb):
+cdef void pyio_close_gil(AVIOContext *pb):
     try:
-        lib.avio_close(pb)
+        avio_close(pb)
 
     except Exception as e:
         stash_exception()
 
 
-cdef void pyio_close_custom_gil(lib.AVIOContext *pb):
+cdef void pyio_close_custom_gil(AVIOContext *pb):
     cdef PyIOFile self
     try:
         self = <PyIOFile>pb.opaque
 
         # Flush bytes in the AVIOContext buffers to the custom I/O
-        lib.avio_flush(pb)
+        avio_flush(pb)
 
         if self.fclose is not None:
             self.fclose()

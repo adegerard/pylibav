@@ -1,4 +1,12 @@
-cimport libav as lib
+cimport libav
+from libav cimport (
+    AVInputFormat,
+    AVOutputFormat,
+    av_find_input_format,
+    av_demuxer_iterate,
+    av_muxer_iterate,
+    av_guess_format,
+)
 
 from pylibav.descriptor cimport wrap_avclass
 from pylibav.enum cimport define_enum
@@ -6,7 +14,7 @@ from pylibav.enum cimport define_enum
 
 cdef object _cinit_bypass_sentinel = object()
 
-cdef ContainerFormat build_container_format(lib.AVInputFormat* iptr, lib.AVOutputFormat* optr):
+cdef ContainerFormat build_container_format(lib.AVInputFormat* iptr, AVOutputFormat* optr):
     if not iptr and not optr:
         raise ValueError("needs input format or output format")
     cdef ContainerFormat format = ContainerFormat.__new__(ContainerFormat, _cinit_bypass_sentinel)
@@ -17,35 +25,35 @@ cdef ContainerFormat build_container_format(lib.AVInputFormat* iptr, lib.AVOutpu
 
 
 Flags = define_enum("Flags", __name__, (
-    ("NOFILE", lib.AVFMT_NOFILE),
-    ("NEEDNUMBER", lib.AVFMT_NEEDNUMBER, "Needs '%d' in filename."),
-    ("SHOW_IDS", lib.AVFMT_SHOW_IDS, "Show format stream IDs numbers."),
-    ("GLOBALHEADER", lib.AVFMT_GLOBALHEADER, "Format wants global header."),
-    ("NOTIMESTAMPS", lib.AVFMT_NOTIMESTAMPS, "Format does not need / have any timestamps."),
-    ("GENERIC_INDEX", lib.AVFMT_GENERIC_INDEX, "Use generic index building code."),
-    ("TS_DISCONT", lib.AVFMT_TS_DISCONT,
+    ("NOFILE", libav.AVFMT_NOFILE),
+    ("NEEDNUMBER", libav.AVFMT_NEEDNUMBER, "Needs '%d' in filename."),
+    ("SHOW_IDS", libav.AVFMT_SHOW_IDS, "Show format stream IDs numbers."),
+    ("GLOBALHEADER", libav.AVFMT_GLOBALHEADER, "Format wants global header."),
+    ("NOTIMESTAMPS", libav.AVFMT_NOTIMESTAMPS, "Format does not need / have any timestamps."),
+    ("GENERIC_INDEX", libav.AVFMT_GENERIC_INDEX, "Use generic index building code."),
+    ("TS_DISCONT", libav.AVFMT_TS_DISCONT,
         """Format allows timestamp discontinuities.
         Note, muxers always require valid (monotone) timestamps"""),
-    ("VARIABLE_FPS", lib.AVFMT_VARIABLE_FPS, "Format allows variable fps."),
-    ("NODIMENSIONS", lib.AVFMT_NODIMENSIONS, "Format does not need width/height"),
-    ("NOSTREAMS", lib.AVFMT_NOSTREAMS, "Format does not require any streams"),
-    ("NOBINSEARCH", lib.AVFMT_NOBINSEARCH,
+    ("VARIABLE_FPS", libav.AVFMT_VARIABLE_FPS, "Format allows variable fps."),
+    ("NODIMENSIONS", libav.AVFMT_NODIMENSIONS, "Format does not need width/height"),
+    ("NOSTREAMS", libav.AVFMT_NOSTREAMS, "Format does not require any streams"),
+    ("NOBINSEARCH", libav.AVFMT_NOBINSEARCH,
         "Format does not allow to fall back on binary search via read_timestamp"),
-    ("NOGENSEARCH", lib.AVFMT_NOGENSEARCH,
+    ("NOGENSEARCH", libav.AVFMT_NOGENSEARCH,
         "Format does not allow to fall back on generic search"),
-    ("NO_BYTE_SEEK", lib.AVFMT_NO_BYTE_SEEK, "Format does not allow seeking by bytes"),
-    ("ALLOW_FLUSH", lib.AVFMT_ALLOW_FLUSH,
+    ("NO_BYTE_SEEK", libav.AVFMT_NO_BYTE_SEEK, "Format does not allow seeking by bytes"),
+    ("ALLOW_FLUSH", libav.AVFMT_ALLOW_FLUSH,
         """Format allows flushing. If not set, the muxer will not receive a NULL
         packet in the write_packet function."""),
-    ("TS_NONSTRICT", lib.AVFMT_TS_NONSTRICT,
+    ("TS_NONSTRICT", libav.AVFMT_TS_NONSTRICT,
         """Format does not require strictly increasing timestamps, but they must
         still be monotonic."""),
-    ("TS_NEGATIVE", lib.AVFMT_TS_NEGATIVE,
+    ("TS_NEGATIVE", libav.AVFMT_TS_NEGATIVE,
         """Format allows muxing negative timestamps. If not set the timestamp
         will be shifted in av_write_frame and av_interleaved_write_frame so they
         start from 0. The user or muxer can override this through
         AVFormatContext.avoid_negative_ts"""),
-    ("SEEK_TO_PTS", lib.AVFMT_SEEK_TO_PTS, "Seeking is based on PTS"),
+    ("SEEK_TO_PTS", libav.AVFMT_SEEK_TO_PTS, "Seeking is based on PTS"),
 ), is_flags=True)
 
 
@@ -70,10 +78,10 @@ cdef class ContainerFormat:
 
         # Searches comma-seperated names.
         if mode is None or mode == "r":
-            self.iptr = lib.av_find_input_format(name)
+            self.iptr = av_find_input_format(name)
 
         if mode is None or mode == "w":
-            self.optr = lib.av_guess_format(name, NULL, NULL)
+            self.optr = av_guess_format(name, NULL, NULL)
 
         if not self.iptr and not self.optr:
             raise ValueError(f"no container format {name!r}")
@@ -163,10 +171,10 @@ cdef class ContainerFormat:
 
 cdef get_output_format_names():
     names = set()
-    cdef const lib.AVOutputFormat *ptr
+    cdef const AVOutputFormat *ptr
     cdef void *opaque = NULL
     while True:
-        ptr = lib.av_muxer_iterate(&opaque)
+        ptr = av_muxer_iterate(&opaque)
         if ptr:
             names.add(ptr.name)
         else:
@@ -175,10 +183,10 @@ cdef get_output_format_names():
 
 cdef get_input_format_names():
     names = set()
-    cdef const lib.AVInputFormat *ptr
+    cdef const AVInputFormat *ptr
     cdef void *opaque = NULL
     while True:
-        ptr = lib.av_demuxer_iterate(&opaque)
+        ptr = av_demuxer_iterate(&opaque)
         if ptr:
             names.add(ptr.name)
         else:

@@ -1,3 +1,7 @@
+from ..libavformat.avformat cimport (
+    AVInputFormat,
+    AVOutputFormat,
+)
 
 cdef extern from "libavdevice/avdevice.h" nogil:
 

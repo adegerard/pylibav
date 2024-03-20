@@ -1,10 +1,10 @@
-cimport libav as lib
-
-from pylibav.container.pyio cimport PyIOFile
-from pylibav.container.streams cimport StreamContainer
-from pylibav.dictionary cimport _Dictionary
-from pylibav.format cimport ContainerFormat
-from pylibav.stream cimport Stream
+from ..libav cimport (
+    AVFormatContext
+)
+from .pyio cimport PyIOFile
+from .streams cimport StreamContainer
+from ..format cimport ContainerFormat
+from ..stream cimport Stream
 
 # Interrupt callback information, times are in seconds.
 ctypedef struct timeout_info:
@@ -15,7 +15,7 @@ ctypedef struct timeout_info:
 cdef class Container:
 
     cdef readonly bint writeable
-    cdef lib.AVFormatContext *ptr
+    cdef AVFormatContext *ptr
 
     cdef readonly object name
     cdef readonly str metadata_encoding

@@ -1,14 +1,19 @@
-cimport libav as lib
+from ..libav cimport (
+    AVCodec,
+    AVCodecContext,
+    AV_CODEC_CAP_VARIABLE_FRAME_SIZE,
+    av_get_default_channel_layout,
+)
 
-from pylibav.audio.format cimport AudioFormat, get_audio_format
-from pylibav.audio.frame cimport AudioFrame, alloc_audio_frame
-from pylibav.audio.layout cimport AudioLayout, get_audio_layout
-from pylibav.frame cimport Frame
-from pylibav.packet cimport Packet
+from .format cimport AudioFormat, get_audio_format
+from .frame cimport AudioFrame, alloc_audio_frame
+from .layout cimport AudioLayout, get_audio_layout
+from ..frame cimport Frame
+from ..packet cimport Packet
 
 
 cdef class AudioCodecContext(CodecContext):
-    cdef _init(self, lib.AVCodecContext *ptr, const lib.AVCodec *codec):
+    cdef _init(self, AVCodecContext *ptr, const AVCodec *codec):
         CodecContext._init(self, ptr, codec)
 
         # Sometimes there isn't a layout set, but there are a number of
@@ -26,7 +31,7 @@ cdef class AudioCodecContext(CodecContext):
 
         cdef AudioFrame frame = input_frame
 
-        cdef bint allow_var_frame_size = self.ptr.codec.capabilities & lib.AV_CODEC_CAP_VARIABLE_FRAME_SIZE
+        cdef bint allow_var_frame_size = self.ptr.codec.capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE
 
         # Note that the resampler will simply return an input frame if there is
         # no resampling to be done. The control flow was just a little easier this way.
@@ -93,7 +98,7 @@ cdef class AudioCodecContext(CodecContext):
     @channels.setter
     def channels(self, value):
         self.ptr.channels = value
-        self.ptr.channel_layout = lib.av_get_default_channel_layout(value)
+        self.ptr.channel_layout = av_get_default_channel_layout(value)
     @property
     def channel_layout(self):
         return self.ptr.channel_layout

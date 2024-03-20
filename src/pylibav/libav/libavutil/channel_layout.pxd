@@ -1,3 +1,6 @@
+from libc.stdint cimport uint64_t
+
+
 cdef extern from "libavutil/channel_layout.h" nogil:
 
     # This is not a comprehensive list.
