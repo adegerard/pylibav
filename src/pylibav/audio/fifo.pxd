@@ -1,12 +1,14 @@
-cimport libav as lib
 from libc.stdint cimport int64_t, uint64_t
+from ..libav cimport (
+    AVAudioFifo
+)
 
 from pylibav.audio.frame cimport AudioFrame
 
 
 cdef class AudioFifo:
 
-    cdef lib.AVAudioFifo *ptr
+    cdef AVAudioFifo *ptr
 
     cdef AudioFrame template
 

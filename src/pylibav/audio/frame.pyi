@@ -1,10 +1,8 @@
 from typing import Any, Union
-
 import numpy as np
-
-from pylibav.frame import Frame
-
+from ..frame import Frame
 from .plane import AudioPlane
+
 
 format_dtypes: dict[str, str]
 _SupportedNDarray = Union[

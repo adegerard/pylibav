@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pylibav.codec.context import CodecContext
+from ..codec.context import CodecContext
 
 from .format import AudioFormat
 from .layout import AudioLayout

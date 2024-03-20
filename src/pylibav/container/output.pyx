@@ -1,16 +1,16 @@
 import logging
 import os
 
-from pylibav.codec.codec cimport Codec
-from pylibav.codec.context cimport CodecContext, wrap_codec_context
-from pylibav.container.streams cimport StreamContainer
-from pylibav.dictionary cimport _Dictionary
-from pylibav.error cimport err_check
-from pylibav.packet cimport Packet
-from pylibav.stream cimport Stream, wrap_stream
-from pylibav.utils cimport dict_to_avdict, to_avrational
+from ..codec.codec cimport Codec
+from ..codec.context cimport CodecContext, wrap_codec_context
+from ..container.streams cimport StreamContainer
+from ..dictionary cimport _Dictionary
+from ..error cimport err_check
+from ..packet cimport Packet
+from ..stream cimport Stream, wrap_stream
+from ..utils cimport dict_to_avdict, to_avrational
 
-from pylibav.dictionary import Dictionary
+from ..dictionary import Dictionary
 
 log = logging.getLogger(__name__)
 

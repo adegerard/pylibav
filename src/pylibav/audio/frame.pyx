@@ -1,12 +1,19 @@
-from pylibav.audio.format cimport get_audio_format
-from pylibav.audio.layout cimport get_audio_layout
-from pylibav.audio.plane cimport AudioPlane
-from pylibav.error cimport err_check
-from pylibav.utils cimport check_ndarray, check_ndarray_shape
+from .format cimport get_audio_format
+from .layout cimport get_audio_layout
+from .plane cimport AudioPlane
+from ..error cimport err_check
+from ..utils cimport check_ndarray, check_ndarray_shape
+from ..libav cimport (
+    AVSampleFormat,
+    av_samples_get_buffer_size,
+    av_freep,
+    av_malloc,
+    avcodec_fill_audio_frame,
+)
 
 import warnings
 
-from pylibav.deprecation import AVDeprecationWarning
+from ..deprecation import AVDeprecationWarning
 
 
 cdef object _cinit_bypass_sentinel
@@ -47,7 +54,7 @@ cdef class AudioFrame(Frame):
         cdef AudioLayout cy_layout = AudioLayout(layout)
         self._init(cy_format.sample_fmt, cy_layout.layout, samples, align)
 
-    cdef _init(self, lib.AVSampleFormat format, uint64_t layout, unsigned int nb_samples, unsigned int align):
+    cdef _init(self, AVSampleFormat format, uint64_t layout, unsigned int nb_samples, unsigned int align):
 
         self.ptr.nb_samples = nb_samples
         self.ptr.format = <int>format
@@ -61,36 +68,36 @@ cdef class AudioFrame(Frame):
 
         if self.layout.channels and nb_samples:
             # Cleanup the old buffer.
-            lib.av_freep(&self._buffer)
+            av_freep(&self._buffer)
 
             # Get a new one.
-            self._buffer_size = err_check(lib.av_samples_get_buffer_size(
+            self._buffer_size = err_check(av_samples_get_buffer_size(
                 NULL,
                 len(self.layout.channels),
                 nb_samples,
                 format,
                 align
             ))
-            self._buffer = <uint8_t *>lib.av_malloc(self._buffer_size)
+            self._buffer = <uint8_t *>av_malloc(self._buffer_size)
             if not self._buffer:
                 raise MemoryError("cannot allocate AudioFrame buffer")
 
             # Connect the data pointers to the buffer.
-            err_check(lib.avcodec_fill_audio_frame(
+            err_check(avcodec_fill_audio_frame(
                 self.ptr,
                 len(self.layout.channels),
-                <lib.AVSampleFormat>self.ptr.format,
+                <AVSampleFormat>self.ptr.format,
                 self._buffer,
                 self._buffer_size,
                 align
             ))
 
     def __dealloc__(self):
-        lib.av_freep(&self._buffer)
+        av_freep(&self._buffer)
 
     cdef _init_user_attributes(self):
         self.layout = get_audio_layout(0, self.ptr.channel_layout)
-        self.format = get_audio_format(<lib.AVSampleFormat>self.ptr.format)
+        self.format = get_audio_format(<AVSampleFormat>self.ptr.format)
 
     def __repr__(self):
         return (

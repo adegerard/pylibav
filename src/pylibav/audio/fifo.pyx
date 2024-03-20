@@ -1,6 +1,14 @@
-from pylibav.audio.frame cimport alloc_audio_frame
-from pylibav.error cimport err_check
-
+from .frame cimport alloc_audio_frame
+from ..error cimport err_check
+from ..libav cimport (
+    av_audio_fifo_free,
+    av_audio_fifo_alloc,
+    av_audio_fifo_size,
+    av_audio_fifo_read,
+    av_audio_fifo_write,
+    AVSampleFormat,
+    AV_NOPTS_VALUE,
+)
 
 cdef class AudioFifo:
     """A simple audio sample FIFO (First In First Out) buffer."""
@@ -20,7 +28,7 @@ cdef class AudioFifo:
 
     def __dealloc__(self):
         if self.ptr:
-            lib.av_audio_fifo_free(self.ptr)
+            av_audio_fifo_free(self.ptr)
 
     cpdef write(self, AudioFrame frame):
         """write(frame)
@@ -59,8 +67,8 @@ cdef class AudioFifo:
             else:
                 self.pts_per_sample = 0
 
-            self.ptr = lib.av_audio_fifo_alloc(
-                <lib.AVSampleFormat>frame.ptr.format,
+            self.ptr = av_audio_fifo_alloc(
+                <AVSampleFormat>frame.ptr.format,
                 len(frame.layout.channels),  # TODO: Can we safely use frame.ptr.nb_channels?
                 frame.ptr.nb_samples * 2,  # Just a default number of samples; it will adjust.
             )
@@ -82,14 +90,14 @@ cdef class AudioFifo:
 
         # Assert that the PTS are what we expect.
         cdef int64_t expected_pts
-        if self.pts_per_sample and frame.ptr.pts != lib.AV_NOPTS_VALUE:
+        if self.pts_per_sample and frame.ptr.pts != AV_NOPTS_VALUE:
             expected_pts = <int64_t>(self.pts_per_sample * self.samples_written)
             if frame.ptr.pts != expected_pts:
                 raise ValueError(
                     "Frame.pts (%d) != expected (%d); fix or set to None." % (frame.ptr.pts, expected_pts)
                 )
 
-        err_check(lib.av_audio_fifo_write(
+        err_check(av_audio_fifo_write(
             self.ptr,
             <void **>frame.ptr.extended_data,
             frame.ptr.nb_samples,
@@ -115,7 +123,7 @@ cdef class AudioFifo:
         if not self.ptr:
             return
 
-        cdef int buffered_samples = lib.av_audio_fifo_size(self.ptr)
+        cdef int buffered_samples = av_audio_fifo_size(self.ptr)
         if buffered_samples < 1:
             return
 
@@ -130,13 +138,13 @@ cdef class AudioFifo:
         cdef AudioFrame frame = alloc_audio_frame()
         frame._copy_internal_attributes(self.template)
         frame._init(
-            <lib.AVSampleFormat>self.template.ptr.format,
+            <AVSampleFormat>self.template.ptr.format,
             self.template.ptr.channel_layout,
             samples,
             1,  # Align?
         )
 
-        err_check(lib.av_audio_fifo_read(
+        err_check(av_audio_fifo_read(
             self.ptr,
             <void **>frame.ptr.extended_data,
             samples,
@@ -145,7 +153,7 @@ cdef class AudioFifo:
         if self.pts_per_sample:
             frame.ptr.pts = <uint64_t>(self.pts_per_sample * self.samples_read)
         else:
-            frame.ptr.pts = lib.AV_NOPTS_VALUE
+            frame.ptr.pts = AV_NOPTS_VALUE
 
         self.samples_read += samples
 
@@ -188,4 +196,4 @@ cdef class AudioFifo:
     @property
     def samples(self):
         """Number of audio samples (per channel) in the buffer."""
-        return lib.av_audio_fifo_size(self.ptr) if self.ptr else 0
+        return av_audio_fifo_size(self.ptr) if self.ptr else 0

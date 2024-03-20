@@ -1,4 +1,4 @@
-cimport libav as lib
+from pylibav cimport libav as libav
 
 
 cdef object _cinit_bypass_sentinel
@@ -15,14 +15,14 @@ cdef AudioLayout get_audio_layout(int channels, uint64_t c_layout):
 # TODO: What about av_get_default_channel_layout(...)?
 cdef uint64_t default_layouts[17]
 default_layouts[0] = 0
-default_layouts[1] = lib.AV_CH_LAYOUT_MONO
-default_layouts[2] = lib.AV_CH_LAYOUT_STEREO
-default_layouts[3] = lib.AV_CH_LAYOUT_2POINT1
-default_layouts[4] = lib.AV_CH_LAYOUT_4POINT0
-default_layouts[5] = lib.AV_CH_LAYOUT_5POINT0_BACK
-default_layouts[6] = lib.AV_CH_LAYOUT_5POINT1_BACK
-default_layouts[7] = lib.AV_CH_LAYOUT_6POINT1
-default_layouts[8] = lib.AV_CH_LAYOUT_7POINT1
+default_layouts[1] = libav.AV_CH_LAYOUT_MONO
+default_layouts[2] = libav.AV_CH_LAYOUT_STEREO
+default_layouts[3] = libav.AV_CH_LAYOUT_2POINT1
+default_layouts[4] = libav.AV_CH_LAYOUT_4POINT0
+default_layouts[5] = libav.AV_CH_LAYOUT_5POINT0_BACK
+default_layouts[6] = libav.AV_CH_LAYOUT_5POINT1_BACK
+default_layouts[7] = libav.AV_CH_LAYOUT_6POINT1
+default_layouts[8] = libav.AV_CH_LAYOUT_7POINT1
 default_layouts[9] = 0x01FF
 default_layouts[10] = 0x03FF
 default_layouts[11] = 0x07FF

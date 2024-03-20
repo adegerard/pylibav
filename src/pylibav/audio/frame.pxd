@@ -1,9 +1,8 @@
-cimport libav as lib
 from libc.stdint cimport uint8_t, uint64_t
-
-from pylibav.audio.format cimport AudioFormat
-from pylibav.audio.layout cimport AudioLayout
-from pylibav.frame cimport Frame
+from ..libav cimport AVSampleFormat
+from .format cimport AudioFormat
+from .layout cimport AudioLayout
+from ..frame cimport Frame
 
 
 cdef class AudioFrame(Frame):
@@ -26,7 +25,7 @@ cdef class AudioFrame(Frame):
     :type: AudioFormat
     """
 
-    cdef _init(self, lib.AVSampleFormat format, uint64_t layout, unsigned int nb_samples, unsigned int align)
+    cdef _init(self, AVSampleFormat format, uint64_t layout, unsigned int nb_samples, unsigned int align)
     cdef _init_user_attributes(self)
 
 cdef AudioFrame alloc_audio_frame()
