@@ -1,9 +1,9 @@
 from fractions import Fraction
 from typing import Literal
 
-from pylibav.descriptor import Descriptor
-from pylibav.enum_type import EnumFlag
-from pylibav.video.format import VideoFormat
+from ..descriptor import Descriptor
+from ..enum_type import EnumFlag
+from ..video.format import VideoFormat
 
 from .context import CodecContext
 
@@ -51,7 +51,7 @@ class Codec:
     frame_rates: list[Fraction] | None
     audio_rates: list[int] | None
     video_formats: list[VideoFormat] | None
-    audio_formats: list[AudioFormat] | None
+    # audio_formats: list[AudioFormat] | None
     properties: Properties
     capabilities: Capabilities
 

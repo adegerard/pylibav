@@ -8,7 +8,7 @@ from libc.string cimport memcpy
 from pylibav.bytesource cimport ByteSource, bytesource
 from pylibav.codec.codec cimport Codec, wrap_codec
 from pylibav.dictionary cimport _Dictionary
-from pylibav.enum cimport define_enum
+from pylibav.enum_type cimport define_enum
 from pylibav.error cimport err_check
 from pylibav.packet cimport Packet
 from pylibav.utils cimport avrational_to_fraction, to_avrational

@@ -1,4 +1,4 @@
-from .link import FilterLink
+from pylibav.filtergraph.link import FilterLink
 
 class FilterPad:
     is_output: bool

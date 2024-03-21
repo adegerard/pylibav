@@ -1,4 +1,4 @@
-from .libav cimport (
+from libav cimport (
     AVClass,
     AVOption,
     AVOptionType,

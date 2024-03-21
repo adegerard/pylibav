@@ -1,6 +1,6 @@
 from pylibav.libav cimport AVFilterLink
-from .graph cimport Graph
-from .pad cimport FilterContextPad
+from pylibav.filtergraph.graph cimport Graph
+from pylibav.filtergraph.pad cimport FilterContextPad
 
 cdef class FilterLink:
 

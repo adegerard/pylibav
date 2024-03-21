@@ -1,4 +1,5 @@
-from .libav cimport (
+from libav cimport (
+    libav,
     AVInputFormat,
     AVOutputFormat,
     avformat_get_class,
@@ -7,15 +8,13 @@ from .libav cimport (
     av_muxer_iterate,
     av_guess_format,
 )
-cimport pylibav.libav as libav
-
 from .descriptor cimport wrap_avclass
 from .enum_type cimport define_enum
 
 
 cdef object _cinit_bypass_sentinel = object()
 
-cdef ContainerFormat build_container_format(AVInputFormat* iptr, AVOutputFormat* optr):
+cdef ContainerFormat build_container_format(libav.AVInputFormat* iptr, AVOutputFormat* optr):
     if not iptr and not optr:
         raise ValueError("needs input format or output format")
     cdef ContainerFormat format = ContainerFormat.__new__(ContainerFormat, _cinit_bypass_sentinel)

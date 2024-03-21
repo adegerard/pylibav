@@ -1,4 +1,4 @@
-from .libav cimport AVDictionary
+from pylibav.libav cimport AVDictionary
 
 cdef class _Dictionary:
 

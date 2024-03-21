@@ -1,5 +1,5 @@
 from libc.stdint cimport int64_t, uint8_t
-from ..libavutil.samplefmt cimport AVSampleFormat
+from pylibav.libav.libavutil.samplefmt cimport AVSampleFormat
 
 cdef extern from "libswresample/swresample.h" nogil:
 

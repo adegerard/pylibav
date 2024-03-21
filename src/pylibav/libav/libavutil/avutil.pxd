@@ -1,6 +1,6 @@
 from libc.stdint cimport int64_t, uint8_t, uint64_t, int32_t
-from ..libavformat.avformat cimport AVMediaType
-from .samplefmt cimport AVSampleFormat
+from pylibav.libav.libavformat.avformat cimport AVMediaType
+from pylibav.libav.libavutil.samplefmt cimport AVSampleFormat
 
 
 cdef extern from "libavutil/mathematics.h" nogil:

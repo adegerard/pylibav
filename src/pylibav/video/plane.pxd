@@ -1,4 +1,4 @@
-from pylibav.plane cimport Plane
+from .plane cimport Plane
 
 cdef class VideoPlane(Plane):
     cdef readonly size_t buffer_size

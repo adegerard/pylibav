@@ -1,7 +1,8 @@
-from pylibav.libav import (
+from pylibav.libav cimport (
     AVCodecDescriptor,
     avcodec_descriptor_get
 )
+from pylibav.stream cimport Stream
 
 
 cdef class DataStream(Stream):

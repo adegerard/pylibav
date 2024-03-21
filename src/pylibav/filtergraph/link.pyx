@@ -1,7 +1,7 @@
 from pylibav.libav cimport (
     AVFilterContext,
 )
-from .graph cimport Graph
+from pylibav.filtergraph.graph cimport Graph
 
 cdef _cinit_sentinel = object()
 

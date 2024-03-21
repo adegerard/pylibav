@@ -1,4 +1,4 @@
-from .libav cimport (
+from pylibav.libav cimport (
     AVInputFormat,
     AVOutputFormat,
 )

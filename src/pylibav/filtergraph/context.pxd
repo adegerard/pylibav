@@ -2,8 +2,8 @@ from pylibav.libav cimport (
     AVFilterContext
 )
 
-from .filter cimport Filter
-from .graph cimport Graph
+from pylibav.filtergraph.filter cimport Filter
+from pylibav.filtergraph.graph cimport Graph
 
 
 cdef class FilterContext:

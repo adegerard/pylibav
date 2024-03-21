@@ -104,7 +104,7 @@ print()
 ext_modules = []
 for dirname, dirnames, filenames in os.walk(package_dir):
 
-    for filename in filenames:
+    for filename in sorted(filenames):
         # We are looking for Cython sources.
         if filename.startswith(".") or os.path.splitext(filename)[1] != ".pyx":
             continue
@@ -115,8 +115,14 @@ for dirname, dirnames, filenames in os.walk(package_dir):
             os.path.splitext(pyx_filepath)[0]
         ).replace("/", ".").replace(os.sep, ".")
 
-        if "filtergraph" in module_name:
+        if "codec." in module_name or "container." in module_name:
             continue
+
+        print()
+        print(f"build module {module_name} from [{src}]")
+        print(dirname)
+        dirname = dirname.replace('\\', '/')
+        print(os.path.join(dirname, "libav"))
 
         # Cythonize the module.
         ext_modules.extend(
@@ -124,9 +130,9 @@ for dirname, dirnames, filenames in os.walk(package_dir):
                 Extension(
                     module_name,
                     sources=[src],
-                    include_dirs=[package_include_dir, ffmpeg_include_dir, "include"],
+                    include_dirs=[ffmpeg_include_dir, dirname],
                     libraries=FFMPEG_AV_LIBRARIES,
-                    library_dirs=[package_lib_dir],
+                    library_dirs=[package_lib_dir, dirname],
                 ),
                 compiler_directives=dict(
                     c_string_type="str",
@@ -135,7 +141,12 @@ for dirname, dirnames, filenames in os.walk(package_dir):
                     language_level=3,
                 ),
                 build_dir=os.path.join("build", "src"),
-                include_path=["include", package_include_dir, ffmpeg_include_dir],
+                include_path=[
+                    "include",
+                    package_include_dir,
+                    ffmpeg_include_dir,
+                    dirname,
+                ],
             )
         )
 

@@ -1,7 +1,7 @@
 import warnings
 from libc.stdint cimport int64_t
 
-cimport pylibav.libav as libav
+cimport libav
 from pylibav.libav cimport (
     AVCodec,
     AVCodecContext,

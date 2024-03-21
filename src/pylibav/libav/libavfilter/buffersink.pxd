@@ -1,5 +1,5 @@
-from ..libavcodec.avcodec cimport AVFrame
-from .avfilter cimport AVFilterContext
+from pylibav.libav.libavcodec.avcodec cimport AVFrame
+from pylibav.libav.libavfilter.avfilter cimport AVFilterContext
 
 
 cdef extern from "libavfilter/buffersink.h" nogil:

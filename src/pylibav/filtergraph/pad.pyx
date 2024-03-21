@@ -5,7 +5,7 @@ from pylibav.libav cimport (
     avfilter_pad_get_type,
     av_get_media_type_string,
 )
-from .link cimport wrap_filter_link
+from pylibav.filtergraph.link cimport wrap_filter_link
 
 
 cdef object _cinit_sentinel = object()

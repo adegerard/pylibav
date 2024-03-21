@@ -3,9 +3,7 @@ from pylibav.libav cimport (
     AVCodecDescriptor,
 )
 
-
 cdef class Codec:
-
     cdef const AVCodec *ptr
     cdef const AVCodecDescriptor *desc
     cdef readonly bint is_encoder

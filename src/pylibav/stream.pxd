@@ -1,6 +1,6 @@
 from .codec.context cimport CodecContext
 from .container.core cimport Container
-from .libav cimport AVStream
+from pylibav.libav cimport AVStream
 
 
 cdef class Stream:

@@ -1,12 +1,12 @@
-cimport pylibav.libav as libav
 from pylibav.libav cimport (
+    libav,
     AVFilter,
     av_filter_iterate,
     avfilter_get_class,
     avfilter_get_by_name,
 )
-from ..descriptor cimport wrap_avclass
-from .pad cimport alloc_filter_pads
+from pylibav.descriptor cimport wrap_avclass
+from pylibav.filtergraph.pad cimport alloc_filter_pads
 
 
 cdef object _cinit_sentinel = object()

@@ -1,4 +1,5 @@
 from .libav cimport (
+    libav,
     av_packet_alloc,
     av_new_packet,
     av_packet_free,
@@ -6,7 +7,6 @@ from .libav cimport (
     AVRational,
     AV_NOPTS_VALUE,
 )
-import libav
 from .bytesource cimport bytesource
 from .error cimport err_check
 from .utils cimport avrational_to_fraction, to_avrational

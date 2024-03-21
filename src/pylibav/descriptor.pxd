@@ -1,4 +1,4 @@
-from .libav cimport AVClass
+from pylibav.libav cimport AVClass
 
 cdef class Descriptor:
 

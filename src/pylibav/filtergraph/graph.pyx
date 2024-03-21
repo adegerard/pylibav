@@ -1,6 +1,6 @@
 from fractions import Fraction
 import warnings
-from ..libav cimport (
+from pylibav.libav cimport (
     AVFilterContext,
     AVFilterGraph,
     avfilter_graph_alloc,
@@ -8,11 +8,11 @@ from ..libav cimport (
     avfilter_graph_config,
     avfilter_graph_alloc_filter,
 )
-from ..error cimport err_check
-from ..video.format cimport VideoFormat
-from ..video.frame cimport VideoFrame
-from .context cimport FilterContext, wrap_filter_context
-from .filter cimport Filter, wrap_filter
+from pylibav.error cimport err_check
+from pylibav.video.format cimport VideoFormat
+from pylibav.video.frame cimport VideoFrame
+from pylibav.filtergraph.context cimport FilterContext, wrap_filter_context
+from pylibav.filtergraph.filter cimport Filter, wrap_filter
 
 
 

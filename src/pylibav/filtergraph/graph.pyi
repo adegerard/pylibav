@@ -5,9 +5,9 @@ from typing import Any
 # from ..audio.frame import AudioFrame
 # from ..audio.layout import AudioLayout
 # from ..audio.stream import AudioStream
-from ..video.format import VideoFormat
-from ..video.frame import VideoFrame
-from ..video.stream import VideoStream
+from pylibav.video.format import VideoFormat
+from pylibav.video.frame import VideoFrame
+from pylibav.video.stream import VideoStream
 
 from .context import FilterContext
 from .filter import Filter

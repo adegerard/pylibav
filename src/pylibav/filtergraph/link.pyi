@@ -1,4 +1,4 @@
-from .pad import FilterContextPad
+from pylibav.filtergraph.pad import FilterContextPad
 
 class FilterLink:
     input: FilterContextPad

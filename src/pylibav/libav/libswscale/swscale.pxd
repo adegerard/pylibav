@@ -1,4 +1,4 @@
-from ..libavutil.avutil cimport AVPixelFormat
+from pylibav.libav.libavutil.avutil cimport AVPixelFormat
 
 cdef extern from "libswscale/swscale.h" nogil:
 

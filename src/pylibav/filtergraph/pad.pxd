@@ -1,9 +1,9 @@
 from pylibav.libav cimport (
     AVFilterPad,
 )
-from .context cimport FilterContext
-from .filter cimport Filter
-from .link cimport FilterLink
+from pylibav.filtergraph.context cimport FilterContext
+from pylibav.filtergraph.filter cimport Filter
+from pylibav.filtergraph.link cimport FilterLink
 
 
 cdef class FilterPad:

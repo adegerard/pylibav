@@ -50,7 +50,7 @@ version = {attr = "pylibav.__version__"}
 
 
 [tool.setuptools.package-data]
-pylibav = ["*.so*"]
+pylibav = ["*.so*", "*.dll"]
 
 # exclude = [
 #   "tests/**",

@@ -1,7 +1,7 @@
 from pylibav.libav cimport (
     AVFilter
 )
-from ..descriptor cimport Descriptor
+from pylibav.descriptor cimport Descriptor
 
 
 cdef class Filter:

@@ -1,5 +1,5 @@
 from libc.stdint cimport int8_t, uint8_t, int64_t, uint16_t, uint32_t
-from ..libavcodec.avcodec cimport (
+from pylibav.libav.libavcodec.avcodec cimport (
     AVCodecParameters,
     AVPacketSideData,
     AVCodecID,
@@ -7,8 +7,8 @@ from ..libavcodec.avcodec cimport (
     AVCodec,
     AVFrame,
 )
-from ..libavutil.dict cimport AVDictionary
-from ..libavutil.avutil cimport (
+from pylibav.libav.libavutil.dict cimport AVDictionary
+from pylibav.libav.libavutil.avutil cimport (
     AVClass,
     AVRational,
 )

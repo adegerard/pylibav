@@ -1,5 +1,5 @@
 from libc.stdint cimport uint64_t
-from .libav cimport (
+from pylibav.libav cimport (
     AVDictionary,
     AVRational,
 )

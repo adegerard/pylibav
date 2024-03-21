@@ -1,4 +1,4 @@
-from pylibav.video.frame import VideoFrame
+from .frame import VideoFrame
 
 class VideoPlane:
     line_size: int

@@ -1,33 +1,41 @@
+from pylibav.libav cimport (
+    libav,
+    AVCodec,
+    av_codec_is_encoder,
+    avcodec_find_encoder_by_name,
+    avcodec_descriptor_get_by_name,
+    avcodec_find_encoder,
+    avcodec_find_decoder_by_name,
+    avcodec_find_decoder,
+    avcodec_descriptor_get,
+    avcodec_get_class,
+    av_codec_is_decoder,
+    av_get_media_type_string,
+    av_codec_iterate,
+)
 from pylibav.descriptor cimport wrap_avclass
-from pylibav.enum cimport define_enum
+from pylibav.enum_type cimport define_enum
 from pylibav.utils cimport avrational_to_fraction
 from pylibav.video.format cimport get_video_format
-
 
 cdef object _cinit_sentinel = object()
 
 
-cdef Codec wrap_codec(const lib.AVCodec *ptr):
-    cdef Codec codec = Codec(_cinit_sentinel)
-    codec.ptr = ptr
-    codec.is_encoder = lib.av_codec_is_encoder(ptr)
-    codec._init()
-    return codec
 
 
 Properties = define_enum("Properties", "pylibav.codec", (
     ("NONE", 0),
-    ("INTRA_ONLY", lib.AV_CODEC_PROP_INTRA_ONLY,
+    ("INTRA_ONLY", libav.AV_CODEC_PROP_INTRA_ONLY,
         """Codec uses only intra compression.
         Video and audio codecs only."""),
-    ("LOSSY", lib.AV_CODEC_PROP_LOSSY,
+    ("LOSSY", libav.AV_CODEC_PROP_LOSSY,
         """Codec supports lossy compression. Audio and video codecs only.
 
         Note: A codec may support both lossy and lossless
         compression modes."""),
-    ("LOSSLESS", lib.AV_CODEC_PROP_LOSSLESS,
+    ("LOSSLESS", libav.AV_CODEC_PROP_LOSSLESS,
         """Codec supports lossless compression. Audio and video codecs only."""),
-    ("REORDER", lib.AV_CODEC_PROP_REORDER,
+    ("REORDER", libav.AV_CODEC_PROP_REORDER,
         """Codec supports frame reordering. That is, the coded order (the order in which
         the encoded packets are output by the encoders / stored / input to the
         decoders) may be different from the presentation order of the corresponding
@@ -35,24 +43,24 @@ Properties = define_enum("Properties", "pylibav.codec", (
 
         For codecs that do not have this property set, PTS and DTS should always be
         equal."""),
-    ("BITMAP_SUB", lib.AV_CODEC_PROP_BITMAP_SUB,
+    ("BITMAP_SUB", libav.AV_CODEC_PROP_BITMAP_SUB,
         """Subtitle codec is bitmap based
         Decoded AVSubtitle data can be read from the AVSubtitleRect->pict field."""),
-    ("TEXT_SUB", lib.AV_CODEC_PROP_TEXT_SUB,
+    ("TEXT_SUB", libav.AV_CODEC_PROP_TEXT_SUB,
         """Subtitle codec is text based.
         Decoded AVSubtitle data can be read from the AVSubtitleRect->ass field."""),
 ), is_flags=True)
 
 Capabilities = define_enum("Capabilities", "pylibav.codec", (
     ("NONE", 0),
-    ("DRAW_HORIZ_BAND", lib.AV_CODEC_CAP_DRAW_HORIZ_BAND,
+    ("DRAW_HORIZ_BAND", libav.AV_CODEC_CAP_DRAW_HORIZ_BAND,
         """Decoder can use draw_horiz_band callback."""),
-    ("DR1", lib.AV_CODEC_CAP_DR1,
+    ("DR1", libav.AV_CODEC_CAP_DR1,
         """Codec uses get_buffer() for allocating buffers and supports custom allocators.
         If not set, it might not use get_buffer() at all or use operations that
         assume the buffer was allocated by avcodec_default_get_buffer."""),
     ("HWACCEL", 1 << 4),
-    ("DELAY", lib.AV_CODEC_CAP_DELAY,
+    ("DELAY", libav.AV_CODEC_CAP_DELAY,
         """Encoder or decoder requires flushing with NULL input at the end in order to
         give the complete and correct output.
 
@@ -74,11 +82,11 @@ Capabilities = define_enum("Capabilities", "pylibav.codec", (
               flag also means that the encoder must set the pts and duration for
               each output packet. If this flag is not set, the pts and duration will
               be determined by libavcodec from the input frame."""),
-    ("SMALL_LAST_FRAME", lib.AV_CODEC_CAP_SMALL_LAST_FRAME,
+    ("SMALL_LAST_FRAME", libav.AV_CODEC_CAP_SMALL_LAST_FRAME,
         """Codec can be fed a final frame with a smaller size.
         This can be used to prevent truncation of the last audio samples."""),
     ("HWACCEL_VDPAU", 1 << 7),
-    ("SUBFRAMES", lib.AV_CODEC_CAP_SUBFRAMES,
+    ("SUBFRAMES", libav.AV_CODEC_CAP_SUBFRAMES,
         """Codec can output multiple frames per AVPacket
         Normally demuxers return one frame at a time, demuxers which do not do
         are connected to a parser to split what they return into proper frames.
@@ -88,25 +96,25 @@ Capabilities = define_enum("Capabilities", "pylibav.codec", (
         may return multiple frames in a packet. This has many disadvantages like
         prohibiting stream copy in many cases thus it should only be considered
         as a last resort."""),
-    ("EXPERIMENTAL", lib.AV_CODEC_CAP_EXPERIMENTAL,
+    ("EXPERIMENTAL", libav.AV_CODEC_CAP_EXPERIMENTAL,
         """Codec is experimental and is thus avoided in favor of non experimental
         encoders"""),
-    ("CHANNEL_CONF", lib.AV_CODEC_CAP_CHANNEL_CONF,
+    ("CHANNEL_CONF", libav.AV_CODEC_CAP_CHANNEL_CONF,
         """Codec should fill in channel configuration and samplerate instead of container"""),
     ("NEG_LINESIZES", 1 << 11),
-    ("FRAME_THREADS", lib.AV_CODEC_CAP_FRAME_THREADS,
+    ("FRAME_THREADS", libav.AV_CODEC_CAP_FRAME_THREADS,
         """Codec supports frame-level multithreading""",),
-    ("SLICE_THREADS", lib.AV_CODEC_CAP_SLICE_THREADS,
+    ("SLICE_THREADS", libav.AV_CODEC_CAP_SLICE_THREADS,
         """Codec supports slice-based (or partition-based) multithreading."""),
-    ("PARAM_CHANGE", lib.AV_CODEC_CAP_PARAM_CHANGE,
+    ("PARAM_CHANGE", libav.AV_CODEC_CAP_PARAM_CHANGE,
         """Codec supports changed parameters at any point."""),
-    ("AUTO_THREADS", lib.AV_CODEC_CAP_OTHER_THREADS,
+    ("AUTO_THREADS", libav.AV_CODEC_CAP_OTHER_THREADS,
         """Codec supports multithreading through a method other than slice- or
         frame-level multithreading. Typically this marks wrappers around
         multithreading-capable external libraries."""),
-    ("VARIABLE_FRAME_SIZE", lib.AV_CODEC_CAP_VARIABLE_FRAME_SIZE,
+    ("VARIABLE_FRAME_SIZE", libav.AV_CODEC_CAP_VARIABLE_FRAME_SIZE,
         """Audio encoder supports receiving a different number of samples in each call."""),
-    ("AVOID_PROBING", lib.AV_CODEC_CAP_AVOID_PROBING,
+    ("AVOID_PROBING", libav.AV_CODEC_CAP_AVOID_PROBING,
         """Decoder is not a preferred choice for probing.
         This indicates that the decoder is not a good choice for probing.
         It could for example be an expensive to spin up hardware decoder,
@@ -114,19 +122,19 @@ Capabilities = define_enum("Capabilities", "pylibav.codec", (
         the stream.
         A decoder marked with this flag should only be used as last resort
         choice for probing."""),
-    ("HARDWARE", lib.AV_CODEC_CAP_HARDWARE,
+    ("HARDWARE", libav.AV_CODEC_CAP_HARDWARE,
         """Codec is backed by a hardware implementation. Typically used to
         identify a non-hwaccel hardware decoder. For information about hwaccels, use
         avcodec_get_hw_config() instead."""),
-    ("HYBRID", lib.AV_CODEC_CAP_HYBRID,
+    ("HYBRID", libav.AV_CODEC_CAP_HYBRID,
         """Codec is potentially backed by a hardware implementation, but not
         necessarily. This is used instead of AV_CODEC_CAP_HARDWARE, if the
         implementation provides some sort of internal fallback."""),
-    ("ENCODER_REORDERED_OPAQUE", 1 << 20,  # lib.AV_CODEC_CAP_ENCODER_REORDERED_OPAQUE,  # FFmpeg 4.2
+    ("ENCODER_REORDERED_OPAQUE", 1 << 20,  # libav.AV_CODEC_CAP_ENCODER_REORDERED_OPAQUE,  # FFmpeg 4.2
         """This codec takes the reordered_opaque field from input AVFrames
         and returns it in the corresponding field in AVCodecContext after
         encoding."""),
-    ("ENCODER_FLUSH", 1 << 21,  # lib.AV_CODEC_CAP_ENCODER_FLUSH  # FFmpeg 4.3
+    ("ENCODER_FLUSH", 1 << 21,  # libav.AV_CODEC_CAP_ENCODER_FLUSH  # FFmpeg 4.3
         """This encoder can be flushed using avcodec_flush_buffers(). If this
         flag is not set, the encoder must be closed and reopened to ensure that
         no frames remain pending."""),
@@ -164,19 +172,21 @@ cdef class Codec:
         if name is _cinit_sentinel:
             return
 
+        cdef const AVCodec* p_avcodec
         if mode == "w":
-            self.ptr = lib.avcodec_find_encoder_by_name(name)
+            p_avcodec = <AVCodec*>avcodec_find_encoder_by_name(name).name
+            self.ptr = p_avcodec
             if not self.ptr:
-                self.desc = lib.avcodec_descriptor_get_by_name(name)
+                self.desc = avcodec_descriptor_get_by_name(<char*>name)
                 if self.desc:
-                    self.ptr = lib.avcodec_find_encoder(self.desc.id)
+                    self.ptr = avcodec_find_encoder(self.desc.id)
 
         elif mode == "r":
-            self.ptr = lib.avcodec_find_decoder_by_name(name)
+            self.ptr = <AVCodec*>avcodec_find_decoder_by_name(<char*>name).name
             if not self.ptr:
-                self.desc = lib.avcodec_descriptor_get_by_name(name)
+                self.desc = avcodec_descriptor_get_by_name(<char*>name)
                 if self.desc:
-                    self.ptr = lib.avcodec_find_decoder(self.desc.id)
+                    self.ptr = avcodec_find_decoder(self.desc.id)
 
         else:
             raise ValueError('Invalid mode; must be "r" or "w".', mode)
@@ -193,14 +203,14 @@ cdef class Codec:
             raise UnknownCodecError(name)
 
         if not self.desc:
-            self.desc = lib.avcodec_descriptor_get(self.ptr.id)
+            self.desc = avcodec_descriptor_get(self.ptr.id)
             if not self.desc:
                 raise RuntimeError("No codec descriptor for %r." % name)
 
-        self.is_encoder = lib.av_codec_is_encoder(self.ptr)
+        self.is_encoder = av_codec_is_encoder(self.ptr)
 
         # Sanity check.
-        if self.is_encoder and lib.av_codec_is_decoder(self.ptr):
+        if self.is_encoder and av_codec_is_decoder(self.ptr):
             raise RuntimeError("%s is both encoder and decoder.")
 
     def create(self):
@@ -228,7 +238,7 @@ cdef class Codec:
         E.g: ``'audio'``, ``'video'``, ``'subtitle'``.
 
         """
-        return lib.av_get_media_type_string(self.ptr.type)
+        return av_get_media_type_string(self.ptr.type)
 
     @property
     def id(self): return self.ptr.id
@@ -272,18 +282,18 @@ cdef class Codec:
             i += 1
         return ret
 
-    @property
-    def audio_formats(self):
-        """A list of supported :class:`.AudioFormat`, or ``None``."""
-        if not self.ptr.sample_fmts:
-            return
+    # @property
+    # def audio_formats(self):
+    #     """A list of supported :class:`.AudioFormat`, or ``None``."""
+    #     if not self.ptr.sample_fmts:
+    #         return
 
-        ret = []
-        cdef int i = 0
-        while self.ptr.sample_fmts[i] != -1:
-            ret.append(get_audio_format(self.ptr.sample_fmts[i]))
-            i += 1
-        return ret
+    #     ret = []
+    #     cdef int i = 0
+    #     while self.ptr.sample_fmts[i] != -1:
+    #         ret.append(get_audio_format(self.ptr.sample_fmts[i]))
+    #         i += 1
+    #     return ret
 
     # NOTE: there are some overlaps, which we defer to how `ffmpeg -codecs`
     # handles them (by prefering the capablity to the property).
@@ -332,10 +342,10 @@ cdef class Codec:
 
 cdef get_codec_names():
     names = set()
-    cdef const lib.AVCodec *ptr
+    cdef const AVCodec *ptr
     cdef void *opaque = NULL
     while True:
-        ptr = lib.av_codec_iterate(&opaque)
+        ptr = av_codec_iterate(&opaque)
         if ptr:
             names.add(ptr.name)
         else:
@@ -345,7 +355,7 @@ cdef get_codec_names():
 codecs_available = get_codec_names()
 
 
-codec_descriptor = wrap_avclass(lib.avcodec_get_class())
+codec_descriptor = wrap_avclass(avcodec_get_class())
 
 
 def dump_codecs():
@@ -394,3 +404,14 @@ def dump_codecs():
             )
         except Exception as e:
             print(f"...... {codec.name:<18} ERROR: {e}")
+
+
+
+
+cdef Codec wrap_codec(const AVCodec *ptr):
+    cdef Codec codec = Codec(_cinit_sentinel)
+    # cdef AVCodec* p_avcodec = <AVCodec>ptr.name[0]
+    codec.ptr = <AVCodec*>ptr.name
+    codec.is_encoder = av_codec_is_encoder(ptr)
+    codec._init()
+    return codec

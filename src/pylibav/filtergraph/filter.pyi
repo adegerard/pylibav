@@ -1,6 +1,6 @@
-from ..descriptor import Descriptor
-from ..option import Option
-from .pad import FilterPad
+from pylibav.descriptor import Descriptor
+from pylibav.option import Option
+from pylibav.filtergraph.pad import FilterPad
 
 
 class Filter:

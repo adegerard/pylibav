@@ -1,4 +1,4 @@
-from ..libavcodec.avcodec cimport (
+from pylibav.libav.libavcodec.avcodec cimport (
     AVFrame,
     AVFrameSideData,
     AVFrameSideDataType,

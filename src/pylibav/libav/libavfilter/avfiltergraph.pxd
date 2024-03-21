@@ -1,4 +1,4 @@
-from .avfilter cimport (
+from pylibav.libav.libavfilter.avfilter cimport (
     AVFilter,
     AVFilterContext,
 )

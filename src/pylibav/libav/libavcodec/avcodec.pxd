@@ -1,7 +1,7 @@
 from libc.stdint cimport int8_t, uint8_t, int64_t, uint16_t, uint32_t
-from ..libavformat.avformat cimport AVMediaType
-from ..libavutil.samplefmt cimport AVSampleFormat
-from ..libavutil.avutil cimport (
+from pylibav.libav.libavformat.avformat cimport AVMediaType
+from pylibav.libav.libavutil.samplefmt cimport AVSampleFormat
+from pylibav.libav.libavutil.avutil cimport (
     AVPixelFormat,
     AVClass,
     AVRational,
@@ -11,7 +11,7 @@ from ..libavutil.avutil cimport (
     AVColorTransferCharacteristic,
     AVPictureType,
 )
-from ..libavutil.dict cimport AVDictionary
+from pylibav.libav.libavutil.dict cimport AVDictionary
 
 cdef extern from "libavcodec/avcodec.h" nogil:
     """

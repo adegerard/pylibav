@@ -1,10 +1,10 @@
 from libc.stdint cimport uint64_t
-from ..libavformat.avformat cimport (
+from pylibav.libav.libavformat.avformat cimport (
     AVClass,
     AVMediaType,
 )
-from ..libavutil.dict cimport AVDictionary
-from ..libavutil.avutil cimport AVRational
+from pylibav.libav.libavutil.dict cimport AVDictionary
+from pylibav.libav.libavutil.avutil cimport AVRational
 
 cdef extern from "libavfilter/avfilter.h" nogil:
     """

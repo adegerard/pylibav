@@ -1,6 +1,14 @@
 from libc.stdint cimport int32_t
 import warnings
-from .libav cimport (
+from .enum_type cimport define_enum
+from .error cimport err_check
+from .utils cimport (
+    avdict_to_dict,
+    avrational_to_fraction,
+    dict_to_avdict,
+    to_avrational,
+)
+from pylibav.libav cimport (
     AVStream,
     AVMediaType,
     avcodec_parameters_from_context,
@@ -9,20 +17,12 @@ from .libav cimport (
     AVPacketSideDataType,
     AV_NOPTS_VALUE,
 )
-from .enum_type cimport define_enum
-from .error cimport err_check
-from .packet cimport Packet
-from .utils cimport (
-    avdict_to_dict,
-    avrational_to_fraction,
-    dict_to_avdict,
-    to_avrational,
-)
 from .video.stream import VideoStream
 # from .audio.stream import AudioStream
 # from .subtitles.stream import SubtitleStream
 from .data.stream import DataStream
 from .deprecation import AVDeprecationWarning
+
 
 
 cdef object _cinit_bypass_sentinel = object()
@@ -46,17 +46,17 @@ cdef Stream wrap_stream(Container container, AVStream *c_stream, CodecContext co
     assert container.ptr.streams[c_stream.index] == c_stream
 
     cdef Stream py_stream
-
-    if c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_VIDEO:
+    cdef AVMediaType av_type = c_stream.codecpar.codec_type
+    if av_type == AVMediaType.AVMEDIA_TYPE_VIDEO:
         py_stream = VideoStream.__new__(VideoStream, _cinit_bypass_sentinel)
 
-    # elif c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_AUDIO:
+    # elif av_type == AVMediaType.AVMEDIA_TYPE_AUDIO:
     #     py_stream = AudioStream.__new__(AudioStream, _cinit_bypass_sentinel)
 
-    # elif c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_SUBTITLE:
+    # elif av_type == AVMediaType.AVMEDIA_TYPE_SUBTITLE:
     #     py_stream = SubtitleStream.__new__(SubtitleStream, _cinit_bypass_sentinel)
 
-    elif c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_DATA:
+    elif av_type == AVMediaType.AVMEDIA_TYPE_DATA:
         py_stream = DataStream.__new__(DataStream, _cinit_bypass_sentinel)
 
     else:
@@ -114,7 +114,7 @@ cdef class Stream:
         # Deprecate framerate pass-through as it is not always set.
         # See: https://github.com/PyAV-Org/PyAV/issues/1005
         if (
-            self.ptr.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_VIDEO
+            <AVMediaType>self.ptr.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_VIDEO
             and name in ("framerate", "rate")
         ):
             warnings.warn(
@@ -167,8 +167,13 @@ cdef class Stream:
 
         for i in range(nb_side_data):
             # Based on: https://www.ffmpeg.org/doxygen/trunk/dump_8c_source.html#l00430
-            if stream.side_data[i].type == AVPacketSideDataType.AV_PKT_DATA_DISPLAYMATRIX:
-                side_data["DISPLAYMATRIX"] = av_display_rotation_get(<const int32_t *>stream.side_data[i].data)
+            if (
+                <AVPacketSideDataType>stream.side_data[i].type
+                == AVPacketSideDataType.AV_PKT_DATA_DISPLAYMATRIX
+            ):
+                side_data["DISPLAYMATRIX"] = av_display_rotation_get(
+                    <const int32_t *>stream.side_data[i].data
+                )
 
         return nb_side_data, side_data
 

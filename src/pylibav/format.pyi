@@ -1,5 +1,3 @@
-__all__ = ("ContainerFormat", "formats_available")
-
 from .enum_type import EnumFlag
 
 class Flags(EnumFlag):
@@ -46,3 +44,6 @@ class ContainerFormat:
     seek_to_pts: int
 
 formats_available: set[str]
+
+
+__all__ = ("ContainerFormat", "formats_available")

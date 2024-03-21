@@ -1,6 +1,6 @@
-from ..frame import Frame
+from pylibav.frame import Frame
 
-from .pad import FilterContextPad
+from pylibav.filtergraph.pad import FilterContextPad
 
 class FilterContext:
     name: str | None
