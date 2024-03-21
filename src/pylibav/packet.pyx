@@ -1,8 +1,15 @@
-cimport libav as lib
-
-from pylibav.bytesource cimport bytesource
-from pylibav.error cimport err_check
-from pylibav.utils cimport avrational_to_fraction, to_avrational
+from .libav cimport (
+    av_packet_alloc,
+    av_new_packet,
+    av_packet_free,
+    av_packet_rescale_ts,
+    AVRational,
+    AV_NOPTS_VALUE,
+)
+import libav
+from .bytesource cimport bytesource
+from .error cimport err_check
+from .utils cimport avrational_to_fraction, to_avrational
 
 
 cdef class Packet(Buffer):
@@ -16,7 +23,7 @@ cdef class Packet(Buffer):
 
     def __cinit__(self, input=None):
         with nogil:
-            self.ptr = lib.av_packet_alloc()
+            self.ptr = av_packet_alloc()
 
     def __init__(self, input=None):
         cdef size_t size = 0
@@ -32,7 +39,7 @@ cdef class Packet(Buffer):
             size = source.length
 
         if size:
-            err_check(lib.av_new_packet(self.ptr, size))
+            err_check(av_new_packet(self.ptr, size))
 
         if source is not None:
             self.update(source)
@@ -42,7 +49,7 @@ cdef class Packet(Buffer):
 
     def __dealloc__(self):
         with nogil:
-            lib.av_packet_free(&self.ptr)
+            av_packet_free(&self.ptr)
 
     def __repr__(self):
         stream = self._stream.index if self._stream else 0
@@ -57,7 +64,7 @@ cdef class Packet(Buffer):
     cdef void* _buffer_ptr(self):
         return self.ptr.data
 
-    cdef _rebase_time(self, lib.AVRational dst):
+    cdef _rebase_time(self, AVRational dst):
         if not dst.num:
             raise ValueError("Cannot rebase to zero time.")
 
@@ -68,7 +75,7 @@ cdef class Packet(Buffer):
         if self._time_base.num == dst.num and self._time_base.den == dst.den:
             return
 
-        lib.av_packet_rescale_ts(self.ptr, self._time_base, dst)
+        av_packet_rescale_ts(self.ptr, self._time_base, dst)
 
         self._time_base = dst
 
@@ -117,13 +124,13 @@ cdef class Packet(Buffer):
 
         :type: int
         """
-        if self.ptr.pts != lib.AV_NOPTS_VALUE:
+        if self.ptr.pts != AV_NOPTS_VALUE:
             return self.ptr.pts
 
     @pts.setter
     def pts(self, v):
         if v is None:
-            self.ptr.pts = lib.AV_NOPTS_VALUE
+            self.ptr.pts = AV_NOPTS_VALUE
         else:
             self.ptr.pts = v
 
@@ -134,13 +141,13 @@ cdef class Packet(Buffer):
 
         :type: int
         """
-        if self.ptr.dts != lib.AV_NOPTS_VALUE:
+        if self.ptr.dts != AV_NOPTS_VALUE:
             return self.ptr.dts
 
     @dts.setter
     def dts(self, v):
         if v is None:
-            self.ptr.dts = lib.AV_NOPTS_VALUE
+            self.ptr.dts = AV_NOPTS_VALUE
         else:
             self.ptr.dts = v
 
@@ -174,40 +181,40 @@ cdef class Packet(Buffer):
 
         :type: int
         """
-        if self.ptr.duration != lib.AV_NOPTS_VALUE:
+        if self.ptr.duration != AV_NOPTS_VALUE:
             return self.ptr.duration
 
     @property
     def is_keyframe(self):
-        return bool(self.ptr.flags & lib.AV_PKT_FLAG_KEY)
+        return bool(self.ptr.flags & libav.AV_PKT_FLAG_KEY)
 
     @is_keyframe.setter
     def is_keyframe(self, v):
         if v:
-            self.ptr.flags |= lib.AV_PKT_FLAG_KEY
+            self.ptr.flags |= libav.AV_PKT_FLAG_KEY
         else:
-            self.ptr.flags &= ~(lib.AV_PKT_FLAG_KEY)
+            self.ptr.flags &= ~(libav.AV_PKT_FLAG_KEY)
 
     @property
     def is_corrupt(self):
-        return bool(self.ptr.flags & lib.AV_PKT_FLAG_CORRUPT)
+        return bool(self.ptr.flags & libav.AV_PKT_FLAG_CORRUPT)
 
     @is_corrupt.setter
     def is_corrupt(self, v):
         if v:
-            self.ptr.flags |= lib.AV_PKT_FLAG_CORRUPT
+            self.ptr.flags |= libav.AV_PKT_FLAG_CORRUPT
         else:
-            self.ptr.flags &= ~(lib.AV_PKT_FLAG_CORRUPT)
+            self.ptr.flags &= ~(libav.AV_PKT_FLAG_CORRUPT)
 
     @property
     def is_discard(self):
-        return bool(self.ptr.flags & lib.AV_PKT_FLAG_DISCARD)
+        return bool(self.ptr.flags & libav.AV_PKT_FLAG_DISCARD)
 
     @property
     def is_trusted(self):
-        return bool(self.ptr.flags & lib.AV_PKT_FLAG_TRUSTED)
+        return bool(self.ptr.flags & libav.AV_PKT_FLAG_TRUSTED)
 
     @property
     def is_disposable(self):
-        return bool(self.ptr.flags & lib.AV_PKT_FLAG_DISPOSABLE)
+        return bool(self.ptr.flags & libav.AV_PKT_FLAG_DISPOSABLE)
 

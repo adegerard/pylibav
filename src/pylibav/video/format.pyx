@@ -1,20 +1,32 @@
+from pylibav.libav cimport (
+    AVPixelFormat,
+    AVPixFmtDescriptor,
+    AVPixFmtFlags,
+    AVComponentDescriptor,
+    av_get_pix_fmt,
+    av_pix_fmt_desc_get,
+    av_pix_fmt_desc_next,
+    av_get_padded_bits_per_pixel,
+    av_get_bits_per_pixel,
+)
+
 
 cdef object _cinit_bypass_sentinel = object()
 
-cdef VideoFormat get_video_format(lib.AVPixelFormat c_format, unsigned int width, unsigned int height):
-    if c_format == lib.AV_PIX_FMT_NONE:
+cdef VideoFormat get_video_format(AVPixelFormat c_format, unsigned int width, unsigned int height):
+    if c_format == AVPixelFormat.AV_PIX_FMT_NONE:
         return None
 
     cdef VideoFormat format = VideoFormat.__new__(VideoFormat, _cinit_bypass_sentinel)
     format._init(c_format, width, height)
     return format
 
-cdef lib.AVPixelFormat get_pix_fmt(const char *name) except lib.AV_PIX_FMT_NONE:
+cdef AVPixelFormat get_pix_fmt(const char *name) except AVPixelFormat.AV_PIX_FMT_NONE:
     """Wrapper for lib.av_get_pix_fmt with error checking."""
 
-    cdef lib.AVPixelFormat pix_fmt = lib.av_get_pix_fmt(name)
+    cdef AVPixelFormat pix_fmt = av_get_pix_fmt(name)
 
-    if pix_fmt == lib.AV_PIX_FMT_NONE:
+    if pix_fmt == AVPixelFormat.AV_PIX_FMT_NONE:
         raise ValueError("not a pixel format: %r" % name)
 
     return pix_fmt
@@ -39,12 +51,12 @@ cdef class VideoFormat:
             self._init(other.pix_fmt, width or other.width, height or other.height)
             return
 
-        cdef lib.AVPixelFormat pix_fmt = get_pix_fmt(name)
+        cdef AVPixelFormat pix_fmt = get_pix_fmt(name)
         self._init(pix_fmt, width, height)
 
-    cdef _init(self, lib.AVPixelFormat pix_fmt, unsigned int width, unsigned int height):
+    cdef _init(self, AVPixelFormat pix_fmt, unsigned int width, unsigned int height):
         self.pix_fmt = pix_fmt
-        self.ptr = lib.av_pix_fmt_desc_get(pix_fmt)
+        self.ptr = av_pix_fmt_desc_get(pix_fmt)[0]
         self.width = width
         self.height = height
         self.components = tuple(
@@ -68,27 +80,28 @@ cdef class VideoFormat:
 
     @property
     def bits_per_pixel(self):
-        return lib.av_get_bits_per_pixel(self.ptr)
+        return av_get_bits_per_pixel(<AVPixFmtDescriptor*>self.ptr)
 
     @property
-    def padded_bits_per_pixel(self): return lib.av_get_padded_bits_per_pixel(self.ptr)
+    def padded_bits_per_pixel(self) -> int:
+        return av_get_padded_bits_per_pixel(<AVPixFmtDescriptor*>self.ptr)
 
     @property
     def is_big_endian(self):
         """Pixel format is big-endian."""
-        return bool(self.ptr.flags & lib.AV_PIX_FMT_FLAG_BE)
+        return bool(self.ptr.flags & AVPixFmtFlags.AV_PIX_FMT_FLAG_BE)
 
 
     @property
     def has_palette(self):
         """Pixel format has a palette in data[1], values are indexes in this palette."""
-        return bool(self.ptr.flags & lib.AV_PIX_FMT_FLAG_PAL)
+        return bool(self.ptr.flags & AVPixFmtFlags.AV_PIX_FMT_FLAG_PAL)
 
 
     @property
     def is_bit_stream(self):
         """All values of a component are bit-wise packed end to end."""
-        return bool(self.ptr.flags & lib.AV_PIX_FMT_FLAG_BITSTREAM)
+        return bool(self.ptr.flags & AVPixFmtFlags.AV_PIX_FMT_FLAG_BITSTREAM)
 
 
     # Skipping PIX_FMT_HWACCEL
@@ -97,13 +110,13 @@ cdef class VideoFormat:
     @property
     def is_planar(self):
         """At least one pixel component is not in the first data plane."""
-        return bool(self.ptr.flags & lib.AV_PIX_FMT_FLAG_PLANAR)
+        return bool(self.ptr.flags & AVPixFmtFlags.AV_PIX_FMT_FLAG_PLANAR)
 
 
     @property
     def is_rgb(self):
         """The pixel format contains RGB-like data (as opposed to YUV/grayscale)."""
-        return bool(self.ptr.flags & lib.AV_PIX_FMT_FLAG_RGB)
+        return bool(self.ptr.flags & AVPixFmtFlags.AV_PIX_FMT_FLAG_RGB)
 
 
     cpdef chroma_width(self, int luma_width=0):
@@ -129,11 +142,14 @@ cdef class VideoFormat:
         return -((-luma_height) >> self.ptr.log2_chroma_h) if luma_height else 0
 
 
+
 cdef class VideoFormatComponent:
     def __cinit__(self, VideoFormat format, size_t index):
         self.format = format
         self.index = index
-        self.ptr = &format.ptr.comp[index]
+        cdef AVComponentDescriptor *avcd = <AVComponentDescriptor *>format.ptr.comp[index][0]
+        self.ptr = <AVComponentDescriptor *>avcd
+
 
     @property
     def plane(self):
@@ -185,9 +201,9 @@ cdef class VideoFormatComponent:
 
 
 names = set()
-cdef const lib.AVPixFmtDescriptor *desc = NULL
+cdef const AVPixFmtDescriptor *desc = NULL
 while True:
-    desc = lib.av_pix_fmt_desc_next(desc)
+    desc = av_pix_fmt_desc_next(desc)
     if not desc:
         break
     names.add(desc.name)

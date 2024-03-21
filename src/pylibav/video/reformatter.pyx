@@ -1,43 +1,52 @@
-cimport libav as lib
 from libc.stdint cimport uint8_t
-
-from pylibav.enum cimport define_enum
+cimport libav
+from .libav cimport (
+    sws_getCachedContext,
+    sws_getCoefficients,
+    sws_getColorspaceDetails,
+    sws_setColorspaceDetails,
+    sws_scale,
+)
+from pylibav.enum_type cimport define_enum
 from pylibav.error cimport err_check
 from pylibav.video.format cimport VideoFormat
 from pylibav.video.frame cimport alloc_video_frame
 
+
 Interpolation = define_enum("Interpolation", __name__, (
-    ("FAST_BILINEAR", lib.SWS_FAST_BILINEAR, "Fast bilinear"),
-    ("BILINEAR", lib.SWS_BILINEAR, "Bilinear"),
-    ("BICUBIC", lib.SWS_BICUBIC, "Bicubic"),
-    ("X", lib.SWS_X, "Experimental"),
-    ("POINT", lib.SWS_POINT, "Nearest neighbor / point"),
-    ("AREA", lib.SWS_AREA, "Area averaging"),
-    ("BICUBLIN", lib.SWS_BICUBLIN, "Luma bicubic / chroma bilinear"),
-    ("GAUSS", lib.SWS_GAUSS, "Gaussian"),
-    ("SINC", lib.SWS_SINC, "Sinc"),
-    ("LANCZOS", lib.SWS_LANCZOS, "Lanczos"),
-    ("SPLINE", lib.SWS_SPLINE, "Bicubic spline"),
+    ("FAST_BILINEAR", libav.SWS_FAST_BILINEAR, "Fast bilinear"),
+    ("BILINEAR", libav.SWS_BILINEAR, "Bilinear"),
+    ("BICUBIC", libav.SWS_BICUBIC, "Bicubic"),
+    ("X", libav.SWS_X, "Experimental"),
+    ("POINT", libav.SWS_POINT, "Nearest neighbor / point"),
+    ("AREA", libav.SWS_AREA, "Area averaging"),
+    ("BICUBLIN", libav.SWS_BICUBLIN, "Luma bicubic / chroma bilinear"),
+    ("GAUSS", libav.SWS_GAUSS, "Gaussian"),
+    ("SINC", libav.SWS_SINC, "Sinc"),
+    ("LANCZOS", libav.SWS_LANCZOS, "Lanczos"),
+    ("SPLINE", libav.SWS_SPLINE, "Bicubic spline"),
 ))
+
 
 Colorspace = define_enum("Colorspace", __name__, (
-    ("ITU709", lib.SWS_CS_ITU709),
-    ("FCC", lib.SWS_CS_FCC),
-    ("ITU601", lib.SWS_CS_ITU601),
-    ("ITU624", lib.SWS_CS_ITU624),
-    ("SMPTE170M", lib.SWS_CS_SMPTE170M),
-    ("SMPTE240M", lib.SWS_CS_SMPTE240M),
-    ("DEFAULT", lib.SWS_CS_DEFAULT),
+    ("ITU709", libav.SWS_CS_ITU709),
+    ("FCC", libav.SWS_CS_FCC),
+    ("ITU601", libav.SWS_CS_ITU601),
+    ("ITU624", libav.SWS_CS_ITU624),
+    ("SMPTE170M", libav.SWS_CS_SMPTE170M),
+    ("SMPTE240M", libav.SWS_CS_SMPTE240M),
+    ("DEFAULT", libav.SWS_CS_DEFAULT),
 
     # Lowercase for b/c.
-    ("itu709", lib.SWS_CS_ITU709),
-    ("fcc", lib.SWS_CS_FCC),
-    ("itu601", lib.SWS_CS_ITU601),
-    ("itu624", lib.SWS_CS_SMPTE170M),
-    ("smpte240", lib.SWS_CS_SMPTE240M),
-    ("default", lib.SWS_CS_DEFAULT),
+    ("itu709", libav.SWS_CS_ITU709),
+    ("fcc", libav.SWS_CS_FCC),
+    ("itu601", libav.SWS_CS_ITU601),
+    ("itu624", libav.SWS_CS_SMPTE170M),
+    ("smpte240", libav.SWS_CS_SMPTE240M),
+    ("default", libav.SWS_CS_DEFAULT),
 
 ))
+
 
 ColorRange = define_enum("ColorRange", __name__, (
     ("UNSPECIFIED", lib.AVCOL_RANGE_UNSPECIFIED, "Unspecified"),
@@ -56,7 +65,7 @@ cdef class VideoReformatter:
 
     def __dealloc__(self):
         with nogil:
-            lib.sws_freeContext(self.ptr)
+            libav.sws_freeContext(self.ptr)
 
     def reformat(self, VideoFrame frame not None, width=None, height=None,
                  format=None, src_colorspace=None, dst_colorspace=None,
@@ -126,7 +135,7 @@ cdef class VideoReformatter:
         # VideoStream.decode will copy its SwsContextProxy to VideoFrame
         # So all Video frames from the same VideoStream should have the same one
         with nogil:
-            self.ptr = lib.sws_getCachedContext(
+            self.ptr = sws_getCachedContext(
                 self.ptr,
                 frame.ptr.width,
                 frame.ptr.height,
@@ -149,10 +158,13 @@ cdef class VideoReformatter:
         cdef int brightness, contrast, saturation
         cdef int ret
 
-        if src_colorspace != dst_colorspace or src_color_range != dst_color_range:
+        if (
+            src_colorspace != dst_colorspace
+            or src_color_range != dst_color_range
+        ):
             with nogil:
                 # Casts for const-ness, because Cython isn't expressive enough.
-                ret = lib.sws_getColorspaceDetails(
+                ret = sws_getColorspaceDetails(
                     self.ptr,
                     <int**>&inv_tbl,
                     &src_colorspace_range,
@@ -168,13 +180,13 @@ cdef class VideoReformatter:
             with nogil:
                 # Grab the coefficients for the requested transforms.
                 # The inv_table brings us to linear, and `tbl` to the new space.
-                if src_colorspace != lib.SWS_CS_DEFAULT:
-                    inv_tbl = lib.sws_getCoefficients(src_colorspace)
-                if dst_colorspace != lib.SWS_CS_DEFAULT:
-                    tbl = lib.sws_getCoefficients(dst_colorspace)
+                if src_colorspace != libav.SWS_CS_DEFAULT:
+                    inv_tbl = sws_getCoefficients(src_colorspace)
+                if dst_colorspace != libav.SWS_CS_DEFAULT:
+                    tbl = sws_getCoefficients(dst_colorspace)
 
                 # Apply!
-                ret = lib.sws_setColorspaceDetails(
+                ret = sws_setColorspaceDetails(
                     self.ptr,
                     inv_tbl,
                     src_color_range,
@@ -194,7 +206,7 @@ cdef class VideoReformatter:
 
         # Finally, scale the image.
         with nogil:
-            lib.sws_scale(
+            sws_scale(
                 self.ptr,
                 # Cast for const-ness, because Cython isn't expressive enough.
                 <const uint8_t**>frame.ptr.data,

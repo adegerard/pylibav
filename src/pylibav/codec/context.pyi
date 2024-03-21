@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from pylibav.enum import EnumFlag, EnumItem
+from pylibav.enum_type import EnumFlag, EnumItem
 from pylibav.packet import Packet
 
 from .codec import Codec

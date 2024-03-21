@@ -29,9 +29,11 @@ cdef CodecContext wrap_codec_context(lib.AVCodecContext *c_ctx, const lib.AVCode
     if c_ctx.codec_type == lib.AVMEDIA_TYPE_VIDEO:
         from pylibav.video.codeccontext import VideoCodecContext
         py_ctx = VideoCodecContext(_cinit_sentinel)
-    elif c_ctx.codec_type == lib.AVMEDIA_TYPE_AUDIO:
-        from pylibav.audio.codeccontext import AudioCodecContext
-        py_ctx = AudioCodecContext(_cinit_sentinel)
+
+    # elif c_ctx.codec_type == lib.AVMEDIA_TYPE_AUDIO:
+    #     from pylibav.audio.codeccontext import AudioCodecContext
+    #     py_ctx = AudioCodecContext(_cinit_sentinel)
+
     else:
         py_ctx = CodecContext(_cinit_sentinel)
 

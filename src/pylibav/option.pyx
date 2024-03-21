@@ -1,12 +1,11 @@
-cimport libav as lib
-
-from pylibav.enum cimport define_enum
-from pylibav.utils cimport flag_in_bitfield
+cimport pylibav.libav as libav
+from .enum_type cimport define_enum
+from .utils cimport flag_in_bitfield
 
 
 cdef object _cinit_sentinel = object()
 
-cdef Option wrap_option(tuple choices, const lib.AVOption *ptr):
+cdef Option wrap_option(tuple choices, const libav.AVOption *ptr):
     if ptr == NULL:
         return None
     cdef Option obj = Option(_cinit_sentinel)
@@ -16,47 +15,47 @@ cdef Option wrap_option(tuple choices, const lib.AVOption *ptr):
 
 
 OptionType = define_enum("OptionType", __name__, (
-    ("FLAGS", lib.AV_OPT_TYPE_FLAGS),
-    ("INT", lib.AV_OPT_TYPE_INT),
-    ("INT64", lib.AV_OPT_TYPE_INT64),
-    ("DOUBLE", lib.AV_OPT_TYPE_DOUBLE),
-    ("FLOAT", lib.AV_OPT_TYPE_FLOAT),
-    ("STRING", lib.AV_OPT_TYPE_STRING),
-    ("RATIONAL", lib.AV_OPT_TYPE_RATIONAL),
-    ("BINARY", lib.AV_OPT_TYPE_BINARY),
-    ("DICT", lib.AV_OPT_TYPE_DICT),
-    # ("UINT64", lib.AV_OPT_TYPE_UINT64), # Added recently, and not yet used AFAICT.
-    ("CONST", lib.AV_OPT_TYPE_CONST),
-    ("IMAGE_SIZE", lib.AV_OPT_TYPE_IMAGE_SIZE),
-    ("PIXEL_FMT", lib.AV_OPT_TYPE_PIXEL_FMT),
-    ("SAMPLE_FMT", lib.AV_OPT_TYPE_SAMPLE_FMT),
-    ("VIDEO_RATE", lib.AV_OPT_TYPE_VIDEO_RATE),
-    ("DURATION", lib.AV_OPT_TYPE_DURATION),
-    ("COLOR", lib.AV_OPT_TYPE_COLOR),
-    ("CHANNEL_LAYOUT", lib.AV_OPT_TYPE_CHANNEL_LAYOUT),
-    ("BOOL", lib.AV_OPT_TYPE_BOOL),
+    ("FLAGS", libav.AV_OPT_TYPE_FLAGS),
+    ("INT", libav.AV_OPT_TYPE_INT),
+    ("INT64", libav.AV_OPT_TYPE_INT64),
+    ("DOUBLE", libav.AV_OPT_TYPE_DOUBLE),
+    ("FLOAT", libav.AV_OPT_TYPE_FLOAT),
+    ("STRING", libav.AV_OPT_TYPE_STRING),
+    ("RATIONAL", libav.AV_OPT_TYPE_RATIONAL),
+    ("BINARY", libav.AV_OPT_TYPE_BINARY),
+    ("DICT", libav.AV_OPT_TYPE_DICT),
+    # ("UINT64", libav.AV_OPT_TYPE_UINT64), # Added recently, and not yet used AFAICT.
+    ("CONST", libav.AV_OPT_TYPE_CONST),
+    ("IMAGE_SIZE", libav.AV_OPT_TYPE_IMAGE_SIZE),
+    ("PIXEL_FMT", libav.AV_OPT_TYPE_PIXEL_FMT),
+    ("SAMPLE_FMT", libav.AV_OPT_TYPE_SAMPLE_FMT),
+    ("VIDEO_RATE", libav.AV_OPT_TYPE_VIDEO_RATE),
+    ("DURATION", libav.AV_OPT_TYPE_DURATION),
+    ("COLOR", libav.AV_OPT_TYPE_COLOR),
+    ("CHANNEL_LAYOUT", libav.AV_OPT_TYPE_CHANNEL_LAYOUT),
+    ("BOOL", libav.AV_OPT_TYPE_BOOL),
 ))
 
 cdef tuple _INT_TYPES = (
-    lib.AV_OPT_TYPE_FLAGS,
-    lib.AV_OPT_TYPE_INT,
-    lib.AV_OPT_TYPE_INT64,
-    lib.AV_OPT_TYPE_PIXEL_FMT,
-    lib.AV_OPT_TYPE_SAMPLE_FMT,
-    lib.AV_OPT_TYPE_DURATION,
-    lib.AV_OPT_TYPE_CHANNEL_LAYOUT,
-    lib.AV_OPT_TYPE_BOOL,
+    libav.AV_OPT_TYPE_FLAGS,
+    libav.AV_OPT_TYPE_INT,
+    libav.AV_OPT_TYPE_INT64,
+    libav.AV_OPT_TYPE_PIXEL_FMT,
+    libav.AV_OPT_TYPE_SAMPLE_FMT,
+    libav.AV_OPT_TYPE_DURATION,
+    libav.AV_OPT_TYPE_CHANNEL_LAYOUT,
+    libav.AV_OPT_TYPE_BOOL,
 )
 
 OptionFlags = define_enum("OptionFlags", __name__, (
-    ("ENCODING_PARAM", lib.AV_OPT_FLAG_ENCODING_PARAM),
-    ("DECODING_PARAM", lib.AV_OPT_FLAG_DECODING_PARAM),
-    ("AUDIO_PARAM", lib.AV_OPT_FLAG_AUDIO_PARAM),
-    ("VIDEO_PARAM", lib.AV_OPT_FLAG_VIDEO_PARAM),
-    ("SUBTITLE_PARAM", lib.AV_OPT_FLAG_SUBTITLE_PARAM),
-    ("EXPORT", lib.AV_OPT_FLAG_EXPORT),
-    ("READONLY", lib.AV_OPT_FLAG_READONLY),
-    ("FILTERING_PARAM", lib.AV_OPT_FLAG_FILTERING_PARAM),
+    ("ENCODING_PARAM", libav.AV_OPT_FLAG_ENCODING_PARAM),
+    ("DECODING_PARAM", libav.AV_OPT_FLAG_DECODING_PARAM),
+    ("AUDIO_PARAM", libav.AV_OPT_FLAG_AUDIO_PARAM),
+    ("VIDEO_PARAM", libav.AV_OPT_FLAG_VIDEO_PARAM),
+    ("SUBTITLE_PARAM", libav.AV_OPT_FLAG_SUBTITLE_PARAM),
+    ("EXPORT", libav.AV_OPT_FLAG_EXPORT),
+    ("READONLY", libav.AV_OPT_FLAG_READONLY),
+    ("FILTERING_PARAM", libav.AV_OPT_FLAG_FILTERING_PARAM),
 ), is_flags=True)
 
 cdef class BaseOption:
@@ -79,28 +78,28 @@ cdef class BaseOption:
     # Option flags
     @property
     def is_encoding_param(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_ENCODING_PARAM)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_ENCODING_PARAM)
     @property
     def is_decoding_param(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_DECODING_PARAM)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_DECODING_PARAM)
     @property
     def is_audio_param(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_AUDIO_PARAM)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_AUDIO_PARAM)
     @property
     def is_video_param(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_VIDEO_PARAM)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_VIDEO_PARAM)
     @property
     def is_subtitle_param(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_SUBTITLE_PARAM)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_SUBTITLE_PARAM)
     @property
     def is_export(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_EXPORT)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_EXPORT)
     @property
     def is_readonly(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_READONLY)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_READONLY)
     @property
     def is_filtering_param(self):
-        return flag_in_bitfield(self.ptr.flags, lib.AV_OPT_FLAG_FILTERING_PARAM)
+        return flag_in_bitfield(self.ptr.flags, libav.AV_OPT_FLAG_FILTERING_PARAM)
 
 
 cdef class Option(BaseOption):
@@ -120,13 +119,23 @@ cdef class Option(BaseOption):
     def default(self):
         if self.ptr.type in _INT_TYPES:
             return self.ptr.default_val.i64
-        if self.ptr.type in (lib.AV_OPT_TYPE_DOUBLE, lib.AV_OPT_TYPE_FLOAT,
-                             lib.AV_OPT_TYPE_RATIONAL):
+
+        if self.ptr.type in (
+            libav.AV_OPT_TYPE_DOUBLE,
+            libav.AV_OPT_TYPE_FLOAT,
+            libav.AV_OPT_TYPE_RATIONAL
+        ):
             return self.ptr.default_val.dbl
-        if self.ptr.type in (lib.AV_OPT_TYPE_STRING, lib.AV_OPT_TYPE_BINARY,
-                             lib.AV_OPT_TYPE_IMAGE_SIZE, lib.AV_OPT_TYPE_VIDEO_RATE,
-                             lib.AV_OPT_TYPE_COLOR):
+
+        if self.ptr.type in (
+            libav.AV_OPT_TYPE_STRING,
+            libav.AV_OPT_TYPE_BINARY,
+            libav.AV_OPT_TYPE_IMAGE_SIZE,
+            libav.AV_OPT_TYPE_VIDEO_RATE,
+            libav.AV_OPT_TYPE_COLOR
+        ):
             return self.ptr.default_val.str if self.ptr.default_val.str != NULL else ""
+
 
     def _norm_range(self, value):
         if self.ptr.type in _INT_TYPES:
@@ -148,7 +157,7 @@ cdef class Option(BaseOption):
         )
 
 
-cdef OptionChoice wrap_option_choice(const lib.AVOption *ptr, bint is_default):
+cdef OptionChoice wrap_option_choice(const AVOption *ptr, bint is_default):
     if ptr == NULL:
         return None
 

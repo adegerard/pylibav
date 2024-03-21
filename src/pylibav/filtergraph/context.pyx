@@ -1,12 +1,20 @@
-from pylibav.audio.frame cimport alloc_audio_frame
-from pylibav.dictionary cimport _Dictionary
-from pylibav.dictionary import Dictionary
-from pylibav.error cimport err_check
-from pylibav.filter.pad cimport alloc_filter_pads
-from pylibav.frame cimport Frame
-from pylibav.utils cimport avrational_to_fraction
-from pylibav.video.frame cimport alloc_video_frame
-
+# from ..audio.frame cimport alloc_audio_frame
+from ..dictionary cimport _Dictionary
+from ..dictionary import Dictionary
+from ..error cimport err_check
+from .pad cimport alloc_filter_pads
+from ..frame cimport Frame
+from ..utils cimport avrational_to_fraction
+from ..video.frame cimport alloc_video_frame
+# from ..audio.frame cimport alloc_audio_frame
+cimport pylibav.libav as libav
+from pylibav.libav import (
+    avfilter_link,
+    avfilter_init_str,
+    avfilter_init_dict,
+    av_buffersrc_write_frame,
+    av_buffersink_get_frame
+)
 
 cdef object _cinit_sentinel = object()
 
@@ -61,29 +69,29 @@ cdef class FilterContext:
         if args or not kwargs:
             if args:
                 c_args = args
-            err_check(lib.avfilter_init_str(self.ptr, c_args))
+            err_check(avfilter_init_str(self.ptr, c_args))
         else:
             dict_ = Dictionary(kwargs)
-            err_check(lib.avfilter_init_dict(self.ptr, &dict_.ptr))
+            err_check(avfilter_init_dict(self.ptr, &dict_.ptr))
 
         self.inited = True
         if dict_:
             raise ValueError(f"unused config: {', '.join(sorted(dict_))}")
 
     def link_to(self, FilterContext input_, int output_idx=0, int input_idx=0):
-        err_check(lib.avfilter_link(self.ptr, output_idx, input_.ptr, input_idx))
+        err_check(avfilter_link(self.ptr, output_idx, input_.ptr, input_idx))
 
     def push(self, Frame frame):
         cdef int res
 
         if frame is None:
             with nogil:
-                res = lib.av_buffersrc_write_frame(self.ptr, NULL)
+                res = av_buffersrc_write_frame(self.ptr, NULL)
             err_check(res)
             return
         elif self.filter.name in ("abuffer", "buffer"):
             with nogil:
-                res = lib.av_buffersrc_write_frame(self.ptr, frame.ptr)
+                res = av_buffersrc_write_frame(self.ptr, frame.ptr)
             err_check(res)
             return
 
@@ -102,8 +110,8 @@ cdef class FilterContext:
 
         if self.filter.name == "buffersink":
             frame = alloc_video_frame()
-        elif self.filter.name == "abuffersink":
-            frame = alloc_audio_frame()
+        # elif self.filter.name == "abuffersink":
+        #     frame = alloc_audio_frame()
         else:
             # Delegate to the output.
             if len(self.outputs) != 1:
@@ -117,7 +125,7 @@ cdef class FilterContext:
         self.graph.configure()
 
         with nogil:
-            res = lib.av_buffersink_get_frame(self.ptr, frame.ptr)
+            res = av_buffersink_get_frame(self.ptr, frame.ptr)
         err_check(res)
 
         frame._init_user_attributes()

@@ -1,6 +1,6 @@
 __all__ = ("ContainerFormat", "formats_available")
 
-from .enum import EnumFlag
+from .enum_type import EnumFlag
 
 class Flags(EnumFlag):
     NOFILE: int

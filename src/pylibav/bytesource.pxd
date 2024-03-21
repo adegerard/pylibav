@@ -2,7 +2,6 @@ from cpython cimport Py_buffer
 
 
 cdef class ByteSource:
-
     cdef object owner
 
     cdef bint has_view

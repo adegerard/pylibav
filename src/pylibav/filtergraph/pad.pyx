@@ -1,4 +1,10 @@
-cimport include.libav as lib
+from pylibav.libav cimport (
+    AVFilterLink,
+    AVFilterPad,
+    avfilter_pad_get_name,
+    avfilter_pad_get_type,
+    av_get_media_type_string,
+)
 from .link cimport wrap_filter_link
 
 
@@ -22,7 +28,7 @@ cdef class FilterPad:
 
     @property
     def name(self):
-        return lib.avfilter_pad_get_name(self.base_ptr, self.index)
+        return avfilter_pad_get_name(self.base_ptr, self.index)
 
     @property
     def type(self):
@@ -33,7 +39,7 @@ cdef class FilterPad:
 
         :type: str
         """
-        return lib.av_get_media_type_string(lib.avfilter_pad_get_type(self.base_ptr, self.index))
+        return av_get_media_type_string(avfilter_pad_get_type(self.base_ptr, self.index))
 
 
 cdef class FilterContextPad(FilterPad):
@@ -48,8 +54,8 @@ cdef class FilterContextPad(FilterPad):
     def link(self):
         if self._link:
             return self._link
-        cdef lib.AVFilterLink **links = self.context.ptr.inputs if self.is_input else self.context.ptr.outputs
-        cdef lib.AVFilterLink *link = links[self.index]
+        cdef AVFilterLink **links = self.context.ptr.inputs if self.is_input else self.context.ptr.outputs
+        cdef AVFilterLink *link = links[self.index]
         if not link:
             return
         self._link = wrap_filter_link(self.context.graph, link)
@@ -62,7 +68,7 @@ cdef class FilterContextPad(FilterPad):
             return link.input if self.is_input else link.output
 
 
-cdef tuple alloc_filter_pads(Filter filter, const lib.AVFilterPad *ptr, bint is_input, FilterContext context=None):
+cdef tuple alloc_filter_pads(Filter filter, const AVFilterPad *ptr, bint is_input, FilterContext context=None):
     if not ptr:
         return ()
 

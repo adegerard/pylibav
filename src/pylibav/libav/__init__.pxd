@@ -1,21 +1,19 @@
-from .libavutil.avutil cimport *
-from .libavutil.channel_layout cimport *
-from .libavutil.dict cimport *
-from .libavutil.error cimport *
-from .libavutil.frame cimport *
-from .libavutil.samplefmt cimport *
-from .libavutil.motion_vector cimport *
-
-from .libavcodec.avcodec cimport *
-from .libavdevice.avdevice cimport *
-from .libavformat.avformat cimport *
-from .libswresample.swresample cimport *
-from .libswscale.swscale cimport *
-
-from .libavfilter.avfilter cimport *
-from .libavfilter.avfiltergraph cimport *
-from .libavfilter.buffersink cimport *
-from .libavfilter.buffersrc cimport *
+from pylibav.libav.libavutil.avutil cimport *
+from pylibav.libav.libavutil.channel_layout cimport *
+from pylibav.libav.libavutil.dict cimport *
+from pylibav.libav.libavutil.error cimport *
+from pylibav.libav.libavutil.frame cimport *
+from pylibav.libav.libavutil.samplefmt cimport *
+from pylibav.libav.libavutil.motion_vector cimport *
+from pylibav.libav.libavcodec.avcodec cimport *
+from pylibav.libav.libavdevice.avdevice cimport *
+from pylibav.libav.libavformat.avformat cimport *
+from pylibav.libav.libswresample.swresample cimport *
+from pylibav.libav.libswscale.swscale cimport *
+from pylibav.libav.libavfilter.avfilter cimport *
+from pylibav.libav.libavfilter.avfiltergraph cimport *
+from pylibav.libav.libavfilter.buffersink cimport *
+from pylibav.libav.libavfilter.buffersrc cimport *
 
 
 cdef extern from "stdio.h" nogil:

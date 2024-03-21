@@ -1,3 +1,4 @@
+from .buffer cimport Buffer
 
 cdef class Plane(Buffer):
     """

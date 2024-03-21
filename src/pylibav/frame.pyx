@@ -1,7 +1,7 @@
 from .utils cimport avrational_to_fraction, to_avrational
 
-from .sidedata.sidedata import SideDataContainer
-from libav cimport (
+# from .sidedata.sidedata import SideDataContainer
+from .libav cimport (
     AVRational,
     AV_NOPTS_VALUE,
     AV_FRAME_FLAG_CORRUPT,
@@ -144,8 +144,8 @@ cdef class Frame:
             or bool(self.ptr.flags & AV_FRAME_FLAG_CORRUPT)
         )
 
-    @property
-    def side_data(self):
-        if self._side_data is None:
-            self._side_data = SideDataContainer(self)
-        return self._side_data
+    # @property
+    # def side_data(self):
+    #     if self._side_data is None:
+    #         self._side_data = SideDataContainer(self)
+    #     return self._side_data

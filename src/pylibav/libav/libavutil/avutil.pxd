@@ -1,6 +1,7 @@
 from libc.stdint cimport int64_t, uint8_t, uint64_t, int32_t
-from samplefmt cimport AVSampleFormat
 from ..libavformat.avformat cimport AVMediaType
+from .samplefmt cimport AVSampleFormat
+
 
 cdef extern from "libavutil/mathematics.h" nogil:
     pass
@@ -200,7 +201,7 @@ cdef extern from "libavutil/pixdesc.h" nogil:
         uint8_t log2_chroma_w
         uint8_t log2_chroma_h
         uint8_t flags
-        AVComponentDescriptor comp[4]
+        AVComponentDescriptor[4] comp
 
     cdef AVPixFmtDescriptor* av_pix_fmt_desc_get(AVPixelFormat pix_fmt)
     cdef AVPixFmtDescriptor* av_pix_fmt_desc_next(AVPixFmtDescriptor *prev)
@@ -394,7 +395,7 @@ cdef extern from "libavutil/log.h" nogil:
         AV_LOG_MAX_OFFSET
 
     # Send a log.
-    void av_log(void *ptr, int level, const char *fmt, ...)
+    void av_log(void *ptr, int level, const char *fmt, const char * message)
 
     # Get the logs.
     ctypedef void(*av_log_callback)(void *, int, const char *, va_list)

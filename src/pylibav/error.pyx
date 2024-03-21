@@ -1,14 +1,14 @@
-cimport libav as lib
-
-from pylibav.logging cimport get_last_error
-
 import errno
 import os
 import sys
 import traceback
 from threading import local
-
-from pylibav.enum import define_enum
+from .logging cimport get_last_error
+from .enum_type cimport define_enum
+from .libav cimport (
+    av_err2str,
+)
+cimport pylibav.libav as libav
 
 # Will get extended with all of the exceptions.
 __all__ = [
@@ -137,31 +137,31 @@ class HTTPClientError(FFmpegError):
 
 # Tuples of (enum_name, enum_value, exc_name, exc_base).
 _ffmpeg_specs = (
-    ("BSF_NOT_FOUND", -lib.AVERROR_BSF_NOT_FOUND, "BSFNotFoundError", LookupError),
-    ("BUG", -lib.AVERROR_BUG, None, RuntimeError),
-    ("BUFFER_TOO_SMALL", -lib.AVERROR_BUFFER_TOO_SMALL, None, ValueError),
-    ("DECODER_NOT_FOUND", -lib.AVERROR_DECODER_NOT_FOUND, None, LookupError),
-    ("DEMUXER_NOT_FOUND", -lib.AVERROR_DEMUXER_NOT_FOUND, None, LookupError),
-    ("ENCODER_NOT_FOUND", -lib.AVERROR_ENCODER_NOT_FOUND, None, LookupError),
-    ("EOF", -lib.AVERROR_EOF, "EOFError", EOFError),
-    ("EXIT", -lib.AVERROR_EXIT, None, None),
-    ("EXTERNAL", -lib.AVERROR_EXTERNAL, None, None),
-    ("FILTER_NOT_FOUND", -lib.AVERROR_FILTER_NOT_FOUND, None, LookupError),
-    ("INVALIDDATA", -lib.AVERROR_INVALIDDATA, "InvalidDataError", ValueError),
-    ("MUXER_NOT_FOUND", -lib.AVERROR_MUXER_NOT_FOUND, None, LookupError),
-    ("OPTION_NOT_FOUND", -lib.AVERROR_OPTION_NOT_FOUND, None, LookupError),
-    ("PATCHWELCOME", -lib.AVERROR_PATCHWELCOME, "PatchWelcomeError", None),
-    ("PROTOCOL_NOT_FOUND", -lib.AVERROR_PROTOCOL_NOT_FOUND, None, LookupError),
-    ("UNKNOWN", -lib.AVERROR_UNKNOWN, None, None),
-    ("EXPERIMENTAL", -lib.AVERROR_EXPERIMENTAL, None, None),
-    ("INPUT_CHANGED", -lib.AVERROR_INPUT_CHANGED, None, None),
-    ("OUTPUT_CHANGED", -lib.AVERROR_OUTPUT_CHANGED, None, None),
-    ("HTTP_BAD_REQUEST", -lib.AVERROR_HTTP_BAD_REQUEST, "HTTPBadRequestError", HTTPClientError),
-    ("HTTP_UNAUTHORIZED", -lib.AVERROR_HTTP_UNAUTHORIZED, "HTTPUnauthorizedError", HTTPClientError),
-    ("HTTP_FORBIDDEN", -lib.AVERROR_HTTP_FORBIDDEN, "HTTPForbiddenError", HTTPClientError),
-    ("HTTP_NOT_FOUND", -lib.AVERROR_HTTP_NOT_FOUND, "HTTPNotFoundError", HTTPClientError),
-    ("HTTP_OTHER_4XX", -lib.AVERROR_HTTP_OTHER_4XX, "HTTPOtherClientError", HTTPClientError),
-    ("HTTP_SERVER_ERROR", -lib.AVERROR_HTTP_SERVER_ERROR, "HTTPServerError", HTTPError),
+    ("BSF_NOT_FOUND", -libav.AVERROR_BSF_NOT_FOUND, "BSFNotFoundError", LookupError),
+    ("BUG", -libav.AVERROR_BUG, None, RuntimeError),
+    ("BUFFER_TOO_SMALL", -libav.AVERROR_BUFFER_TOO_SMALL, None, ValueError),
+    ("DECODER_NOT_FOUND", -libav.AVERROR_DECODER_NOT_FOUND, None, LookupError),
+    ("DEMUXER_NOT_FOUND", -libav.AVERROR_DEMUXER_NOT_FOUND, None, LookupError),
+    ("ENCODER_NOT_FOUND", -libav.AVERROR_ENCODER_NOT_FOUND, None, LookupError),
+    ("EOF", -libav.AVERROR_EOF, "EOFError", EOFError),
+    ("EXIT", -libav.AVERROR_EXIT, None, None),
+    ("EXTERNAL", -libav.AVERROR_EXTERNAL, None, None),
+    ("FILTER_NOT_FOUND", -libav.AVERROR_FILTER_NOT_FOUND, None, LookupError),
+    ("INVALIDDATA", -libav.AVERROR_INVALIDDATA, "InvalidDataError", ValueError),
+    ("MUXER_NOT_FOUND", -libav.AVERROR_MUXER_NOT_FOUND, None, LookupError),
+    ("OPTION_NOT_FOUND", -libav.AVERROR_OPTION_NOT_FOUND, None, LookupError),
+    ("PATCHWELCOME", -libav.AVERROR_PATCHWELCOME, "PatchWelcomeError", None),
+    ("PROTOCOL_NOT_FOUND", -libav.AVERROR_PROTOCOL_NOT_FOUND, None, LookupError),
+    ("UNKNOWN", -libav.AVERROR_UNKNOWN, None, None),
+    ("EXPERIMENTAL", -libav.AVERROR_EXPERIMENTAL, None, None),
+    ("INPUT_CHANGED", -libav.AVERROR_INPUT_CHANGED, None, None),
+    ("OUTPUT_CHANGED", -libav.AVERROR_OUTPUT_CHANGED, None, None),
+    ("HTTP_BAD_REQUEST", -libav.AVERROR_HTTP_BAD_REQUEST, "HTTPBadRequestError", HTTPClientError),
+    ("HTTP_UNAUTHORIZED", -libav.AVERROR_HTTP_UNAUTHORIZED, "HTTPUnauthorizedError", HTTPClientError),
+    ("HTTP_FORBIDDEN", -libav.AVERROR_HTTP_FORBIDDEN, "HTTPForbiddenError", HTTPClientError),
+    ("HTTP_NOT_FOUND", -libav.AVERROR_HTTP_NOT_FOUND, "HTTPNotFoundError", HTTPClientError),
+    ("HTTP_OTHER_4XX", -libav.AVERROR_HTTP_OTHER_4XX, "HTTPOtherClientError", HTTPClientError),
+    ("HTTP_SERVER_ERROR", -libav.AVERROR_HTTP_SERVER_ERROR, "HTTPServerError", HTTPError),
     ("PYAV_CALLBACK", c_PYAV_STASHED_ERROR, "PyAVCallbackError", RuntimeError),
 )
 
@@ -190,7 +190,7 @@ for enum in ErrorType:
     if enum.value == c_PYAV_STASHED_ERROR:
         enum.strerror = PYAV_STASHED_ERROR_message
     else:
-        enum.strerror = lib.av_err2str(-enum.value)
+        enum.strerror = av_err2str(-enum.value)
 
 
 # Mimick the builtin exception types.
@@ -342,9 +342,9 @@ cpdef make_error(int res, filename=None, log=None):
         message = PYAV_STASHED_ERROR_message
     else:
         # Jump through some hoops due to Python 2 in same codebase.
-        py_buffer = b"\0" * lib.AV_ERROR_MAX_STRING_SIZE
+        py_buffer = b"\0" * libav.AV_ERROR_MAX_STRING_SIZE
         c_buffer = py_buffer
-        lib.av_strerror(res, c_buffer, lib.AV_ERROR_MAX_STRING_SIZE)
+        libav.av_strerror(res, c_buffer, libav.AV_ERROR_MAX_STRING_SIZE)
         py_buffer = c_buffer
         message = py_buffer.decode("latin1")
 

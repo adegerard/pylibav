@@ -1,9 +1,8 @@
 from fractions import Fraction
 from typing import Iterator
-
-from pylibav.subtitles.subtitle import SubtitleSet
-
 from .stream import Stream
+# from .subtitles.subtitle import SubtitleSet
+
 
 class Packet:
     stream: Stream
@@ -21,4 +20,4 @@ class Packet:
     is_disposable: bool
 
     def __init__(self, input: int | None = None) -> None: ...
-    def decode(self) -> Iterator[SubtitleSet]: ...
+    # def decode(self) -> Iterator[SubtitleSet]: ...

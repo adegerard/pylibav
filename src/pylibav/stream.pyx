@@ -1,19 +1,28 @@
-import warnings
-
-cimport libav as lib
 from libc.stdint cimport int32_t
-
-from pylibav.enum cimport define_enum
-from pylibav.error cimport err_check
-from pylibav.packet cimport Packet
-from pylibav.utils cimport (
+import warnings
+from .libav cimport (
+    AVStream,
+    AVMediaType,
+    avcodec_parameters_from_context,
+    av_get_media_type_string,
+    av_display_rotation_get,
+    AVPacketSideDataType,
+    AV_NOPTS_VALUE,
+)
+from .enum_type cimport define_enum
+from .error cimport err_check
+from .packet cimport Packet
+from .utils cimport (
     avdict_to_dict,
     avrational_to_fraction,
     dict_to_avdict,
     to_avrational,
 )
-
-from pylibav.deprecation import AVDeprecationWarning
+from .video.stream import VideoStream
+# from .audio.stream import AudioStream
+# from .subtitles.stream import SubtitleStream
+from .data.stream import DataStream
+from .deprecation import AVDeprecationWarning
 
 
 cdef object _cinit_bypass_sentinel = object()
@@ -22,10 +31,10 @@ cdef object _cinit_bypass_sentinel = object()
 # If necessary more can be added from
 # https://ffmpeg.org/doxygen/trunk/group__lavc__packet.html#ga9a80bfcacc586b483a973272800edb97
 SideData = define_enum("SideData", __name__, (
-    ("DISPLAYMATRIX", lib.AV_PKT_DATA_DISPLAYMATRIX, "Display Matrix"),
+    ("DISPLAYMATRIX", AVPacketSideDataType.AV_PKT_DATA_DISPLAYMATRIX, "Display Matrix"),
 ))
 
-cdef Stream wrap_stream(Container container, lib.AVStream *c_stream, CodecContext codec_context):
+cdef Stream wrap_stream(Container container, AVStream *c_stream, CodecContext codec_context):
     """Build an pylibav.Stream for an existing AVStream.
 
     The AVStream MUST be fully constructed and ready for use before this is
@@ -38,18 +47,18 @@ cdef Stream wrap_stream(Container container, lib.AVStream *c_stream, CodecContex
 
     cdef Stream py_stream
 
-    if c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_VIDEO:
-        from pylibav.video.stream import VideoStream
+    if c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_VIDEO:
         py_stream = VideoStream.__new__(VideoStream, _cinit_bypass_sentinel)
-    elif c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_AUDIO:
-        from pylibav.audio.stream import AudioStream
-        py_stream = AudioStream.__new__(AudioStream, _cinit_bypass_sentinel)
-    elif c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_SUBTITLE:
-        from pylibav.subtitles.stream import SubtitleStream
-        py_stream = SubtitleStream.__new__(SubtitleStream, _cinit_bypass_sentinel)
-    elif c_stream.codecpar.codec_type == lib.AVMEDIA_TYPE_DATA:
-        from pylibav.data.stream import DataStream
+
+    # elif c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_AUDIO:
+    #     py_stream = AudioStream.__new__(AudioStream, _cinit_bypass_sentinel)
+
+    # elif c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_SUBTITLE:
+    #     py_stream = SubtitleStream.__new__(SubtitleStream, _cinit_bypass_sentinel)
+
+    elif c_stream.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_DATA:
         py_stream = DataStream.__new__(DataStream, _cinit_bypass_sentinel)
+
     else:
         py_stream = Stream.__new__(Stream, _cinit_bypass_sentinel)
 
@@ -79,7 +88,7 @@ cdef class Stream:
             return
         raise RuntimeError("cannot manually instantiate Stream")
 
-    cdef _init(self, Container container, lib.AVStream *stream, CodecContext codec_context):
+    cdef _init(self, Container container, AVStream *stream, CodecContext codec_context):
         self.container = container
         self.ptr = stream
 
@@ -104,7 +113,10 @@ cdef class Stream:
     def __getattr__(self, name):
         # Deprecate framerate pass-through as it is not always set.
         # See: https://github.com/PyAV-Org/PyAV/issues/1005
-        if self.ptr.codecpar.codec_type == lib.AVMEDIA_TYPE_VIDEO and name in ("framerate", "rate"):
+        if (
+            self.ptr.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_VIDEO
+            and name in ("framerate", "rate")
+        ):
             warnings.warn(
                 f"VideoStream.{name} is deprecated as it is not always set; please use VideoStream.average_rate.",
                 AVDeprecationWarning
@@ -144,10 +156,10 @@ cdef class Stream:
 
         # It prefers if we pass it parameters via this other object.
         # Lets just copy what we want.
-        err_check(lib.avcodec_parameters_from_context(self.ptr.codecpar, self.codec_context.ptr))
+        err_check(avcodec_parameters_from_context(self.ptr.codecpar, self.codec_context.ptr))
 
-    cdef _get_side_data(self, lib.AVStream *stream):
-        # Get DISPLAYMATRIX SideData from a lib.AVStream object.
+    cdef _get_side_data(self, AVStream *stream):
+        # Get DISPLAYMATRIX SideData from a libav.AVStream object.
         # Returns: tuple[int, dict[str, Any]]
 
         nb_side_data = stream.nb_side_data
@@ -155,8 +167,8 @@ cdef class Stream:
 
         for i in range(nb_side_data):
             # Based on: https://www.ffmpeg.org/doxygen/trunk/dump_8c_source.html#l00430
-            if stream.side_data[i].type == lib.AV_PKT_DATA_DISPLAYMATRIX:
-                side_data["DISPLAYMATRIX"] = lib.av_display_rotation_get(<const int32_t *>stream.side_data[i].data)
+            if stream.side_data[i].type == AVPacketSideDataType.AV_PKT_DATA_DISPLAYMATRIX:
+                side_data["DISPLAYMATRIX"] = av_display_rotation_get(<const int32_t *>stream.side_data[i].data)
 
         return nb_side_data, side_data
 
@@ -225,7 +237,7 @@ cdef class Stream:
 
         :type: :class:`int` or ``None``
         """
-        if self.ptr.start_time != lib.AV_NOPTS_VALUE:
+        if self.ptr.start_time != AV_NOPTS_VALUE:
             return self.ptr.start_time
 
     @property
@@ -236,7 +248,7 @@ cdef class Stream:
         :type: :class:`int` or ``None``
 
         """
-        if self.ptr.duration != lib.AV_NOPTS_VALUE:
+        if self.ptr.duration != AV_NOPTS_VALUE:
             return self.ptr.duration
 
     @property
@@ -268,4 +280,4 @@ cdef class Stream:
 
         :type: str
         """
-        return lib.av_get_media_type_string(self.ptr.codecpar.codec_type)
+        return av_get_media_type_string(self.ptr.codecpar.codec_type)

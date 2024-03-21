@@ -1,4 +1,4 @@
-from avfilter cimport AVFilterContext
+from .avfilter cimport AVFilterContext
 from ..libavcodec.avcodec cimport AVFrame
 
 

@@ -1,4 +1,4 @@
-from ..libav cimport (
+from pylibav.libav cimport (
     AVFormatContext
 )
 from .pyio cimport PyIOFile

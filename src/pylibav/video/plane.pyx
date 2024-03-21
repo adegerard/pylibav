@@ -1,4 +1,5 @@
 from pylibav.video.frame cimport VideoFrame
+from pylibav.plane cimport Plane
 
 
 cdef class VideoPlane(Plane):

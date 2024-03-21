@@ -1,7 +1,7 @@
-from pylibav.descriptor import Descriptor
-from pylibav.option import Option
-
+from ..descriptor import Descriptor
+from ..option import Option
 from .pad import FilterPad
+
 
 class Filter:
     name: str

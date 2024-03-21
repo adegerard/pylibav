@@ -1,7 +1,16 @@
 import warnings
-
-cimport libav as lib
 from libc.stdint cimport int64_t
+
+cimport pylibav.libav as libav
+from pylibav.libav cimport (
+    AVCodec,
+    AVCodecContext,
+    AVPixelFormat,
+    AVRational,
+    av_reduce,
+)
+
+
 
 from pylibav.codec.context cimport CodecContext
 from pylibav.frame cimport Frame
@@ -19,14 +28,14 @@ cdef class VideoCodecContext(CodecContext):
         self.last_w = 0
         self.last_h = 0
 
-    cdef _init(self, lib.AVCodecContext *ptr, const lib.AVCodec *codec):
+    cdef _init(self, AVCodecContext *ptr, const AVCodec *codec):
         CodecContext._init(self, ptr, codec)  # TODO: Can this be `super`?
         self._build_format()
         self.encoded_frame_count = 0
 
     cdef _set_default_time_base(self):
         self.ptr.time_base.num = self.ptr.framerate.den or 1
-        self.ptr.time_base.den = self.ptr.framerate.num or lib.AV_TIME_BASE
+        self.ptr.time_base.den = self.ptr.framerate.num or libav.AV_TIME_BASE
 
     cdef _prepare_frames_for_encode(self, Frame input):
         if not input:
@@ -50,7 +59,7 @@ cdef class VideoCodecContext(CodecContext):
             )
 
         # There is no pts, so create one.
-        if vframe.ptr.pts == lib.AV_NOPTS_VALUE:
+        if vframe.ptr.pts == libav.AV_NOPTS_VALUE:
             vframe.ptr.pts = <int64_t>self.encoded_frame_count
 
         self.encoded_frame_count += 1
@@ -66,7 +75,11 @@ cdef class VideoCodecContext(CodecContext):
         vframe._init_user_attributes()
 
     cdef _build_format(self):
-        self._format = get_video_format(<lib.AVPixelFormat>self.ptr.pix_fmt, self.ptr.width, self.ptr.height)
+        self._format = get_video_format(
+            <AVPixelFormat>self.ptr.pix_fmt,
+            self.ptr.width,
+            self.ptr.height
+        )
 
     @property
     def format(self):
@@ -100,7 +113,8 @@ cdef class VideoCodecContext(CodecContext):
     @property
     def bits_per_coded_sample(self):
         """
-        The number of bits per sample in the codedwords. It's mandatory for this to be set for some formats to decode properly.
+        The number of bits per sample in the codedwords.
+        It's mandatory for this to be set for some formats to decode properly.
 
         Wraps :ffmpeg:`AVCodecContext.bits_per_coded_sample`.
 
@@ -185,9 +199,9 @@ cdef class VideoCodecContext(CodecContext):
 
     @property
     def display_aspect_ratio(self):
-        cdef lib.AVRational dar
+        cdef AVRational dar
 
-        lib.av_reduce(
+        av_reduce(
             &dar.num, &dar.den,
             self.ptr.width * self.ptr.sample_aspect_ratio.num,
             self.ptr.height * self.ptr.sample_aspect_ratio.den, 1024*1024)

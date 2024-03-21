@@ -1,12 +1,10 @@
 from typing import Any, Union
-
 import numpy as np
-
-from pylibav.enum import EnumItem
+from pylibav.enum_type import EnumItem
 from pylibav.frame import Frame
-
 from .format import VideoFormat
 from .plane import VideoPlane
+
 
 _SupportedNDarray = Union[
     np.ndarray[Any, np.dtype[np.uint8]],

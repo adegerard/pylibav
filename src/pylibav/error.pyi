@@ -1,4 +1,4 @@
-from .enum import EnumItem
+from .enum_type import EnumItem
 
 classes: dict[int, Exception]
 

@@ -1,13 +1,16 @@
-cimport libav as lib
 from libc.stdint cimport uint64_t
+from .libav cimport (
+    AVDictionary,
+    AVRational,
+)
 
 
-cdef dict avdict_to_dict(lib.AVDictionary *input, str encoding, str errors)
-cdef dict_to_avdict(lib.AVDictionary **dst, dict src, str encoding, str errors)
+cdef dict avdict_to_dict(AVDictionary *input, str encoding, str errors)
+cdef dict_to_avdict(AVDictionary **dst, dict src, str encoding, str errors)
 
 
-cdef object avrational_to_fraction(const lib.AVRational *input)
-cdef object to_avrational(object value, lib.AVRational *input)
+cdef object avrational_to_fraction(const AVRational *input)
+cdef object to_avrational(object value, AVRational *input)
 
 
 cdef check_ndarray(object array, object dtype, int ndim)

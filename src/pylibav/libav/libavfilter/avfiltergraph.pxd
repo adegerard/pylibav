@@ -1,4 +1,4 @@
-from avfilter cimport (
+from .avfilter cimport (
     AVFilter,
     AVFilterContext,
 )

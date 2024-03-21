@@ -1,10 +1,16 @@
 from libc.stdint cimport uint64_t
-
 from fractions import Fraction
+from .libav cimport (
+    AVDictionary,
+    AVDictionaryEntry,
+    AVRational,
+    av_dict_get,
+    av_dict_set,
+    av_dict_free,
+    AV_DICT_IGNORE_SUFFIX,
+)
+from .error cimport err_check
 
-cimport libav as lib
-
-from pylibav.error cimport err_check
 
 # === DICTIONARIES ===
 # ====================
@@ -15,22 +21,22 @@ cdef _decode(char *s, encoding, errors):
 cdef bytes _encode(s, encoding, errors):
     return s.encode(encoding, errors)
 
-cdef dict avdict_to_dict(lib.AVDictionary *input, str encoding, str errors):
-    cdef lib.AVDictionaryEntry *element = NULL
+cdef dict avdict_to_dict(AVDictionary *input, str encoding, str errors):
+    cdef AVDictionaryEntry *element = NULL
     cdef dict output = {}
     while True:
-        element = lib.av_dict_get(input, "", element, lib.AV_DICT_IGNORE_SUFFIX)
+        element = av_dict_get(input, "", element, AV_DICT_IGNORE_SUFFIX)
         if element == NULL:
             break
         output[_decode(element.key, encoding, errors)] = _decode(element.value, encoding, errors)
     return output
 
 
-cdef dict_to_avdict(lib.AVDictionary **dst, dict src, str encoding, str errors):
-    lib.av_dict_free(dst)
+cdef dict_to_avdict(AVDictionary **dst, dict src, str encoding, str errors):
+    av_dict_free(dst)
     for key, value in src.items():
         err_check(
-            lib.av_dict_set(
+            av_dict_set(
                 dst,
                 _encode(key, encoding, errors),
                 _encode(value, encoding, errors),
@@ -42,12 +48,12 @@ cdef dict_to_avdict(lib.AVDictionary **dst, dict src, str encoding, str errors):
 # === FRACTIONS ===
 # =================
 
-cdef object avrational_to_fraction(const lib.AVRational *input):
+cdef object avrational_to_fraction(const AVRational *input):
     if input.num and input.den:
         return Fraction(input.num, input.den)
 
 
-cdef object to_avrational(object value, lib.AVRational *input):
+cdef object to_avrational(object value, AVRational *input):
     if value is None:
         input.num = 0
         input.den = 1

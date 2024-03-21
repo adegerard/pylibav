@@ -1,7 +1,7 @@
-cimport libav as lib
-
-from pylibav.filter.graph cimport Graph
-
+from pylibav.libav cimport (
+    AVFilterContext,
+)
+from .graph cimport Graph
 
 cdef _cinit_sentinel = object()
 
@@ -16,7 +16,7 @@ cdef class FilterLink:
     def input(self):
         if self._input:
             return self._input
-        cdef lib.AVFilterContext *cctx = self.ptr.src
+        cdef AVFilterContext *cctx = self.ptr.src
         cdef unsigned int i
         for i in range(cctx.nb_outputs):
             if self.ptr == cctx.outputs[i]:
@@ -31,7 +31,7 @@ cdef class FilterLink:
     def output(self):
         if self._output:
             return self._output
-        cdef lib.AVFilterContext *cctx = self.ptr.dst
+        cdef AVFilterContext *cctx = self.ptr.dst
         cdef unsigned int i
         for i in range(cctx.nb_inputs):
             if self.ptr == cctx.inputs[i]:
@@ -46,7 +46,7 @@ cdef class FilterLink:
         return self._output
 
 
-cdef FilterLink wrap_filter_link(Graph graph, lib.AVFilterLink *ptr):
+cdef FilterLink wrap_filter_link(Graph graph, AVFilterLink *ptr):
     cdef FilterLink link = FilterLink(_cinit_sentinel)
     link.graph = graph
     link.ptr = ptr

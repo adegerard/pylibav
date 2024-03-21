@@ -3,7 +3,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, Callable, Literal, Type, overload
 
-from pylibav.enum import EnumFlag
+from pylibav.enum_type import EnumFlag
 
 from .input import InputContainer
 from .output import OutputContainer

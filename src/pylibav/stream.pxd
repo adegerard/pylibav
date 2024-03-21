@@ -1,13 +1,10 @@
-cimport libav as lib
-
-from pylibav.codec.context cimport CodecContext
-from pylibav.container.core cimport Container
-from pylibav.frame cimport Frame
-from pylibav.packet cimport Packet
+from .codec.context cimport CodecContext
+from .container.core cimport Container
+from .libav cimport AVStream
 
 
 cdef class Stream:
-    cdef lib.AVStream *ptr
+    cdef AVStream *ptr
 
     # Stream attributes.
     cdef readonly Container container
@@ -19,11 +16,11 @@ cdef class Stream:
     cdef readonly CodecContext codec_context
 
     # Private API.
-    cdef _init(self, Container, lib.AVStream*, CodecContext)
+    cdef _init(self, Container, AVStream*, CodecContext)
     cdef _finalize_for_output(self)
-    cdef _get_side_data(self, lib.AVStream *stream)
+    cdef _get_side_data(self, AVStream *stream)
     cdef _set_time_base(self, value)
     cdef _set_id(self, value)
 
 
-cdef Stream wrap_stream(Container, lib.AVStream*, CodecContext)
+cdef Stream wrap_stream(Container, AVStream*, CodecContext)

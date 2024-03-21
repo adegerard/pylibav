@@ -1,11 +1,10 @@
-cimport libav as lib
-
-from pylibav.filter.context cimport FilterContext
+from pylibav.libav cimport AVFilterGraph
+from .context cimport FilterContext
 
 
 cdef class Graph:
 
-    cdef lib.AVFilterGraph *ptr
+    cdef AVFilterGraph *ptr
 
     cdef readonly bint configured
     cpdef configure(self, bint auto_buffer=*, bint force=*)

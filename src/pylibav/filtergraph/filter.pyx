@@ -1,24 +1,29 @@
-cimport libav as lib
-
-from pylibav.descriptor cimport wrap_avclass
-from pylibav.filter.pad cimport alloc_filter_pads
+cimport pylibav.libav as libav
+from pylibav.libav cimport (
+    AVFilter,
+    av_filter_iterate,
+    avfilter_get_class,
+    avfilter_get_by_name,
+)
+from ..descriptor cimport wrap_avclass
+from .pad cimport alloc_filter_pads
 
 
 cdef object _cinit_sentinel = object()
 
 
-cdef Filter wrap_filter(const lib.AVFilter *ptr):
+cdef Filter wrap_filter(const AVFilter *ptr):
     cdef Filter filter_ = Filter(_cinit_sentinel)
     filter_.ptr = ptr
     return filter_
 
 
 cpdef enum FilterFlags:
-    DYNAMIC_INPUTS = lib.AVFILTER_FLAG_DYNAMIC_INPUTS
-    DYNAMIC_OUTPUTS = lib.AVFILTER_FLAG_DYNAMIC_OUTPUTS
-    SLICE_THREADS = lib.AVFILTER_FLAG_SLICE_THREADS
-    SUPPORT_TIMELINE_GENERIC = lib.AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC
-    SUPPORT_TIMELINE_INTERNAL = lib.AVFILTER_FLAG_SUPPORT_TIMELINE_INTERNAL
+    DYNAMIC_INPUTS = libav.AVFILTER_FLAG_DYNAMIC_INPUTS
+    DYNAMIC_OUTPUTS = libav.AVFILTER_FLAG_DYNAMIC_OUTPUTS
+    SLICE_THREADS = libav.AVFILTER_FLAG_SLICE_THREADS
+    SUPPORT_TIMELINE_GENERIC = libav.AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC
+    SUPPORT_TIMELINE_INTERNAL = libav.AVFILTER_FLAG_SUPPORT_TIMELINE_INTERNAL
 
 
 cdef class Filter:
@@ -27,7 +32,7 @@ cdef class Filter:
             return
         if not isinstance(name, str):
             raise TypeError("takes a filter name as a string")
-        self.ptr = lib.avfilter_get_by_name(name)
+        self.ptr = avfilter_get_by_name(name)
         if not self.ptr:
             raise ValueError(f"no filter {name}")
 
@@ -57,19 +62,19 @@ cdef class Filter:
 
     @property
     def dynamic_inputs(self):
-        return bool(self.ptr.flags & lib.AVFILTER_FLAG_DYNAMIC_INPUTS)
+        return bool(self.ptr.flags & libav.AVFILTER_FLAG_DYNAMIC_INPUTS)
 
     @property
     def dynamic_outputs(self):
-        return bool(self.ptr.flags & lib.AVFILTER_FLAG_DYNAMIC_OUTPUTS)
+        return bool(self.ptr.flags & libav.AVFILTER_FLAG_DYNAMIC_OUTPUTS)
 
     @property
     def timeline_support(self):
-        return bool(self.ptr.flags & lib.AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC)
+        return bool(self.ptr.flags & libav.AVFILTER_FLAG_SUPPORT_TIMELINE_GENERIC)
 
     @property
     def slice_threads(self):
-        return bool(self.ptr.flags & lib.AVFILTER_FLAG_SLICE_THREADS)
+        return bool(self.ptr.flags & libav.AVFILTER_FLAG_SLICE_THREADS)
 
     @property
     def command_support(self):
@@ -90,10 +95,10 @@ cdef class Filter:
 
 cdef get_filter_names():
     names = set()
-    cdef const lib.AVFilter *ptr
+    cdef const AVFilter *ptr
     cdef void *opaque = NULL
     while True:
-        ptr = lib.av_filter_iterate(&opaque)
+        ptr = av_filter_iterate(&opaque)
         if ptr:
             names.add(ptr.name)
         else:
@@ -103,4 +108,4 @@ cdef get_filter_names():
 filters_available = get_filter_names()
 
 
-filter_descriptor = wrap_avclass(lib.avfilter_get_class())
+filter_descriptor = wrap_avclass(avfilter_get_class())

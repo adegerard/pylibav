@@ -1,4 +1,7 @@
-cimport libav as lib
+from pylibav.libav import (
+    AVCodecDescriptor,
+    avcodec_descriptor_get
+)
 
 
 cdef class DataStream(Stream):
@@ -16,7 +19,7 @@ cdef class DataStream(Stream):
 
     @property
     def name(self):
-        cdef const lib.AVCodecDescriptor *desc = lib.avcodec_descriptor_get(self.ptr.codecpar.codec_id)
+        cdef const AVCodecDescriptor *desc = avcodec_descriptor_get(self.ptr.codecpar.codec_id)
         if desc == NULL:
             return None
         return desc.name

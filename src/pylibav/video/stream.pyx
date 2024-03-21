@@ -1,9 +1,11 @@
-cimport libav as lib
-
+from pylibav.libav cimport (
+    AVRational,
+    av_guess_frame_rate,
+)
 from pylibav.packet cimport Packet
-from pylibav.utils cimport avrational_to_fraction, to_avrational
-
-from .frame cimport VideoFrame
+from pylibav.stream cimport Stream
+from pylibav.utils cimport avrational_to_fraction
+from pylibav.video.frame cimport VideoFrame
 
 
 cdef class VideoStream(Stream):
@@ -78,5 +80,5 @@ cdef class VideoStream(Stream):
         :type: :class:`~fractions.Fraction` or ``None``
         """
         # The two NULL arguments aren't used in FFmpeg >= 4.0
-        cdef lib.AVRational val = lib.av_guess_frame_rate(NULL, self.ptr, NULL)
+        cdef AVRational val = av_guess_frame_rate(NULL, self.ptr, NULL)
         return avrational_to_fraction(&val)

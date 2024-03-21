@@ -1,7 +1,7 @@
 from libc.string cimport memcpy
 from ..error cimport stash_exception
 cimport pylibav.libav as libav
-from ..libav cimport (
+from pylibav.libav cimport (
     av_malloc,
     avio_alloc_context,
     av_freep,

@@ -1,16 +1,24 @@
 import sys
-
 from libc.stdint cimport uint8_t
+from pylibav.libav cimport (
+    AVPixelFormat,
+    AVPictureType,
+    av_image_alloc,
+    av_image_fill_linesizes,
+    av_image_fill_pointers,
+    av_freep,
+)
 
-from pylibav.enum cimport define_enum
+from pylibav.enum_type cimport define_enum
 from pylibav.error cimport err_check
 from pylibav.utils cimport check_ndarray, check_ndarray_shape
 from pylibav.video.format cimport get_pix_fmt, get_video_format
 from pylibav.video.plane cimport VideoPlane
+from pylibav.frame cimport Frame
 
 import warnings
 
-from pylibav.deprecation import AVDeprecationWarning
+from ..deprecation import AVDeprecationWarning
 
 
 cdef object _cinit_bypass_sentinel
@@ -26,14 +34,14 @@ cdef VideoFrame alloc_video_frame():
 
 
 PictureType = define_enum("PictureType", __name__, (
-    ("NONE", lib.AV_PICTURE_TYPE_NONE, "Undefined"),
-    ("I", lib.AV_PICTURE_TYPE_I, "Intra"),
-    ("P", lib.AV_PICTURE_TYPE_P, "Predicted"),
-    ("B", lib.AV_PICTURE_TYPE_B, "Bi-directional predicted"),
-    ("S", lib.AV_PICTURE_TYPE_S, "S(GMC)-VOP MPEG-4"),
-    ("SI", lib.AV_PICTURE_TYPE_SI, "Switching intra"),
-    ("SP", lib.AV_PICTURE_TYPE_SP, "Switching predicted"),
-    ("BI", lib.AV_PICTURE_TYPE_BI, "BI type"),
+    ("NONE", AVPictureType.AV_PICTURE_TYPE_NONE, "Undefined"),
+    ("I", AVPictureType.AV_PICTURE_TYPE_I, "Intra"),
+    ("P", AVPictureType.AV_PICTURE_TYPE_P, "Predicted"),
+    ("B", AVPictureType.AV_PICTURE_TYPE_B, "Bi-directional predicted"),
+    ("S", AVPictureType.AV_PICTURE_TYPE_S, "S(GMC)-VOP MPEG-4"),
+    ("SI", AVPictureType.AV_PICTURE_TYPE_SI, "Switching intra"),
+    ("SP", AVPictureType.AV_PICTURE_TYPE_SP, "Switching predicted"),
+    ("BI", AVPictureType.AV_PICTURE_TYPE_BI, "BI type"),
 ))
 
 
@@ -81,11 +89,11 @@ cdef class VideoFrame(Frame):
         if width is _cinit_bypass_sentinel:
             return
 
-        cdef lib.AVPixelFormat c_format = get_pix_fmt(format)
+        cdef AVPixelFormat c_format = get_pix_fmt(format)
 
         self._init(c_format, width, height)
 
-    cdef _init(self, lib.AVPixelFormat format, unsigned int width, unsigned int height):
+    cdef _init(self, AVPixelFormat format, unsigned int width, unsigned int height):
         cdef int res = 0
 
         with nogil:
@@ -98,27 +106,28 @@ cdef class VideoFrame(Frame):
             # We enforce aligned buffers, otherwise `sws_scale` can perform
             # poorly or even cause out-of-bounds reads and writes.
             if width and height:
-                res = lib.av_image_alloc(
+                res = av_image_alloc(
                     self.ptr.data,
                     self.ptr.linesize,
                     width,
                     height,
                     format,
                     16)
-                self._buffer = self.ptr.data[0]
+
 
         if res:
+            self._buffer = self.ptr.data[0]
             err_check(res)
 
         self._init_user_attributes()
 
     cdef _init_user_attributes(self):
-        self.format = get_video_format(<lib.AVPixelFormat>self.ptr.format, self.ptr.width, self.ptr.height)
+        self.format = get_video_format(<AVPixelFormat>self.ptr.format, self.ptr.width, self.ptr.height)
 
     def __dealloc__(self):
         # The `self._buffer` member is only set if *we* allocated the buffer in `_init`,
         # as opposed to a buffer allocated by a decoder.
-        lib.av_freep(&self._buffer)
+        av_freep(<char*>self._buffer[0])
         # Let go of the reference from the numpy buffers if we made one
         self._np_buffer = None
 
@@ -375,7 +384,7 @@ cdef class VideoFrame(Frame):
         return frame
 
     def _image_fill_pointers_numpy(self, buffer, width, height, format):
-        cdef lib.AVPixelFormat c_format
+        cdef AVPixelFormat c_format
         cdef uint8_t * c_ptr
         cdef size_t c_data
 
@@ -401,7 +410,7 @@ cdef class VideoFrame(Frame):
         c_data = buffer.ctypes.data
         c_ptr = <uint8_t*> (c_data)
         c_format = get_pix_fmt(format)
-        lib.av_freep(&self._buffer)
+        av_freep(&self._buffer)
 
         # Hold on to a reference for the numpy buffer
         # so that it doesn't get accidentally garbage collected
@@ -409,17 +418,17 @@ cdef class VideoFrame(Frame):
         self.ptr.format = c_format
         self.ptr.width = width
         self.ptr.height = height
-        res = lib.av_image_fill_linesizes(
+        res = av_image_fill_linesizes(
             self.ptr.linesize,
-            <lib.AVPixelFormat>self.ptr.format,
+            <AVPixelFormat>self.ptr.format,
             width,
         )
         if res:
           err_check(res)
 
-        res = lib.av_image_fill_pointers(
+        res = av_image_fill_pointers(
             self.ptr.data,
-            <lib.AVPixelFormat>self.ptr.format,
+            <AVPixelFormat>self.ptr.format,
             self.ptr.height,
             c_ptr,
             self.ptr.linesize,

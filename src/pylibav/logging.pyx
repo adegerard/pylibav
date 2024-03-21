@@ -39,8 +39,8 @@ import os
 import sys
 from threading import Lock, get_ident
 
-cimport libav
-from libav cimport (
+cimport pylibav.libav as libav
+from .libav cimport (
     AVClass,
     av_log_set_callback,
     av_log_default_callback,

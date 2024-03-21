@@ -9,12 +9,12 @@ log = logging.getLogger(__name__)
 
 def iter_data_dirs(check_writable=False):
     try:
-        yield os.environ["PYAV_TESTDATA_DIR"]
+        yield os.environ["PYLIBAV_TESTDATA_DIR"]
     except KeyError:
         pass
 
     if os.name == "nt":
-        yield os.path.join(sys.prefix, "pyav", "datasets")
+        yield os.path.join(sys.prefix, "pylibav", "datasets")
         return
 
     bases = [
@@ -29,7 +29,7 @@ def iter_data_dirs(check_writable=False):
         bases.insert(0, sys.prefix)
 
     for base in bases:
-        dir_ = os.path.join(base, "pyav", "datasets")
+        dir_ = os.path.join(base, "pylibav", "datasets")
         if check_writable:
             if os.path.exists(dir_):
                 if not os.access(dir_, os.W_OK):
@@ -39,7 +39,7 @@ def iter_data_dirs(check_writable=False):
                     continue
         yield dir_
 
-    yield os.path.join(os.path.expanduser("~"), ".pyav", "datasets")
+    yield os.path.join(os.path.expanduser("~"), ".pylibav", "datasets")
 
 
 def cached_download(url, name):

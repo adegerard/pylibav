@@ -1,10 +1,8 @@
-from libav cimport (
+from .libav cimport (
     AVFrame,
     AVRational,
 )
-
-from pylibav.packet cimport Packet
-from pylibav.sidedata.sidedata cimport _SideDataContainer
+# from .sidedata.sidedata cimport _SideDataContainer
 
 
 cdef class Frame:
@@ -15,7 +13,7 @@ cdef class Frame:
     cdef AVRational _time_base
     cdef _rebase_time(self, AVRational)
 
-    cdef _SideDataContainer _side_data
+    # cdef _SideDataContainer _side_data
 
     cdef readonly int index
 

@@ -1,4 +1,4 @@
-from pylibav.enum import EnumItem
+from pylibav.enum_type import EnumItem
 
 from .frame import VideoFrame
 
@@ -15,6 +15,7 @@ class Interpolation(EnumItem):
     LANCZOS: int
     SPLINE: int
 
+
 class Colorspace(EnumItem):
     ITU709: int
     FCC: int
@@ -30,11 +31,13 @@ class Colorspace(EnumItem):
     smpte240: int
     default: int
 
+
 class ColorRange(EnumItem):
     UNSPECIFIED: int
     MPEG: int
     JPEG: int
     NB: int
+
 
 class VideoReformatter:
     def reformat(

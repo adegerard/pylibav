@@ -1,12 +1,14 @@
-cimport libav as lib
+from .libav cimport (
+    AVInputFormat,
+    AVOutputFormat,
+)
 
 
 cdef class ContainerFormat:
-
     cdef readonly str name
 
-    cdef lib.AVInputFormat *iptr
-    cdef lib.AVOutputFormat *optr
+    cdef AVInputFormat *iptr
+    cdef AVOutputFormat *optr
 
 
-cdef ContainerFormat build_container_format(lib.AVInputFormat*, lib.AVOutputFormat*)
+cdef ContainerFormat build_container_format(AVInputFormat*, AVOutputFormat*)

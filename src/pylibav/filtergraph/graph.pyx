@@ -1,19 +1,26 @@
-cimport libav as lib
-import warnings
 from fractions import Fraction
+import warnings
+from ..libav cimport (
+    AVFilterContext,
+    AVFilterGraph,
+    avfilter_graph_alloc,
+    avfilter_graph_free,
+    avfilter_graph_config,
+    avfilter_graph_alloc_filter,
+)
+from ..error cimport err_check
+from ..video.format cimport VideoFormat
+from ..video.frame cimport VideoFrame
+from .context cimport FilterContext, wrap_filter_context
+from .filter cimport Filter, wrap_filter
 
-from pylibav.error cimport err_check
-from pylibav.filter.context cimport FilterContext, wrap_filter_context
-from pylibav.filter.filter cimport Filter, wrap_filter
-from pylibav.video.format cimport VideoFormat
-from pylibav.video.frame cimport VideoFrame
 
 
 cdef class Graph:
-    cdef lib.AVFilterGraph *ptr
+    cdef AVFilterGraph *ptr
 
     def __cinit__(self):
-        self.ptr = lib.avfilter_graph_alloc()
+        self.ptr = avfilter_graph_alloc()
         self.configured = False
         self._name_counts = {}
 
@@ -22,10 +29,12 @@ cdef class Graph:
         self._context_by_name = {}
         self._context_by_type = {}
 
+
     def __dealloc__(self):
         if self.ptr:
             # This frees the graph, filter contexts, links, etc..
-            lib.avfilter_graph_free(&self.ptr)
+            avfilter_graph_free(&self.ptr)
+
 
     cdef str _get_unique_name(self, str name):
         count = self._name_counts.get(name, 0)
@@ -35,11 +44,12 @@ cdef class Graph:
         else:
             return name
 
+
     cpdef configure(self, bint auto_buffer=True, bint force=False):
         if self.configured and not force:
             return
 
-        err_check(lib.avfilter_graph_config(self.ptr, NULL))
+        err_check(avfilter_graph_config(self.ptr, NULL))
         self.configured = True
 
         # We get auto-inserted stuff here.
@@ -57,7 +67,7 @@ cdef class Graph:
 
         cdef str name = self._get_unique_name(kwargs.pop("name", None) or cy_filter.name)
 
-        cdef lib.AVFilterContext *ptr = lib.avfilter_graph_alloc_filter(self.ptr, cy_filter.ptr, name)
+        cdef AVFilterContext *ptr = avfilter_graph_alloc_filter(self.ptr, cy_filter.ptr, name)
         if not ptr:
             raise RuntimeError("Could not allocate AVFilterContext")
 
@@ -73,14 +83,16 @@ cdef class Graph:
 
         return ctx
 
+
     cdef _register_context(self, FilterContext ctx):
         self._context_by_ptr[<long>ctx.ptr] = ctx
         self._context_by_name[ctx.ptr.name] = ctx
         self._context_by_type.setdefault(ctx.filter.ptr.name, []).append(ctx)
 
+
     cdef _auto_register(self):
         cdef int i
-        cdef lib.AVFilterContext *c_ctx
+        cdef AVFilterContext *c_ctx
         cdef Filter filter_
         cdef FilterContext py_ctx
         # We assume that filters are never removed from the graph. At this
@@ -93,6 +105,7 @@ cdef class Graph:
             py_ctx = wrap_filter_context(self, filter_, c_ctx)
             self._register_context(py_ctx)
         self._nb_filters_seen = self.ptr.nb_filters
+
 
     def add_buffer(self, template=None, width=None, height=None, format=None, name=None, time_base=None):
         if template is not None:
@@ -126,6 +139,7 @@ cdef class Graph:
             pixel_aspect="1/1",
         )
 
+
     def push(self, frame):
         if frame is None:
             contexts = self._context_by_type.get("buffer", []) + self._context_by_type.get("abuffer", [])
@@ -138,6 +152,7 @@ cdef class Graph:
             raise ValueError(f"can only auto-push with single buffer; found {len(contexts)}")
 
         contexts[0].push(frame)
+
 
     def pull(self):
         vsinks = self._context_by_type.get("buffersink", [])

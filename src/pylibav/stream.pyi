@@ -3,12 +3,12 @@ from typing import Literal
 
 from .codec import CodecContext
 from .container import Container
-from .enum import EnumItem
-from .frame import Frame
-from .packet import Packet
+from .enum_type import EnumItem
+
 
 class SideData(EnumItem):
     DISPLAYMATRIX: int
+
 
 class Stream:
     name: str | None

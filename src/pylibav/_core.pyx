@@ -1,4 +1,4 @@
-cimport libav
+cimport pylibav.libav as libav
 
 # Initialise libraries.
 libav.avformat_network_init()

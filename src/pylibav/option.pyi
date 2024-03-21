@@ -1,4 +1,4 @@
-from .enum import EnumFlag, EnumItem
+from .enum_type import EnumFlag, EnumItem
 
 class OptionType(EnumItem):
     FLAGS: int

@@ -9,12 +9,12 @@ def main():
 
     if args.version:
         import pylibav
-        import pylibav._core as _core
+        from pylibav import _core as core
 
         print(f"PyAV v{pylibav.__version__}")
 
         by_config = {}
-        for libname, config in sorted(_core.library_meta.items()):
+        for libname, config in sorted(core.library_meta.items()):
             version = config["version"]
             if version[0] >= 0:
                 by_config.setdefault(

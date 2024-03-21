@@ -1,11 +1,19 @@
-cimport libav as lib
-
-from .option cimport Option, OptionChoice, wrap_option, wrap_option_choice
+from .libav cimport (
+    AVClass,
+    AVOption,
+    AVOptionType,
+)
+from .option cimport (
+    Option,
+    OptionChoice,
+    wrap_option,
+    wrap_option_choice,
+)
 
 
 cdef object _cinit_sentinel = object()
 
-cdef Descriptor wrap_avclass(const lib.AVClass *ptr):
+cdef Descriptor wrap_avclass(const AVClass *ptr):
     if ptr == NULL:
         return None
     cdef Descriptor obj = Descriptor(_cinit_sentinel)
@@ -24,8 +32,8 @@ cdef class Descriptor:
 
     @property
     def options(self):
-        cdef const lib.AVOption *ptr = self.ptr.option
-        cdef const lib.AVOption *choice_ptr
+        cdef const AVOption *ptr = self.ptr.option
+        cdef const AVOption *choice_ptr
         cdef Option option
         cdef OptionChoice option_choice
         cdef bint choice_is_default
@@ -33,19 +41,24 @@ cdef class Descriptor:
             options = []
             ptr = self.ptr.option
             while ptr != NULL and ptr.name != NULL:
-                if ptr.type == lib.AV_OPT_TYPE_CONST:
+                if ptr.type == AVOptionType.AV_OPT_TYPE_CONST:
                     ptr += 1
                     continue
                 choices = []
                 if ptr.unit != NULL:  # option has choices (matching const options)
                     choice_ptr = self.ptr.option
                     while choice_ptr != NULL and choice_ptr.name != NULL:
-                        if choice_ptr.type != lib.AV_OPT_TYPE_CONST or choice_ptr.unit != ptr.unit:
+                        if (
+                            choice_ptr.type != AVOptionType.AV_OPT_TYPE_CONST
+                            or choice_ptr.unit != ptr.unit
+                        ):
                             choice_ptr += 1
                             continue
-                        choice_is_default = (choice_ptr.default_val.i64 == ptr.default_val.i64 or
-                                             ptr.type == lib.AV_OPT_TYPE_FLAGS and
-                                             choice_ptr.default_val.i64 & ptr.default_val.i64)
+                        choice_is_default = (
+                            choice_ptr.default_val.i64 == ptr.default_val.i64
+                            or ptr.type == AVOptionType.AV_OPT_TYPE_FLAGS
+                            and choice_ptr.default_val.i64 & ptr.default_val.i64
+                        )
                         option_choice = wrap_option_choice(choice_ptr, choice_is_default)
                         choices.append(option_choice)
                         choice_ptr += 1

@@ -358,8 +358,8 @@ cdef extern from "libavcodec/avcodec.h" nogil:
 
     # See: http://ffmpeg.org/doxygen/trunk/structAVFrame.html
     cdef struct AVFrame:
-        uint8_t *data[4]
-        int linesize[4]
+        uint8_t [4] *data
+        int [4] linesize
         uint8_t **extended_data
 
         # Values correspond to enum AVPixelFormat or AVSampleFormat

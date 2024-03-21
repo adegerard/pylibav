@@ -1,8 +1,8 @@
 import logging
 import os
 
-from ..codec.codec cimport Codec
-from ..codec.context cimport CodecContext, wrap_codec_context
+from pylibav.codec.codec cimport Codec
+from pylibav.codec.context cimport CodecContext, wrap_codec_context
 from ..container.streams cimport StreamContainer
 from ..dictionary cimport _Dictionary
 from ..error cimport err_check

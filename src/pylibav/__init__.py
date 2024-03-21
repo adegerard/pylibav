@@ -13,10 +13,10 @@ from ._core import (
 # from logging import logging
 
 # For convenience, IMPORT ALL OF THE THINGS (that are constructable by the user).
-from audio.format import AudioFormat
-from audio.frame import AudioFrame
-from audio.layout import AudioLayout
-from audio.resampler import AudioResampler
+# from audio.format import AudioFormat
+# from audio.frame import AudioFrame
+# from audio.layout import AudioLayout
+# from audio.resampler import AudioResampler
 from .codec.codec import (
     Codec,
     codecs_available,

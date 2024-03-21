@@ -1,3 +1,0 @@
-from pylibav.stream import Stream
-
-class SubtitleStream(Stream): ...
