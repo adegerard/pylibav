@@ -5,7 +5,7 @@ from pylibav.libav cimport (
 from pylibav.packet cimport Packet
 from pylibav.stream cimport Stream
 from pylibav.utils cimport avrational_to_fraction
-from pylibav.video.frame cimport VideoFrame
+from .frame cimport VideoFrame
 
 
 cdef class VideoStream(Stream):

@@ -1,7 +1,6 @@
 from .utils cimport avrational_to_fraction, to_avrational
-
 # from .sidedata.sidedata import SideDataContainer
-from .libav cimport (
+from pylibav.libav cimport (
     AVRational,
     AV_NOPTS_VALUE,
     AV_FRAME_FLAG_CORRUPT,
@@ -18,10 +17,10 @@ cdef class Frame:
 
     See also :class:`~pylibav.audio.frame.AudioFrame` and :class:`~pylibav.video.frame.VideoFrame`.
     """
-
     def __cinit__(self, *args, **kwargs):
         with nogil:
             self.ptr = av_frame_alloc()
+
 
     def __dealloc__(self):
         with nogil:
@@ -29,8 +28,10 @@ cdef class Frame:
             # Thats it.
             av_frame_free(&self.ptr)
 
+
     def __repr__(self):
         return f"pylibav.{self.__class__.__name__} #{self.index} pts={self.pts} at 0x{id(self):x}>"
+
 
     cdef _copy_internal_attributes(self, Frame source, bint data_layout=True):
         """Mimic another frame."""
@@ -42,11 +43,14 @@ cdef class Frame:
             self.ptr.format = source.ptr.format
             self.ptr.width = source.ptr.width
             self.ptr.height = source.ptr.height
-            self.ptr.channel_layout = source.ptr.channel_layout
-            self.ptr.channels = source.ptr.channels
+
+            self.ptr.ch_layout.nb_channels = source.ptr.ch_layout.nb_channels
+            self.ptr.ch_layout.order = source.ptr.ch_layout.order
+
 
     cdef _init_user_attributes(self):
         pass  # Dummy to match the API of the others.
+
 
     cdef _rebase_time(self, AVRational dst):
         if not dst.num:
@@ -64,6 +68,7 @@ cdef class Frame:
 
         self._time_base = dst
 
+
     @property
     def dts(self):
         """
@@ -77,12 +82,14 @@ cdef class Frame:
             return None
         return self.ptr.pkt_dts
 
+
     @dts.setter
     def dts(self, value):
         if value is None:
             self.ptr.pkt_dts = AV_NOPTS_VALUE
         else:
             self.ptr.pkt_dts = value
+
 
     @property
     def pts(self):
@@ -97,12 +104,14 @@ cdef class Frame:
             return None
         return self.ptr.pts
 
+
     @pts.setter
     def pts(self, value):
         if value is None:
             self.ptr.pts = AV_NOPTS_VALUE
         else:
             self.ptr.pts = value
+
 
     @property
     def time(self):
@@ -118,6 +127,7 @@ cdef class Frame:
         else:
             return float(self.ptr.pts) * self._time_base.num / self._time_base.den
 
+
     @property
     def time_base(self):
         """
@@ -128,9 +138,11 @@ cdef class Frame:
         if self._time_base.num:
             return avrational_to_fraction(&self._time_base)
 
+
     @time_base.setter
     def time_base(self, value):
         to_avrational(value, &self._time_base)
+
 
     @property
     def is_corrupt(self):
@@ -143,6 +155,7 @@ cdef class Frame:
             self.ptr.decode_error_flags != 0
             or bool(self.ptr.flags & AV_FRAME_FLAG_CORRUPT)
         )
+
 
     # @property
     # def side_data(self):

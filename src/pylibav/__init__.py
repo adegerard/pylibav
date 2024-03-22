@@ -19,11 +19,11 @@ from ._core import (
 # from audio.resampler import AudioResampler
 from .codec.codec import (
     Codec,
-    codecs_available,
+    available_codecs,
 )
 from .codec.context import CodecContext
 from .container import open
-from .format import ContainerFormat, formats_available
+from .format import ContainerFormat, available_formats
 from .packet import Packet
 from .error import *  # noqa: F403; This is limited to exception types.
 from .video.format import VideoFormat
@@ -38,7 +38,7 @@ __all__ = [
     "library_versions",
 
     "Codec",
-    "codecs_available",
+    "available_codecs",
 
     "CodecContext",
 ]

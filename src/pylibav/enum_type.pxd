@@ -1,4 +1,6 @@
 cpdef define_enum(
-    name, module, items,
+    name,
+    module,
+    items,
     bint is_flags=*
 )

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from pylibav.libav cimport (
     avfilter_link,
     avfilter_init_str,
@@ -6,7 +7,7 @@ from pylibav.libav cimport (
     av_buffersink_get_frame,
     AVFilterContext,
     AVFilterPad,
-    AVRational
+    AVRational,
 )
 from pylibav.dictionary cimport _Dictionary
 from pylibav.dictionary import Dictionary
@@ -138,19 +139,19 @@ cdef class FilterContext:
 
         with nogil:
             res = av_buffersink_get_frame(
-                <AVFilterContext *>self.ptr,
+                <AVFilterContext*>self.ptr,
                 frame.ptr
             )
         err_check(res)
 
         frame._init_user_attributes()
-        frame._time_base = avrational_to_fraction(<AVRational *>self.ptr.inputs[0].time_base.num)
+        frame._time_base = avrational_to_fraction(&self.ptr.inputs[0].time_base)
         return frame
 
 
 cdef FilterContext wrap_filter_context(Graph graph, Filter filter, AVFilterContext *ptr):
-    cdef FilterContext self = FilterContext(_cinit_sentinel)
-    self.graph = graph
-    self.filter = filter
-    self.ptr = ptr
-    return self
+    cdef FilterContext context = FilterContext(_cinit_sentinel)
+    context.graph = graph
+    context.filter = filter
+    context.ptr = ptr
+    return context

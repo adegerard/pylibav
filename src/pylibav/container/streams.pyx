@@ -1,5 +1,9 @@
 
-cimport libav as lib
+from pylibav.libav cimport (
+    AVMediaType,
+
+)
+
 
 
 def _flatten(input_):
@@ -34,14 +38,15 @@ cdef class StreamContainer:
         self.other = ()
 
     cdef add_stream(self, Stream stream):
-
         assert stream.ptr.index == len(self._streams)
         self._streams.append(stream)
 
-        if stream.ptr.codecpar.codec_type == lib.AVMEDIA_TYPE_VIDEO:
+        if stream.ptr.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_VIDEO:
             self.video = self.video + (stream, )
-        elif stream.ptr.codecpar.codec_type == lib.AVMEDIA_TYPE_DATA:
+
+        elif stream.ptr.codecpar.codec_type == AVMediaType.AVMEDIA_TYPE_DATA:
             self.data = self.data + (stream, )
+
         else:
             self.other = self.other + (stream, )
 
@@ -100,10 +105,12 @@ cdef class StreamContainer:
 
             elif isinstance(x, dict):
                 for type_, indices in x.items():
-                    if type_ == "streams":  # For compatibility with the pseudo signature
+                    # For compatibility with the pseudo signature
+                    if type_ == "streams":
                         streams = self._streams
                     else:
                         streams = getattr(self, type_)
+
                     if not isinstance(indices, (tuple, list)):
                         indices = [indices]
                     for i in indices:

@@ -1,23 +1,30 @@
 from cython.operator cimport dereference
 from libc.stdint cimport int64_t
-
 import os
 import time
 from pathlib import Path
 
-cimport libav as lib
-
-from pylibav.container.core cimport timeout_info
-from pylibav.container.input cimport InputContainer
-from pylibav.container.output cimport OutputContainer
-from pylibav.container.pyio cimport pyio_close_custom_gil, pyio_close_gil
-from pylibav.enum cimport define_enum
+from pylibav.enum_type cimport define_enum
 from pylibav.error cimport err_check, stash_exception
 from pylibav.format cimport build_container_format
 from pylibav.utils cimport avdict_to_dict
-
 from pylibav.dictionary import Dictionary
+from pylibav.dictionary cimport _Dictionary
 from pylibav.logging import Capture as LogCapture
+from pylibav.libav cimport (
+    libav,
+    AVDictionary,
+    AVFormatContext,
+    AVIOContext,
+    AVInputFormat,
+    AVOutputFormat,
+    av_guess_format,
+    avformat_alloc_output_context2,
+)
+from .core cimport timeout_info
+from .input cimport InputContainer
+from .output cimport OutputContainer
+from .pyio cimport pyio_close_custom_gil, pyio_close_gil
 
 
 cdef object _cinit_sentinel = object()
@@ -49,20 +56,20 @@ cdef int interrupt_cb (void *p) noexcept nogil:
     return 0
 
 
-cdef int pyav_io_open(lib.AVFormatContext *s,
-                      lib.AVIOContext **pb,
+cdef int pyav_io_open(AVFormatContext *s,
+                      AVIOContext **pb,
                       const char *url,
                       int flags,
-                      lib.AVDictionary **options) noexcept nogil:
+                      AVDictionary **options) noexcept nogil:
     with gil:
         return pyav_io_open_gil(s, pb, url, flags, options)
 
 
-cdef int pyav_io_open_gil(lib.AVFormatContext *s,
-                          lib.AVIOContext **pb,
+cdef int pyav_io_open_gil(AVFormatContext *s,
+                          AVIOContext **pb,
                           const char *url,
                           int flags,
-                          lib.AVDictionary **options) noexcept:
+                          AVDictionary **options) noexcept:
     cdef Container container
     cdef object file
     cdef PyIOFile pyio_file
@@ -71,7 +78,7 @@ cdef int pyav_io_open_gil(lib.AVFormatContext *s,
 
         if options is not NULL:
             options_dict = avdict_to_dict(
-                dereference(<lib.AVDictionary**>options),
+                dereference(<AVDictionary**>options),
                 encoding=container.metadata_encoding,
                 errors=container.metadata_errors
             )
@@ -87,7 +94,7 @@ cdef int pyav_io_open_gil(lib.AVFormatContext *s,
         pyio_file = PyIOFile(
             file,
             container.buffer_size,
-            (flags & lib.AVIO_FLAG_WRITE) != 0
+            (flags & libav.AVIO_FLAG_WRITE) != 0
         )
 
         # Add it to the container to avoid it being deallocated
@@ -100,14 +107,14 @@ cdef int pyav_io_open_gil(lib.AVFormatContext *s,
         return stash_exception()
 
 
-cdef void pyav_io_close(lib.AVFormatContext *s,
-                        lib.AVIOContext *pb) noexcept nogil:
+cdef void pyav_io_close(AVFormatContext *s,
+                        AVIOContext *pb) noexcept nogil:
     with gil:
         pyav_io_close_gil(s, pb)
 
 
-cdef void pyav_io_close_gil(lib.AVFormatContext *s,
-                            lib.AVIOContext *pb) noexcept:
+cdef void pyav_io_close_gil(AVFormatContext *s,
+                            AVIOContext *pb) noexcept:
     cdef Container container
     try:
         container = <Container>dereference(s).opaque
@@ -125,51 +132,53 @@ cdef void pyav_io_close_gil(lib.AVFormatContext *s,
 
 
 Flags = define_enum("Flags", __name__, (
-    ("GENPTS", lib.AVFMT_FLAG_GENPTS,
+    ("GENPTS", libav.AVFMT_FLAG_GENPTS,
         "Generate missing pts even if it requires parsing future frames."),
-    ("IGNIDX", lib.AVFMT_FLAG_IGNIDX,
+    ("IGNIDX", libav.AVFMT_FLAG_IGNIDX,
         "Ignore index."),
-    ("NONBLOCK", lib.AVFMT_FLAG_NONBLOCK,
+    ("NONBLOCK", libav.AVFMT_FLAG_NONBLOCK,
         "Do not block when reading packets from input."),
-    ("IGNDTS", lib.AVFMT_FLAG_IGNDTS,
+    ("IGNDTS", libav.AVFMT_FLAG_IGNDTS,
         "Ignore DTS on frames that contain both DTS & PTS."),
-    ("NOFILLIN", lib.AVFMT_FLAG_NOFILLIN,
+    ("NOFILLIN", libav.AVFMT_FLAG_NOFILLIN,
         "Do not infer any values from other values, just return what is stored in the container."),
-    ("NOPARSE", lib.AVFMT_FLAG_NOPARSE,
+    ("NOPARSE", libav.AVFMT_FLAG_NOPARSE,
         """Do not use AVParsers, you also must set AVFMT_FLAG_NOFILLIN as the fillin code works on frames and no parsing -> no frames.
 
         Also seeking to frames can not work if parsing to find frame boundaries has been disabled."""),
-    ("NOBUFFER", lib.AVFMT_FLAG_NOBUFFER,
+    ("NOBUFFER", libav.AVFMT_FLAG_NOBUFFER,
         "Do not buffer frames when possible."),
-    ("CUSTOM_IO", lib.AVFMT_FLAG_CUSTOM_IO,
+    ("CUSTOM_IO", libav.AVFMT_FLAG_CUSTOM_IO,
         "The caller has supplied a custom AVIOContext, don't avio_close() it."),
-    ("DISCARD_CORRUPT", lib.AVFMT_FLAG_DISCARD_CORRUPT,
+    ("DISCARD_CORRUPT", libav.AVFMT_FLAG_DISCARD_CORRUPT,
         "Discard frames marked corrupted."),
-    ("FLUSH_PACKETS", lib.AVFMT_FLAG_FLUSH_PACKETS,
+    ("FLUSH_PACKETS", libav.AVFMT_FLAG_FLUSH_PACKETS,
         "Flush the AVIOContext every packet."),
-    ("BITEXACT", lib.AVFMT_FLAG_BITEXACT,
+    ("BITEXACT", libav.AVFMT_FLAG_BITEXACT,
         """When muxing, try to avoid writing any random/volatile data to the output.
 
         This includes any random IDs, real-time timestamps/dates, muxer version, etc.
         This flag is mainly intended for testing."""),
-    ("SORT_DTS", lib.AVFMT_FLAG_SORT_DTS,
+    ("SORT_DTS", libav.AVFMT_FLAG_SORT_DTS,
         "Try to interleave outputted packets by dts (using this flag can slow demuxing down)."),
-    ("FAST_SEEK", lib.AVFMT_FLAG_FAST_SEEK,
+    ("FAST_SEEK", libav.AVFMT_FLAG_FAST_SEEK,
         "Enable fast, but inaccurate seeks for some formats."),
-    ("SHORTEST", lib.AVFMT_FLAG_SHORTEST,
+    ("SHORTEST", libav.AVFMT_FLAG_SHORTEST,
         "Stop muxing when the shortest stream stops."),
-    ("AUTO_BSF", lib.AVFMT_FLAG_AUTO_BSF,
+    ("AUTO_BSF", libav.AVFMT_FLAG_AUTO_BSF,
         "Add bitstream filters as requested by the muxer."),
 ), is_flags=True)
 
 
 cdef class Container:
 
-    def __cinit__(self, sentinel, file_, format_name, options,
-                  container_options, stream_options,
-                  metadata_encoding, metadata_errors,
-                  buffer_size, open_timeout, read_timeout,
-                  io_open):
+    def __cinit__(
+            self, sentinel, file_, format_name, options,
+            container_options, stream_options,
+            metadata_encoding, metadata_errors,
+            buffer_size, open_timeout, read_timeout,
+            io_open
+        ):
 
         if sentinel is not _cinit_sentinel:
             raise RuntimeError("cannot construct base Container")
@@ -205,33 +214,32 @@ cdef class Container:
         cdef bytes name_obj = os.fsencode(self.name)
         cdef char *name = name_obj
 
-        cdef lib.AVOutputFormat *ofmt
+        cdef AVOutputFormat *ofmt
         if self.writeable:
-
-            ofmt = self.format.optr if self.format else lib.av_guess_format(NULL, name, NULL)
+            ofmt = self.format.optr if self.format else av_guess_format(NULL, name, NULL)
             if ofmt == NULL:
                 raise ValueError("Could not determine output format")
 
             with nogil:
                 # This does not actually open the file.
-                res = lib.avformat_alloc_output_context2(
+                res = avformat_alloc_output_context2(
                     &self.ptr,
-                    ofmt,
+                    <const AVOutputFormat *>ofmt,
                     NULL,
-                    name,
+                    <const char*>name,
                 )
             self.err_check(res)
 
         else:
             # We need the context before we open the input AND setup Python IO.
-            self.ptr = lib.avformat_alloc_context()
+            self.ptr = libav.avformat_alloc_context()
 
             # Setup interrupt callback
             if self.open_timeout is not None or self.read_timeout is not None:
                 self.ptr.interrupt_callback.callback = interrupt_cb
                 self.ptr.interrupt_callback.opaque = &self.interrupt_callback_info
 
-        self.ptr.flags |= lib.AVFMT_FLAG_GENPTS
+        self.ptr.flags |= libav.AVFMT_FLAG_GENPTS
         self.ptr.opaque = <void*>self
 
         # Setup Python IO.
@@ -242,10 +250,10 @@ cdef class Container:
 
         if io_open is not None:
             self.ptr.io_open = pyav_io_open
-            self.ptr.io_close = pyav_io_close
-            self.ptr.flags |= lib.AVFMT_FLAG_CUSTOM_IO
+            self.ptr.io_close2 = pyav_io_close
+            self.ptr.flags |= libav.AVFMT_FLAG_CUSTOM_IO
 
-        cdef lib.AVInputFormat *ifmt
+        cdef AVInputFormat *ifmt
         cdef _Dictionary c_options
         if not self.writeable:
 
@@ -256,7 +264,7 @@ cdef class Container:
             self.set_timeout(self.open_timeout)
             self.start_timeout()
             with nogil:
-                res = lib.avformat_open_input(
+                res = libav.avformat_open_input(
                     &self.ptr,
                     name,
                     ifmt,
@@ -271,7 +279,7 @@ cdef class Container:
 
     def __dealloc__(self):
         with nogil:
-            lib.avformat_free_context(self.ptr)
+            libav.avformat_free_context(self.ptr)
 
     def __enter__(self):
         return self
@@ -288,7 +296,7 @@ cdef class Container:
     def dumps_format(self):
         self._assert_open()
         with LogCapture() as logs:
-            lib.av_dump_format(self.ptr, 0, "", isinstance(self, OutputContainer))
+            libav.av_dump_format(self.ptr, 0, "", isinstance(self, OutputContainer))
         return "".join(log[2] for log in logs)
 
     cdef set_timeout(self, timeout):

@@ -13,6 +13,7 @@ from pylibav.libav cimport (
 
 cdef object _cinit_bypass_sentinel = object()
 
+
 cdef VideoFormat get_video_format(AVPixelFormat c_format, unsigned int width, unsigned int height):
     if c_format == AVPixelFormat.AV_PIX_FMT_NONE:
         return None
@@ -20,6 +21,7 @@ cdef VideoFormat get_video_format(AVPixelFormat c_format, unsigned int width, un
     cdef VideoFormat format = VideoFormat.__new__(VideoFormat, _cinit_bypass_sentinel)
     format._init(c_format, width, height)
     return format
+
 
 cdef AVPixelFormat get_pix_fmt(const char *name) except AVPixelFormat.AV_PIX_FMT_NONE:
     """Wrapper for lib.av_get_pix_fmt with error checking."""
@@ -56,7 +58,7 @@ cdef class VideoFormat:
 
     cdef _init(self, AVPixelFormat pix_fmt, unsigned int width, unsigned int height):
         self.pix_fmt = pix_fmt
-        self.ptr = av_pix_fmt_desc_get(pix_fmt)[0]
+        self.ptr = av_pix_fmt_desc_get(pix_fmt)
         self.width = width
         self.height = height
         self.components = tuple(
@@ -142,13 +144,11 @@ cdef class VideoFormat:
         return -((-luma_height) >> self.ptr.log2_chroma_h) if luma_height else 0
 
 
-
 cdef class VideoFormatComponent:
     def __cinit__(self, VideoFormat format, size_t index):
         self.format = format
         self.index = index
-        cdef AVComponentDescriptor *avcd = <AVComponentDescriptor *>format.ptr.comp[index][0]
-        self.ptr = <AVComponentDescriptor *>avcd
+        self.ptr = &format.ptr.comp[index]
 
 
     @property

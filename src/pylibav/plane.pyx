@@ -1,12 +1,12 @@
 from .buffer cimport Buffer
 
+
 cdef class Plane(Buffer):
     """
     Base class for audio and video planes.
 
     See also :class:`~pylibav.audio.plane.AudioPlane` and :class:`~pylibav.video.plane.VideoPlane`.
     """
-
     def __cinit__(self, Frame frame, int index):
         self.frame = frame
         self.index = index

@@ -16,7 +16,7 @@ cdef extern from "libavfilter/avfilter.h" nogil:
         #define _avfilter_get_num_pads(filter, is_output, pads) (avfilter_pad_count(pads))
     #endif
     """
-    cdef int   avfilter_version()
+    cdef int avfilter_version()
     cdef char* avfilter_configuration()
     cdef char* avfilter_license()
 
@@ -88,7 +88,6 @@ cdef extern from "libavfilter/avfilter.h" nogil:
     cdef int avfilter_init_dict(AVFilterContext *ctx, AVDictionary **options)
     cdef void avfilter_free(AVFilterContext*)
     cdef AVClass* avfilter_get_class()
-
 
     # custom
     cdef set pyav_get_available_filters()

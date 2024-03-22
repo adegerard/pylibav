@@ -48,7 +48,5 @@ cdef extern from "libavfilter/avfilter.h" nogil:
     )
 
     cdef int avfilter_graph_config(AVFilterGraph *graph, void *logctx)
-
     cdef char* avfilter_graph_dump(AVFilterGraph *graph, const char *options)
-
     cdef void avfilter_inout_free(AVFilterInOut **inout_list)

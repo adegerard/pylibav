@@ -24,7 +24,6 @@ from .data.stream import DataStream
 from .deprecation import AVDeprecationWarning
 
 
-
 cdef object _cinit_bypass_sentinel = object()
 
 
@@ -162,17 +161,17 @@ cdef class Stream:
         # Get DISPLAYMATRIX SideData from a libav.AVStream object.
         # Returns: tuple[int, dict[str, Any]]
 
-        nb_side_data = stream.nb_side_data
+        nb_side_data = stream.codecpar.nb_coded_side_data
         side_data = {}
 
         for i in range(nb_side_data):
             # Based on: https://www.ffmpeg.org/doxygen/trunk/dump_8c_source.html#l00430
             if (
-                <AVPacketSideDataType>stream.side_data[i].type
+                <AVPacketSideDataType>stream.codecpar.coded_side_data[i].type
                 == AVPacketSideDataType.AV_PKT_DATA_DISPLAYMATRIX
             ):
                 side_data["DISPLAYMATRIX"] = av_display_rotation_get(
-                    <const int32_t *>stream.side_data[i].data
+                    <const int32_t *>stream.codecpar.coded_side_data[i].data
                 )
 
         return nb_side_data, side_data

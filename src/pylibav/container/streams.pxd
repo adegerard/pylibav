@@ -2,10 +2,8 @@ from pylibav.stream cimport Stream
 
 
 cdef class StreamContainer:
-
     cdef list _streams
 
-    # For the different types.
     cdef readonly tuple video
     cdef readonly tuple audio
     cdef readonly tuple subtitles

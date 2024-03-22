@@ -2,6 +2,7 @@ import logging
 from threading import Lock
 from typing import Any, Callable
 
+
 PANIC: int
 FATAL: int
 ERROR: int
@@ -11,6 +12,7 @@ VERBOSE: int
 DEBUG: int
 TRACE: int
 CRITICAL: int
+
 
 def adapt_level(level: int) -> int: ...
 def get_level() -> int: ...

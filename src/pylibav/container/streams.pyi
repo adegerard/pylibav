@@ -6,6 +6,7 @@ from pylibav.stream import Stream
 from pylibav.subtitles.stream import SubtitleStream
 from pylibav.video.stream import VideoStream
 
+
 class StreamContainer:
     video: tuple[VideoStream, ...]
     audio: tuple[AudioStream, ...]

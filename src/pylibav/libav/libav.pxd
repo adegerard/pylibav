@@ -1,3 +1,5 @@
+# Used to import constants
+
 include "libavcodec/avcodec.pxd"
 
 include "libavdevice/avdevice.pxd"

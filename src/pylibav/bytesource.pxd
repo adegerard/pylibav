@@ -10,4 +10,5 @@ cdef class ByteSource:
     cdef unsigned char *ptr
     cdef size_t length
 
+
 cdef ByteSource bytesource(object, bint allow_none=*)

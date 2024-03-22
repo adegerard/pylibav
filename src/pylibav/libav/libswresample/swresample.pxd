@@ -3,7 +3,7 @@ from pylibav.libav.libavutil.samplefmt cimport AVSampleFormat
 
 cdef extern from "libswresample/swresample.h" nogil:
 
-    cdef int   swresample_version()
+    cdef int swresample_version()
     cdef char* swresample_configuration()
     cdef char* swresample_license()
 
@@ -19,7 +19,8 @@ cdef extern from "libswresample/swresample.h" nogil:
         AVSampleFormat in_sample_fmt,
         int in_sample_rate,
         int log_offset,
-        void *log_ctx  # logging context, can be NULL
+        # logging context, can be NULL
+        void *log_ctx
     )
 
     cdef int swr_convert(
@@ -34,6 +35,6 @@ cdef extern from "libswresample/swresample.h" nogil:
     cdef int64_t swr_get_delay(SwrContext *s, int64_t base)
 
     cdef SwrContext* swr_alloc()
-    cdef int swr_init(SwrContext* ctx)
+    cdef int swr_init(SwrContext *ctx)
     cdef void swr_free(SwrContext **ctx)
     cdef void swr_close(SwrContext *ctx)

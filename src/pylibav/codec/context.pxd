@@ -1,11 +1,9 @@
+from libc.stdint cimport int64_t
 from pylibav.libav cimport (
     AVCodec,
     AVCodecContext,
     AVCodecParserContext,
 )
-from libc.stdint cimport int64_t
-
-from pylibav.bytesource cimport ByteSource
 from pylibav.codec.codec cimport Codec
 from pylibav.frame cimport Frame
 from pylibav.packet cimport Packet

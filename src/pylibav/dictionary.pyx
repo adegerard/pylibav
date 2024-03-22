@@ -23,7 +23,8 @@ cdef class _Dictionary:
             av_dict_free(&self.ptr)
 
     def __getitem__(self, str key):
-        cdef AVDictionaryEntry *element = av_dict_get(self.ptr, key, NULL, 0)
+        cdef AVDictionaryEntry *element = av_dict_get(
+            self.ptr, <char *>key, <AVDictionaryEntry *>NULL, 0)
         if element != NULL:
             return element.value
         else:

@@ -9,4 +9,17 @@
     // "python.analysis.extraPaths": [
     //     "src/pylibav",
     // ],
+
+    "[cython]": {
+        "editor.rulers": [
+            90,
+            120
+        ]
+    },
+    "[python]": {
+        "editor.rulers": [
+            90,
+            120
+        ]
+    }
 }

@@ -6,6 +6,7 @@ from pylibav.libav.libavcodec.avcodec cimport (
     AVPacket,
     AVCodec,
     AVFrame,
+    AVDiscard,
 )
 from pylibav.libav.libavutil.dict cimport AVDictionary
 from pylibav.libav.libavutil.avutil cimport (
@@ -30,6 +31,7 @@ cdef extern from "libavformat/avformat.h" nogil:
 
     cdef int AVIO_FLAG_WRITE
 
+
     cdef enum AVMediaType:
         AVMEDIA_TYPE_UNKNOWN
         AVMEDIA_TYPE_VIDEO
@@ -39,28 +41,34 @@ cdef extern from "libavformat/avformat.h" nogil:
         AVMEDIA_TYPE_ATTACHMENT
         AVMEDIA_TYPE_NB
 
-    cdef struct AVStream:
 
+    cdef int AVSTREAM_EVENT_FLAG_METADATA_UPDATED
+    cdef int AVSTREAM_EVENT_FLAG_NEW_PACKETS
+
+
+    # https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/avformat.h
+    cdef struct AVStream:
+        # const AVClass *av_class
         int index
         int id
-
         AVCodecParameters *codecpar
-
+        # void *priv_data
         AVRational time_base
-
         int64_t start_time
         int64_t duration
         int64_t nb_frames
-        int64_t cur_dts
-
-        AVDictionary *metadata
-
-        AVRational avg_frame_rate
-        AVRational r_frame_rate
+        int disposition
+        AVDiscard discard
         AVRational sample_aspect_ratio
+        AVDictionary *metadata
+        AVRational avg_frame_rate
+        AVPacket attached_pic
 
-        int nb_side_data
-        AVPacketSideData *side_data
+        int event_flags
+        # AVSTREAM_EVENT_FLAG_XXX
+
+        AVRational r_frame_rate
+        int pts_wrap_bits
 
 
     # http://ffmpeg.org/doxygen/trunk/structAVIOContext.html
@@ -87,8 +95,8 @@ cdef extern from "libavformat/avformat.h" nogil:
     cdef int AVSEEK_SIZE
 
     ctypedef int (*read_packet_t)(void *opaque, uint8_t *buf, int buf_size)
-    ctypedef int(*write_packet_t)(void *opaque, uint8_t *buf, int buf_size)
-    ctypedef int64_t(*seek_t)(void *opaque, int64_t offset, int whence)
+    ctypedef int (*write_packet_t)(void *opaque, uint8_t *buf, int buf_size)
+    ctypedef int64_t (*seek_t)(void *opaque, int64_t offset, int whence)
 
     cdef AVIOContext* avio_alloc_context(
         unsigned char *buffer,
@@ -178,7 +186,7 @@ cdef extern from "libavformat/avformat.h" nogil:
         unsigned int max_probe_size
     )
 
-    cdef AVInputFormat* av_find_input_format(const char *name)
+    cdef const AVInputFormat* av_find_input_format(const char *name)
 
     # http://ffmpeg.org/doxygen/trunk/structAVFormatContext.html
     cdef struct AVFormatContext:
@@ -212,7 +220,7 @@ cdef extern from "libavformat/avformat.h" nogil:
             int flags,
             AVDictionary **options
         )
-        void (*io_close)(
+        void (*io_close2)(
             AVFormatContext *s,
             AVIOContext *pb
         )
@@ -268,7 +276,7 @@ cdef extern from "libavformat/avformat.h" nogil:
         AVIOContext *s
     )
 
-    cdef AVOutputFormat* av_guess_format(
+    cdef const AVOutputFormat* av_guess_format(
         char *short_name,
         char *filename,
         char *mime_type
@@ -298,9 +306,9 @@ cdef extern from "libavformat/avformat.h" nogil:
 
     cdef int avformat_alloc_output_context2(
         AVFormatContext **ctx,
-        AVOutputFormat *oformat,
-        char *format_name,
-        char *filename
+        const AVOutputFormat *oformat,
+        const char *format_name,
+        const char *filename
     )
 
     cdef int avformat_free_context(AVFormatContext *ctx)
@@ -345,5 +353,4 @@ cdef extern from "libavformat/avformat.h" nogil:
     cdef const AVOutputFormat* av_muxer_iterate(void **opaque)
 
     # custom
-
     cdef set pyav_get_available_formats()

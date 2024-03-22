@@ -3,17 +3,37 @@ import os
 
 from pylibav.codec.codec cimport Codec
 from pylibav.codec.context cimport CodecContext, wrap_codec_context
-from ..container.streams cimport StreamContainer
-from ..dictionary cimport _Dictionary
-from ..error cimport err_check
-from ..packet cimport Packet
-from ..stream cimport Stream, wrap_stream
-from ..utils cimport dict_to_avdict, to_avrational
+from pylibav.dictionary import Dictionary
+from pylibav.dictionary cimport _Dictionary
+from pylibav.error cimport err_check
+from pylibav.packet cimport Packet
+from pylibav.stream cimport Stream, wrap_stream
+from pylibav.utils cimport dict_to_avdict, to_avrational
+from pylibav.libav cimport (
+    libav,
+    AVCodec,
+    AVCodecContext,
+    AVMediaType,
+    AVPixelFormat,
+    AVStream,
+    av_interleaved_write_frame,
+    av_packet_alloc,
+    av_packet_free,
+    av_packet_ref,
+    av_write_trailer,
+    avcodec_alloc_context3,
+    avcodec_parameters_to_context,
+    avcodec_parameters_from_context,
+    avformat_new_stream,
+    avformat_query_codec,
+    avformat_write_header,
+    avio_open,
+    avio_closep,
+)
+from .streams cimport StreamContainer
 
-from ..dictionary import Dictionary
 
 log = logging.getLogger(__name__)
-
 
 cdef close_output(OutputContainer self):
     if self._started and not self._done:
@@ -21,10 +41,10 @@ cdef close_output(OutputContainer self):
         # segmentation fault. Therefore no matter whether it succeeds or not
         # we must absolutely set self._done.
         try:
-            self.err_check(lib.av_write_trailer(self.ptr))
+            self.err_check(av_write_trailer(self.ptr))
         finally:
-            if self.file is None and not (self.ptr.oformat.flags & lib.AVFMT_NOFILE):
-                lib.avio_closep(&self.ptr.pb)
+            if self.file is None and not (self.ptr.oformat.flags & libav.AVFMT_NOFILE):
+                avio_closep(&self.ptr.pb)
             self._done = True
 
 
@@ -33,12 +53,12 @@ cdef class OutputContainer(Container):
         self.streams = StreamContainer()
         self.metadata = {}
         with nogil:
-            self.packet_ptr = lib.av_packet_alloc()
+            self.packet_ptr = av_packet_alloc()
 
     def __dealloc__(self):
         close_output(self)
         with nogil:
-            lib.av_packet_free(&self.packet_ptr)
+            av_packet_free(&self.packet_ptr)
 
     def add_stream(self, codec_name=None, object rate=None, Stream template=None, options=None, **kwargs):
         """add_stream(codec_name, rate=None)
@@ -60,7 +80,7 @@ cdef class OutputContainer(Container):
         if (codec_name is None and template is None) or (codec_name is not None and template is not None):
             raise ValueError("needs one of codec_name or template")
 
-        cdef const lib.AVCodec *codec
+        cdef const AVCodec *codec
         cdef Codec codec_obj
 
         if codec_name is not None:
@@ -72,25 +92,25 @@ cdef class OutputContainer(Container):
         codec = codec_obj.ptr
 
         # Assert that this format supports the requested codec.
-        if not lib.avformat_query_codec(self.ptr.oformat, codec.id, lib.FF_COMPLIANCE_NORMAL):
+        if not avformat_query_codec(self.ptr.oformat, codec.id, libav.FF_COMPLIANCE_NORMAL):
             raise ValueError(
                 f"{self.format.name!r} format does not support {codec_name!r} codec"
             )
 
         # Create new stream in the AVFormatContext, set AVCodecContext values.
-        lib.avformat_new_stream(self.ptr, codec)
-        cdef lib.AVStream *stream = self.ptr.streams[self.ptr.nb_streams - 1]
-        cdef lib.AVCodecContext *codec_context = lib.avcodec_alloc_context3(codec)
+        avformat_new_stream(self.ptr, codec)
+        cdef AVStream *stream = self.ptr.streams[self.ptr.nb_streams - 1]
+        cdef AVCodecContext *codec_context = avcodec_alloc_context3(codec)
 
         # Copy from the template.
         if template is not None:
-            err_check(lib.avcodec_parameters_to_context(codec_context, template.ptr.codecpar))
+            err_check(avcodec_parameters_to_context(codec_context, template.ptr.codecpar))
             # Reset the codec tag assuming we are remuxing.
             codec_context.codec_tag = 0
 
         # Now lets set some more sane video defaults
-        elif codec.type == lib.AVMEDIA_TYPE_VIDEO:
-            codec_context.pix_fmt = lib.AV_PIX_FMT_YUV420P
+        elif codec.type == AVMediaType.AVMEDIA_TYPE_VIDEO:
+            codec_context.pix_fmt = AVPixelFormat.AV_PIX_FMT_YUV420P
             codec_context.width = 640
             codec_context.height = 480
             codec_context.bit_rate = 1024000
@@ -102,23 +122,23 @@ cdef class OutputContainer(Container):
             stream.time_base = codec_context.time_base
 
         # Some sane audio defaults
-        elif codec.type == lib.AVMEDIA_TYPE_AUDIO:
+        elif codec.type == AVMediaType.AVMEDIA_TYPE_AUDIO:
             codec_context.sample_fmt = codec.sample_fmts[0]
             codec_context.bit_rate = 128000
             codec_context.bit_rate_tolerance = 32000
             codec_context.sample_rate = rate or 48000
             codec_context.channels = 2
-            codec_context.channel_layout = lib.AV_CH_LAYOUT_STEREO
+            codec_context.channel_layout = libav.AV_CH_LAYOUT_STEREO
 
         # Some formats want stream headers to be separate
-        if self.ptr.oformat.flags & lib.AVFMT_GLOBALHEADER:
-            codec_context.flags |= lib.AV_CODEC_FLAG_GLOBAL_HEADER
+        if self.ptr.oformat.flags & libav.AVFMT_GLOBALHEADER:
+            codec_context.flags |= libav.AV_CODEC_FLAG_GLOBAL_HEADER
 
         # Initialise stream codec parameters to populate the codec type.
         #
         # Subsequent changes to the codec context will be applied just before
         # encoding starts in `start_encoding()`.
-        err_check(lib.avcodec_parameters_from_context(stream.codecpar, codec_context))
+        err_check(avcodec_parameters_from_context(stream.codecpar, codec_context))
 
         # Construct the user-land stream
         cdef CodecContext py_codec_context = wrap_codec_context(codec_context, codec)
@@ -164,8 +184,8 @@ cdef class OutputContainer(Container):
         # Open the output file, if needed.
         cdef bytes name_obj = os.fsencode(self.name if self.file is None else "")
         cdef char *name = name_obj
-        if self.ptr.pb == NULL and not self.ptr.oformat.flags & lib.AVFMT_NOFILE:
-            err_check(lib.avio_open(&self.ptr.pb, name, lib.AVIO_FLAG_WRITE))
+        if self.ptr.pb == NULL and not self.ptr.oformat.flags & libav.AVFMT_NOFILE:
+            err_check(avio_open(&self.ptr.pb, name, libav.AVIO_FLAG_WRITE))
 
         # Copy the metadata dict.
         dict_to_avdict(
@@ -176,7 +196,7 @@ cdef class OutputContainer(Container):
 
         cdef _Dictionary all_options = Dictionary(self.options, self.container_options)
         cdef _Dictionary options = all_options.copy()
-        self.err_check(lib.avformat_write_header(
+        self.err_check(avformat_write_header(
             self.ptr,
             &options.ptr
         ))
@@ -215,14 +235,14 @@ cdef class OutputContainer(Container):
         # Assert the packet is in stream time.
         if packet.ptr.stream_index < 0 or <unsigned int>packet.ptr.stream_index >= self.ptr.nb_streams:
             raise ValueError("Bad Packet stream_index.")
-        cdef lib.AVStream *stream = self.ptr.streams[packet.ptr.stream_index]
+        cdef AVStream *stream = self.ptr.streams[packet.ptr.stream_index]
         packet._rebase_time(stream.time_base)
 
         # Make another reference to the packet, as av_interleaved_write_frame
         # takes ownership of the reference.
-        self.err_check(lib.av_packet_ref(self.packet_ptr, packet.ptr))
+        self.err_check(av_packet_ref(self.packet_ptr, packet.ptr))
 
         cdef int ret
         with nogil:
-            ret = lib.av_interleaved_write_frame(self.ptr, self.packet_ptr)
+            ret = av_interleaved_write_frame(self.ptr, self.packet_ptr)
         self.err_check(ret)

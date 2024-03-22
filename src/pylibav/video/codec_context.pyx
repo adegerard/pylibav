@@ -1,17 +1,14 @@
 import warnings
 from libc.stdint cimport int64_t
 
-cimport libav
 from pylibav.libav cimport (
+    libav,
     AVCodec,
     AVCodecContext,
     AVPixelFormat,
     AVRational,
     av_reduce,
 )
-
-
-
 from pylibav.codec.context cimport CodecContext
 from pylibav.frame cimport Frame
 from pylibav.packet cimport Packet
@@ -202,9 +199,12 @@ cdef class VideoCodecContext(CodecContext):
         cdef AVRational dar
 
         av_reduce(
-            &dar.num, &dar.den,
+            &dar.num,
+            &dar.den,
             self.ptr.width * self.ptr.sample_aspect_ratio.num,
-            self.ptr.height * self.ptr.sample_aspect_ratio.den, 1024*1024)
+            self.ptr.height * self.ptr.sample_aspect_ratio.den,
+            1024*1024
+        )
 
         return avrational_to_fraction(&dar)
 

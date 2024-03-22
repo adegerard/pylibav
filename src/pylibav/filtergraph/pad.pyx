@@ -4,6 +4,7 @@ from pylibav.libav cimport (
     avfilter_pad_get_name,
     avfilter_pad_get_type,
     av_get_media_type_string,
+    pyav_get_num_pads,
 )
 from pylibav.filtergraph.link cimport wrap_filter_link
 
@@ -81,7 +82,7 @@ cdef tuple alloc_filter_pads(Filter filter, const AVFilterPad *ptr, bint is_inpu
     if context is None:
         # This is a custom function defined using a macro in avfilter.pxd. Its usage
         # can be changed after we stop supporting FFmpeg < 5.0.
-        count = lib.pyav_get_num_pads(filter.ptr, not is_input, ptr)
+        count = pyav_get_num_pads(filter.ptr, not is_input, ptr)
     else:
         count = (context.ptr.nb_inputs if is_input else context.ptr.nb_outputs)
 

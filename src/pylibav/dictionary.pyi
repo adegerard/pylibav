@@ -1,6 +1,7 @@
 from collections.abc import MutableMapping
 from typing import Iterator
 
+
 class Dictionary(MutableMapping[str, str]):
     def __getitem__(self, key: str) -> str: ...
     def __setitem__(self, key: str, value: str) -> None: ...

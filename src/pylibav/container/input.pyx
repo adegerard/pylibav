@@ -2,21 +2,40 @@ from libc.stdint cimport int64_t
 from libc.stdlib cimport free, malloc
 
 from pylibav.codec.context cimport CodecContext, wrap_codec_context
-from pylibav.container.streams cimport StreamContainer
 from pylibav.dictionary cimport _Dictionary
 from pylibav.error cimport err_check
 from pylibav.packet cimport Packet
 from pylibav.stream cimport Stream, wrap_stream
 from pylibav.utils cimport avdict_to_dict
-
 from pylibav.dictionary import Dictionary
+from pylibav.libav cimport (
+    libav,
+    AVCodecContext,
+    AVCodec,
+    AVDictionary,
+    AVStream,
+    av_dict_copy,
+    av_dict_free,
+    avformat_close_input,
+    avcodec_find_decoder,
+    avcodec_flush_buffers,
+    avformat_find_stream_info,
+    AV_NOPTS_VALUE,
+    av_read_frame,
+    avio_size,
+    avcodec_alloc_context3,
+    avcodec_parameters_to_context,
+    av_seek_frame,
+
+)
+from .streams cimport StreamContainer
 
 
 cdef close_input(InputContainer self):
     if self.input_was_opened:
         with nogil:
             # This causes `self.ptr` to be set to NULL.
-            lib.avformat_close_input(&self.ptr)
+            avformat_close_input(&self.ptr)
         self.input_was_opened = False
 
 
@@ -24,25 +43,25 @@ cdef class InputContainer(Container):
     def __cinit__(self, *args, **kwargs):
         cdef CodecContext py_codec_context
         cdef unsigned int i
-        cdef lib.AVStream *stream
-        cdef lib.AVCodec *codec
-        cdef lib.AVCodecContext *codec_context
+        cdef AVStream *stream
+        cdef AVCodec *codec
+        cdef AVCodecContext *codec_context
 
         # If we have either the global `options`, or a `stream_options`, prepare
         # a mashup of those options for each stream.
-        cdef lib.AVDictionary **c_options = NULL
+        cdef AVDictionary **c_options = NULL
         cdef _Dictionary base_dict, stream_dict
         if self.options or self.stream_options:
             base_dict = Dictionary(self.options)
-            c_options = <lib.AVDictionary**>malloc(self.ptr.nb_streams * sizeof(void*))
+            c_options = <AVDictionary**>malloc(self.ptr.nb_streams * sizeof(void*))
             for i in range(self.ptr.nb_streams):
                 c_options[i] = NULL
                 if i < len(self.stream_options) and self.stream_options:
                     stream_dict = base_dict.copy()
                     stream_dict.update(self.stream_options[i])
-                    lib.av_dict_copy(&c_options[i], stream_dict.ptr, 0)
+                    av_dict_copy(&c_options[i], stream_dict.ptr, 0)
                 else:
-                    lib.av_dict_copy(&c_options[i], base_dict.ptr, 0)
+                    av_dict_copy(&c_options[i], base_dict.ptr, 0)
 
         self.set_timeout(self.open_timeout)
         self.start_timeout()
@@ -54,7 +73,7 @@ cdef class InputContainer(Container):
             #   - set stream.start_time;
             #   - set stream.r_frame_rate to average value;
             #   - open and closes codecs with the options provided.
-            ret = lib.avformat_find_stream_info(
+            ret = avformat_find_stream_info(
                 self.ptr,
                 c_options
             )
@@ -64,17 +83,17 @@ cdef class InputContainer(Container):
         # Cleanup all of our options.
         if c_options:
             for i in range(self.ptr.nb_streams):
-                lib.av_dict_free(&c_options[i])
+                av_dict_free(&c_options[i])
             free(c_options)
 
         self.streams = StreamContainer()
         for i in range(self.ptr.nb_streams):
             stream = self.ptr.streams[i]
-            codec = lib.avcodec_find_decoder(stream.codecpar.codec_id)
+            codec = avcodec_find_decoder(stream.codecpar.codec_id)
             if codec:
                 # allocate and initialise decoder
-                codec_context = lib.avcodec_alloc_context3(codec)
-                err_check(lib.avcodec_parameters_to_context(codec_context, stream.codecpar))
+                codec_context = avcodec_alloc_context3(codec)
+                err_check(avcodec_parameters_to_context(codec_context, stream.codecpar))
                 codec_context.pkt_timebase = stream.time_base
                 py_codec_context = wrap_codec_context(codec_context, codec)
             else:
@@ -90,13 +109,13 @@ cdef class InputContainer(Container):
     @property
     def start_time(self):
         self._assert_open()
-        if self.ptr.start_time != lib.AV_NOPTS_VALUE:
+        if self.ptr.start_time != AV_NOPTS_VALUE:
             return self.ptr.start_time
 
     @property
     def duration(self):
         self._assert_open()
-        if self.ptr.duration != lib.AV_NOPTS_VALUE:
+        if self.ptr.duration != AV_NOPTS_VALUE:
             return self.ptr.duration
 
     @property
@@ -107,7 +126,7 @@ cdef class InputContainer(Container):
     @property
     def size(self):
         self._assert_open()
-        return lib.avio_size(self.ptr.pb)
+        return avio_size(self.ptr.pb)
 
     def close(self):
         close_input(self)
@@ -162,7 +181,7 @@ cdef class InputContainer(Container):
                 try:
                     self.start_timeout()
                     with nogil:
-                        ret = lib.av_read_frame(self.ptr, packet.ptr)
+                        ret = av_read_frame(self.ptr, packet.ptr)
                     self.err_check(ret)
                 except EOFError:
                     break
@@ -253,19 +272,19 @@ cdef class InputContainer(Container):
         cdef int ret
 
         if backward:
-            flags |= lib.AVSEEK_FLAG_BACKWARD
+            flags |= libav.AVSEEK_FLAG_BACKWARD
         if any_frame:
-            flags |= lib.AVSEEK_FLAG_ANY
+            flags |= libav.AVSEEK_FLAG_ANY
 
         # If someone really wants (and to experiment), expose these.
         if unsupported_frame_offset:
-            flags |= lib.AVSEEK_FLAG_FRAME
+            flags |= libav.AVSEEK_FLAG_FRAME
         if unsupported_byte_offset:
-            flags |= lib.AVSEEK_FLAG_BYTE
+            flags |= libav.AVSEEK_FLAG_BYTE
 
         cdef int stream_index = stream.index if stream else -1
         with nogil:
-            ret = lib.av_seek_frame(self.ptr, stream_index, c_offset, flags)
+            ret = av_seek_frame(self.ptr, stream_index, c_offset, flags)
         err_check(ret)
 
         self.flush_buffers()
@@ -280,4 +299,4 @@ cdef class InputContainer(Container):
             codec_context = stream.codec_context
             if codec_context and codec_context.is_open:
                 with nogil:
-                    lib.avcodec_flush_buffers(codec_context.ptr)
+                    avcodec_flush_buffers(codec_context.ptr)

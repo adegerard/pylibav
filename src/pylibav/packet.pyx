@@ -13,14 +13,12 @@ from .utils cimport avrational_to_fraction, to_avrational
 
 
 cdef class Packet(Buffer):
-
     """A packet of encoded data within a :class:`~pylibav.format.Stream`.
 
     This may, or may not include a complete object within a stream.
     :meth:`decode` must be called to extract encoded data.
 
     """
-
     def __cinit__(self, input=None):
         with nogil:
             self.ptr = av_packet_alloc()

@@ -1,6 +1,5 @@
 from fractions import Fraction
 from typing import Literal
-
 from .codec import CodecContext
 from .container import Container
 from .enum_type import EnumItem

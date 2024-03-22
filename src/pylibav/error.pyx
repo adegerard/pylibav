@@ -5,10 +5,11 @@ import traceback
 from threading import local
 from .logging cimport get_last_error
 from .enum_type cimport define_enum
-from libav cimport (
+from pylibav.libav cimport (
     av_err2str,
     libav,
 )
+
 
 # Will get extended with all of the exceptions.
 __all__ = [

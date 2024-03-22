@@ -2,14 +2,15 @@ from typing import Any, Literal
 
 from pylibav.enum_type import EnumFlag, EnumItem
 from pylibav.packet import Packet
-
 from .codec import Codec
+
 
 class ThreadType(EnumFlag):
     NONE: int
     FRAME: int
     SLICE: int
     AUTO: int
+
 
 class SkipType(EnumItem):
     NONE: int
@@ -19,6 +20,7 @@ class SkipType(EnumItem):
     NONINTRA: int
     NONKEY: int
     ALL: int
+
 
 class Flags(EnumFlag):
     NONE: int
@@ -41,6 +43,7 @@ class Flags(EnumFlag):
     INTERLACED_ME: int
     CLOSED_GOP: int
 
+
 class Flags2(EnumFlag):
     NONE: int
     FAST: int
@@ -52,6 +55,7 @@ class Flags2(EnumFlag):
     EXPORT_MVS: int
     SKIP_MANUAL: int
     RO_FLUSH_NOOP: int
+
 
 class CodecContext:
     extradata: bytes | None

@@ -1,4 +1,6 @@
 from libc.stdint cimport int64_t, uint8_t
+
+
 cdef extern from "libavutil/samplefmt.h" nogil:
 
     cdef enum AVSampleFormat:
@@ -13,24 +15,24 @@ cdef extern from "libavutil/samplefmt.h" nogil:
         AV_SAMPLE_FMT_S32P
         AV_SAMPLE_FMT_FLTP
         AV_SAMPLE_FMT_DBLP
-        AV_SAMPLE_FMT_NB  # Number.
-
+        # Number of values
+        AV_SAMPLE_FMT_NB
 
     # Find by name.
-    cdef AVSampleFormat av_get_sample_fmt(char* name)
+    cdef AVSampleFormat av_get_sample_fmt(char *name)
 
     # Inspection.
-    cdef char * av_get_sample_fmt_name(AVSampleFormat sample_fmt)
-    cdef int    av_get_bytes_per_sample(AVSampleFormat sample_fmt)
-    cdef int    av_sample_fmt_is_planar(AVSampleFormat sample_fmt)
+    cdef char* av_get_sample_fmt_name(AVSampleFormat sample_fmt)
+    cdef int av_get_bytes_per_sample(AVSampleFormat sample_fmt)
+    cdef int av_sample_fmt_is_planar(AVSampleFormat sample_fmt)
 
     # Alternative forms.
     cdef AVSampleFormat av_get_packed_sample_fmt(AVSampleFormat sample_fmt)
     cdef AVSampleFormat av_get_planar_sample_fmt(AVSampleFormat sample_fmt)
 
     cdef int av_samples_alloc(
-        uint8_t** audio_data,
-        int* linesize,
+        uint8_t **audio_data,
+        int *linesize,
         int nb_channels,
         int nb_samples,
         AVSampleFormat sample_fmt,

@@ -1,5 +1,6 @@
 from .enum_type import EnumItem
 
+
 classes: dict[int, Exception]
 
 def code_to_tag(code: int) -> bytes: ...

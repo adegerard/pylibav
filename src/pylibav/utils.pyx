@@ -12,9 +12,7 @@ from pylibav.libav cimport (
 from .error cimport err_check
 
 
-# === DICTIONARIES ===
-# ====================
-
+# Dictionnaries
 cdef _decode(char *s, encoding, errors):
     return (<bytes>s).decode(encoding, errors)
 
@@ -45,9 +43,7 @@ cdef dict_to_avdict(AVDictionary **dst, dict src, str encoding, str errors):
         )
 
 
-# === FRACTIONS ===
-# =================
-
+# Fractions
 cdef object avrational_to_fraction(const AVRational *input):
     if input.num and input.den:
         return Fraction(input.num, input.den)
@@ -68,10 +64,8 @@ cdef object to_avrational(object value, AVRational *input):
     input.den = frac.denominator
 
 
-# === OTHER ===
-# =============
 
-
+# nnumpy.ndarray
 cdef check_ndarray(object array, object dtype, int ndim):
     """
     Check a numpy array has the expected data type and number of dimensions.
@@ -90,14 +84,13 @@ cdef check_ndarray_shape(object array, bint ok):
         raise ValueError(f"Unexpected numpy array shape `{array.shape}`")
 
 
+# Others
 cdef flag_in_bitfield(uint64_t bitfield, uint64_t flag):
     # Not every flag exists in every version of FFMpeg, so we define them to 0.
     if not flag:
         return None
     return bool(bitfield & flag)
 
-
-# === BACKWARDS COMPAT ===
 
 from .error import FFmpegError as AVError
 from .error import err_check

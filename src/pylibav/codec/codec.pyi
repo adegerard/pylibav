@@ -1,11 +1,14 @@
 from fractions import Fraction
 from typing import Literal
 
-from ..descriptor import Descriptor
-from ..enum_type import EnumFlag
-from ..video.format import VideoFormat
-
+from pylibav.descriptor import Descriptor
+from pylibav.enum_type import EnumFlag
+from pylibav.video.format import VideoFormat
 from .context import CodecContext
+
+
+available_codecs: set[str]
+
 
 class Properties(EnumFlag):
     NONE: int
@@ -15,6 +18,7 @@ class Properties(EnumFlag):
     REORDER: int
     BITMAP_SUB: int
     TEXT_SUB: int
+
 
 class Capabilities(EnumFlag):
     NONE: int
@@ -39,7 +43,9 @@ class Capabilities(EnumFlag):
     ENCODER_REORDERED_OPAQUE: int
     ENCODER_FLUSH: int
 
+
 class UnknownCodecError(ValueError): ...
+
 
 class Codec:
     is_decoder: bool
@@ -58,10 +64,10 @@ class Codec:
     def __init__(self, name: str, mode: Literal["r", "w"]) -> None: ...
     def create(self) -> CodecContext: ...
 
+
 class codec_descriptor:
     name: str
     options: tuple[int, ...]
 
-codecs_available: set[str]
 
 def dump_codecs() -> None: ...

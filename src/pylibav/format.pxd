@@ -7,8 +7,11 @@ from pylibav.libav cimport (
 cdef class ContainerFormat:
     cdef readonly str name
 
-    cdef AVInputFormat *iptr
-    cdef AVOutputFormat *optr
+    cdef const AVInputFormat *iptr
+    cdef const AVOutputFormat *optr
 
 
-cdef ContainerFormat build_container_format(AVInputFormat*, AVOutputFormat*)
+cdef ContainerFormat build_container_format(
+    const AVInputFormat*,
+    const AVOutputFormat*
+)

@@ -29,8 +29,7 @@ API Reference
 ~~~~~~~~~~~~~
 
 """
-
-# from __future__ import absolute_import
+from __future__ import absolute_import
 from libc.stdio cimport fprintf, stderr
 from libc.stdlib cimport free, malloc
 
@@ -39,7 +38,7 @@ import os
 import sys
 from threading import Lock, get_ident
 
-from libav cimport (
+from pylibav.libav cimport (
     libav,
     AVClass,
     av_log_set_callback,

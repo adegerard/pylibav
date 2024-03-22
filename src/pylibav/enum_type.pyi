@@ -1,5 +1,6 @@
 from typing import Any, Callable, Iterable, Literal, Sequence, overload
 
+
 class EnumType(type):
     def __init__(
         self,

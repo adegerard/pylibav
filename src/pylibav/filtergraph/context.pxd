@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from pylibav.libav cimport (
     AVFilterContext
 )
@@ -8,7 +9,7 @@ from pylibav.filtergraph.graph cimport Graph
 
 cdef class FilterContext:
 
-    cdef AVFilterContext *ptr
+    cdef const AVFilterContext *ptr
     cdef readonly Graph graph
     cdef readonly Filter filter
 

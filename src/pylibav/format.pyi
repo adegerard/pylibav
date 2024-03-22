@@ -1,5 +1,6 @@
 from .enum_type import EnumFlag
 
+
 class Flags(EnumFlag):
     NOFILE: int
     NEEDNUMBER: int
@@ -18,6 +19,7 @@ class Flags(EnumFlag):
     TS_NONSTRICT: int
     TS_NEGATIVE: int
     SEEK_TO_PTS: int
+
 
 class ContainerFormat:
     is_input: bool
@@ -43,7 +45,7 @@ class ContainerFormat:
     ts_negative: int
     seek_to_pts: int
 
-formats_available: set[str]
+available_formats: set[str]
 
 
-__all__ = ("ContainerFormat", "formats_available")
+__all__ = ("ContainerFormat", "available_formats")

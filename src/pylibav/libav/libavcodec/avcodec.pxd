@@ -12,6 +12,9 @@ from pylibav.libav.libavutil.avutil cimport (
     AVPictureType,
 )
 from pylibav.libav.libavutil.dict cimport AVDictionary
+from pylibav.libav.libavutil.channel_layout cimport AVChannelLayout
+
+
 
 cdef extern from "libavcodec/avcodec.h" nogil:
     """
@@ -29,7 +32,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
     # custom
     cdef set pyav_get_available_codecs()
 
-    cdef int   avcodec_version()
+    cdef int avcodec_version()
     cdef char* avcodec_configuration()
     cdef char* avcodec_license()
 
@@ -121,6 +124,10 @@ cdef extern from "libavcodec/avcodec.h" nogil:
 
     cdef enum:
         AV_FRAME_FLAG_CORRUPT
+        AV_FRAME_FLAG_KEY
+        AV_FRAME_FLAG_DISCARD
+        AV_FRAME_FLAG_INTERLACED
+        AV_FRAME_FLAG_TOP_FIELD_FIRST
 
     cdef enum:
         FF_COMPLIANCE_VERY_STRICT
@@ -174,7 +181,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AVClass *av_class
 
         AVMediaType codec_type
-        char codec_name[32]
+        char[32] codec_name
         unsigned int codec_tag
         AVCodecID codec_id
 
@@ -289,6 +296,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
 
     cdef int AV_NUM_DATA_POINTERS
 
+
     cdef enum AVPacketSideDataType:
         AV_PKT_DATA_PALETTE
         AV_PKT_DATA_NEW_EXTRADATA
@@ -324,10 +332,12 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AV_PKT_DATA_DYNAMIC_HDR10_PLUS
         AV_PKT_DATA_NB
 
+
     cdef struct AVPacketSideData:
         uint8_t *data
         size_t size
         AVPacketSideDataType type
+
 
     cdef enum AVFrameSideDataType:
         AV_FRAME_DATA_PANSCAN
@@ -350,6 +360,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AV_FRAME_DATA_QP_TABLE_DATA
         AV_FRAME_DATA_SEI_UNREGISTERED
 
+
     cdef struct AVFrameSideData:
         AVFrameSideDataType type
         uint8_t *data
@@ -357,45 +368,64 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AVDictionary *metadata
 
     # See: http://ffmpeg.org/doxygen/trunk/structAVFrame.html
+    # https://ffmpeg.org/doxygen/trunk/frame_8h_source.html
     cdef struct AVFrame:
-        uint8_t [4] *data
-        int [4] linesize
+        uint8_t[4] *data
+        int[4] linesize
         uint8_t **extended_data
-
-        # Values correspond to enum AVPixelFormat or AVSampleFormat
-        int format
-        int key_frame  # 0 or 1.
-        AVPictureType pict_type
-
-        int interlaced_frame  # 0 or 1.
 
         int width
         int height
 
-        int nb_side_data
-        AVFrameSideData **side_data
+        # number of audio samples (per channel)
+        int nb_samples
+        # AVPixelFormat or AVSampleFormat
+        int format
 
-        int nb_samples  # Audio samples
-        int sample_rate  # Audio Sample rate
-        int channels  # Number of audio channels
-        int channel_layout  # Audio channel_layout
+        AVPictureType pict_type
+        AVRational sample_aspect_ratio
 
         int64_t pts
         int64_t pkt_dts
+        AVRational time_base
 
-        int pkt_size
-
-        uint8_t **base
+        int quality
         void *opaque
-        AVDictionary *metadata
+        int repeat_pict
+
+        int sample_rate
+
+        AVFrameSideData **side_data
+        int nb_side_data
+
+        # AV_FRAME_FLAG_XXX
         int flags
-        int decode_error_flags
+
+        # MPEG vs JPEG YUV range.
+        # - encoding: Set by user
+        # - decoding: Set by libavcodec
         AVColorRange color_range
         AVColorPrimaries color_primaries
         AVColorTransferCharacteristic color_trc
+        #
+        # YUV colorspace type.
+        # - encoding: Set by user
+        # - decoding: Set by libavcodec
+        #
         AVColorSpace colorspace
 
+        AVDictionary *metadata
+        int decode_error_flags
+
+        AVChannelLayout ch_layout
+
+        # Duration of the frame, in the same units as pts. 0 if unknown.
+        int64_t duration
+
+
+
     cdef AVFrame* avcodec_alloc_frame()
+
 
     cdef struct AVPacket:
 
@@ -410,6 +440,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         int duration
 
         int64_t pos
+
 
     cdef int avcodec_fill_audio_frame(
         AVFrame *frame,
@@ -428,11 +459,13 @@ cdef extern from "libavcodec/avcodec.h" nogil:
     cdef int av_packet_ref(AVPacket *dst, const AVPacket *src)
     cdef void av_packet_rescale_ts(AVPacket *pkt, AVRational src_tb, AVRational dst_tb)
 
+
     cdef enum AVSubtitleType:
         SUBTITLE_NONE
         SUBTITLE_BITMAP
         SUBTITLE_TEXT
         SUBTITLE_ASS
+
 
     cdef struct AVSubtitleRect:
         int x
@@ -440,12 +473,13 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         int w
         int h
         int nb_colors
-        uint8_t *data[4]
-        int linesize[4]
+        uint8_t[4] *data
+        int[4] linesize
         AVSubtitleType type
         char *text
         char *ass
         int flags
+
 
     cdef struct AVSubtitle:
         uint16_t format
@@ -455,12 +489,14 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         AVSubtitleRect **rects
         int64_t pts
 
+
     cdef int avcodec_decode_subtitle2(
         AVCodecContext *ctx,
         AVSubtitle *sub,
         int *done,
         AVPacket *pkt,
     )
+
 
     cdef int avcodec_encode_subtitle(
         AVCodecContext *avctx,
@@ -471,9 +507,12 @@ cdef extern from "libavcodec/avcodec.h" nogil:
 
     cdef void avsubtitle_free(AVSubtitle*)
 
-    cdef void avcodec_get_frame_defaults(AVFrame* frame)
+
+    cdef void avcodec_get_frame_defaults(AVFrame *frame)
+
 
     cdef void avcodec_flush_buffers(AVCodecContext *ctx)
+
 
     # TODO: avcodec_default_get_buffer is deprecated for avcodec_default_get_buffer2 in newer versions of FFmpeg
     cdef int avcodec_default_get_buffer(AVCodecContext *ctx, AVFrame *frame)
@@ -488,12 +527,15 @@ cdef extern from "libavcodec/avcodec.h" nogil:
     # === Parsers
 
     cdef struct AVCodecParser:
-        int codec_ids[5]
+        int[5] codec_ids
+
 
     cdef AVCodecParser* av_parser_next(AVCodecParser *c)
 
+
     cdef struct AVCodecParserContext:
         pass
+
 
     cdef AVCodecParserContext *av_parser_init(int codec_id)
     cdef int av_parser_parse2(
@@ -513,9 +555,20 @@ cdef extern from "libavcodec/avcodec.h" nogil:
     )
     cdef void av_parser_close(AVCodecParserContext *s)
 
+    # https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/codec_par.h
     cdef struct AVCodecParameters:
         AVMediaType codec_type
         AVCodecID codec_id
+        uint32_t codec_tag
+        # uint8_t *extradata
+        # int extradata_size
+        AVPacketSideData *coded_side_data
+        int nb_coded_side_data
+        int format
+        int64_t bit_rate
+        int bits_per_coded_sample
+        int bits_per_raw_sample
+
 
     cdef int avcodec_parameters_copy(
         AVCodecParameters *dst,

@@ -1,6 +1,7 @@
 from libc.stdint cimport uint8_t
-cimport libav
-from .libav cimport (
+from pylibav.libav cimport (
+    libav,
+    AVColorRange,
     sws_getCachedContext,
     sws_getCoefficients,
     sws_getColorspaceDetails,
@@ -9,8 +10,8 @@ from .libav cimport (
 )
 from pylibav.enum_type cimport define_enum
 from pylibav.error cimport err_check
-from pylibav.video.format cimport VideoFormat
-from pylibav.video.frame cimport alloc_video_frame
+from .format cimport VideoFormat
+from .frame cimport alloc_video_frame
 
 
 Interpolation = define_enum("Interpolation", __name__, (
@@ -49,10 +50,10 @@ Colorspace = define_enum("Colorspace", __name__, (
 
 
 ColorRange = define_enum("ColorRange", __name__, (
-    ("UNSPECIFIED", lib.AVCOL_RANGE_UNSPECIFIED, "Unspecified"),
-    ("MPEG", lib.AVCOL_RANGE_MPEG, "MPEG (limited) YUV range, 219*2^(n-8)"),
-    ("JPEG", lib.AVCOL_RANGE_JPEG, "JPEG (full) YUV range, 2^n-1"),
-    ("NB", lib.AVCOL_RANGE_NB, "Not part of ABI"),
+    ("UNSPECIFIED", AVColorRange.AVCOL_RANGE_UNSPECIFIED, "Unspecified"),
+    ("MPEG", AVColorRange.AVCOL_RANGE_MPEG, "MPEG (limited) YUV range, 219*2^(n-8)"),
+    ("JPEG", AVColorRange.AVCOL_RANGE_JPEG, "JPEG (full) YUV range, 2^n-1"),
+    ("NB", AVColorRange.AVCOL_RANGE_NB, "Not part of ABI"),
 ))
 
 cdef class VideoReformatter:
@@ -67,10 +68,18 @@ cdef class VideoReformatter:
         with nogil:
             libav.sws_freeContext(self.ptr)
 
-    def reformat(self, VideoFrame frame not None, width=None, height=None,
-                 format=None, src_colorspace=None, dst_colorspace=None,
-                 interpolation=None, src_color_range=None,
-                 dst_color_range=None):
+    def reformat(
+        self,
+        VideoFrame frame not None,
+        width=None,
+        height=None,
+        format=None,
+        src_colorspace=None,
+        dst_colorspace=None,
+        interpolation=None,
+        src_color_range=None,
+        dst_color_range=None
+        ):
         """Create a new :class:`VideoFrame` with the given width/height/format/colorspace.
 
         Returns the same frame untouched if nothing needs to be done to it.
@@ -111,23 +120,31 @@ cdef class VideoReformatter:
             c_dst_color_range,
         )
 
-    cdef _reformat(self, VideoFrame frame, int width, int height,
-                   lib.AVPixelFormat dst_format, int src_colorspace,
-                   int dst_colorspace, int interpolation,
-                   int src_color_range, int dst_color_range):
+    cdef _reformat(
+        self,
+        VideoFrame frame,
+        int width,
+        int height,
+        AVPixelFormat dst_format,
+        int src_colorspace,
+        int dst_colorspace,
+        int interpolation,
+        int src_color_range,
+        int dst_color_range
+    ):
 
         if frame.ptr.format < 0:
             raise ValueError("Frame does not have format set.")
 
-        cdef lib.AVPixelFormat src_format = <lib.AVPixelFormat> frame.ptr.format
+        cdef AVPixelFormat src_format = <AVPixelFormat> frame.ptr.format
 
         # Shortcut!
         if (
-            dst_format == src_format and
-            width == frame.ptr.width and
-            height == frame.ptr.height and
-            dst_colorspace == src_colorspace and
-            src_color_range == dst_color_range
+            dst_format == src_format
+            and width == frame.ptr.width
+            and height == frame.ptr.height
+            and dst_colorspace == src_colorspace
+            and src_color_range == dst_color_range
         ):
             return frame
 
@@ -213,7 +230,7 @@ cdef class VideoReformatter:
                 frame.ptr.linesize,
                 0,  # slice Y
                 frame.ptr.height,
-                new_frame.ptr.data,
+                <unsigned char **>new_frame.ptr.data,
                 new_frame.ptr.linesize,
             )
 

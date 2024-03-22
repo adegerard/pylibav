@@ -4,10 +4,10 @@ from types import TracebackType
 from typing import Any, Callable, Literal, Type, overload
 
 from pylibav.enum_type import EnumFlag
-
 from .input import InputContainer
 from .output import OutputContainer
 from .streams import StreamContainer
+
 
 class Flags(EnumFlag):
     GENPTS: int

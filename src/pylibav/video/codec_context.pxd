@@ -1,4 +1,3 @@
-
 from pylibav.codec.context cimport CodecContext
 from .format cimport VideoFormat
 from .frame cimport VideoFrame

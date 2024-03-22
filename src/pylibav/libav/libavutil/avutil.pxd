@@ -109,7 +109,7 @@ cdef extern from "libavutil/avutil.h" nogil:
 
     cdef double M_PI
 
-    cdef void* av_malloc(size_t size)
+    cdef void *av_malloc(size_t size)
     cdef void *av_calloc(size_t nmemb, size_t size)
     cdef void *av_realloc(void *ptr, size_t size)
 
@@ -206,8 +206,8 @@ cdef extern from "libavutil/pixdesc.h" nogil:
     cdef AVPixFmtDescriptor* av_pix_fmt_desc_get(AVPixelFormat pix_fmt)
     cdef AVPixFmtDescriptor* av_pix_fmt_desc_next(AVPixFmtDescriptor *prev)
 
-    cdef char * av_get_pix_fmt_name(AVPixelFormat pix_fmt)
-    cdef AVPixelFormat av_get_pix_fmt(char* name)
+    cdef char* av_get_pix_fmt_name(AVPixelFormat pix_fmt)
+    cdef AVPixelFormat av_get_pix_fmt(char *name)
 
     int av_get_bits_per_pixel(AVPixFmtDescriptor *pixdesc)
     int av_get_padded_bits_per_pixel(AVPixFmtDescriptor *pixdesc)
@@ -216,11 +216,11 @@ cdef extern from "libavutil/pixdesc.h" nogil:
 cdef extern from "libavutil/channel_layout.h" nogil:
 
     # Layouts.
-    cdef uint64_t av_get_channel_layout(char* name)
+    cdef uint64_t av_get_channel_layout(char *name)
     cdef int av_get_channel_layout_nb_channels(uint64_t channel_layout)
     cdef int64_t av_get_default_channel_layout(int nb_channels)
     cdef void av_get_channel_layout_string(
-        char* buff,
+        char *buff,
         int buf_size,
         int nb_channels,
         uint64_t channel_layout
@@ -271,7 +271,7 @@ cdef extern from "stdarg.h" nogil:
 cdef extern from "Python.h" nogil:
 
     # For logging. See av/logging.pyx for an explanation.
-    cdef int Py_AddPendingCall(void *, void *)
+    cdef int Py_AddPendingCall(void*, void*)
     void PyErr_PrintEx(int set_sys_last_vars)
     int Py_IsInitialized()
     void PyErr_Display(object, object, object)
@@ -335,22 +335,22 @@ cdef extern from "libavutil/opt.h" nogil:
 cdef extern from "libavutil/imgutils.h" nogil:
 
     cdef int av_image_alloc(
-        uint8_t *pointers[4],
-        int linesizes[4],
+        uint8_t [4] *pointers,
+        int [4] linesizes,
         int width,
         int height,
         AVPixelFormat pix_fmt,
         int align
     )
     cdef int av_image_fill_pointers(
-        uint8_t *pointers[4],
+        uint8_t [4] *pointers,
         AVPixelFormat pix_fmt,
         int height,
         uint8_t *ptr,
-        const int linesizes[4]
+        const int [4] linesizes
     )
     cdef int av_image_fill_linesizes(
-        int linesizes[4],
+        int [4] linesizes,
         AVPixelFormat pix_fmt,
         int width,
     )
@@ -395,7 +395,7 @@ cdef extern from "libavutil/log.h" nogil:
         AV_LOG_MAX_OFFSET
 
     # Send a log.
-    void av_log(void *ptr, int level, const char *fmt, const char * message)
+    void av_log(void *ptr, int level, const char *fmt, const char *message)
 
     # Get the logs.
     ctypedef void(*av_log_callback)(void *, int, const char *, va_list)

@@ -8,7 +8,6 @@ with earlier PyAV patterns. e.g., they can be freely compared to strings or
 integers for names and values respectively.
 
 """
-
 import copyreg
 
 

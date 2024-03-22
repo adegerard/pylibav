@@ -1,7 +1,7 @@
 from pylibav.libav cimport AVClass
 
-cdef class Descriptor:
 
+cdef class Descriptor:
     # These are present as:
     # - AVCodecContext.av_class (same as avcodec_get_class())
     # - AVFormatContext.av_class (same as avformat_get_class())
@@ -12,7 +12,6 @@ cdef class Descriptor:
     # - AVFilter.priv_class
 
     cdef const AVClass *ptr
-
     cdef object _options  # Option list cache.
 
 

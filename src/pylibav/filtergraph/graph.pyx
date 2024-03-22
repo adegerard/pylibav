@@ -17,7 +17,6 @@ from pylibav.filtergraph.filter cimport Filter, wrap_filter
 
 
 cdef class Graph:
-    cdef AVFilterGraph *ptr
 
     def __cinit__(self):
         self.ptr = avfilter_graph_alloc()

@@ -1,6 +1,7 @@
 import sys
 from libc.stdint cimport uint8_t
 from pylibav.libav cimport (
+    libav,
     AVPixelFormat,
     AVPictureType,
     av_image_alloc,
@@ -8,13 +9,12 @@ from pylibav.libav cimport (
     av_image_fill_pointers,
     av_freep,
 )
-
 from pylibav.enum_type cimport define_enum
 from pylibav.error cimport err_check
+from pylibav.frame cimport Frame
 from pylibav.utils cimport check_ndarray, check_ndarray_shape
 from pylibav.video.format cimport get_pix_fmt, get_video_format
 from pylibav.video.plane cimport VideoPlane
-from pylibav.frame cimport Frame
 
 import warnings
 
@@ -33,6 +33,7 @@ cdef VideoFrame alloc_video_frame():
     return VideoFrame.__new__(VideoFrame, _cinit_bypass_sentinel)
 
 
+
 PictureType = define_enum("PictureType", __name__, (
     ("NONE", AVPictureType.AV_PICTURE_TYPE_NONE, "Undefined"),
     ("I", AVPictureType.AV_PICTURE_TYPE_I, "Intra"),
@@ -45,11 +46,13 @@ PictureType = define_enum("PictureType", __name__, (
 ))
 
 
+
 cdef byteswap_array(array, bint big_endian):
     if (sys.byteorder == "big") != big_endian:
         return array.byteswap()
     else:
         return array
+
 
 
 cdef copy_array_to_plane(array, VideoPlane plane, unsigned int bytes_per_pixel):
@@ -69,6 +72,7 @@ cdef copy_array_to_plane(array, VideoPlane plane, unsigned int bytes_per_pixel):
         o_pos += o_stride
 
 
+
 cdef useful_array(VideoPlane plane, unsigned int bytes_per_pixel=1, str dtype="uint8"):
     """
     Return the useful part of the VideoPlane as a single dimensional array.
@@ -84,6 +88,7 @@ cdef useful_array(VideoPlane plane, unsigned int bytes_per_pixel=1, str dtype="u
     return arr.view(np.dtype(dtype))
 
 
+
 cdef class VideoFrame(Frame):
     def __cinit__(self, width=0, height=0, format="yuv420p"):
         if width is _cinit_bypass_sentinel:
@@ -92,6 +97,7 @@ cdef class VideoFrame(Frame):
         cdef AVPixelFormat c_format = get_pix_fmt(format)
 
         self._init(c_format, width, height)
+
 
     cdef _init(self, AVPixelFormat format, unsigned int width, unsigned int height):
         cdef int res = 0
@@ -112,7 +118,8 @@ cdef class VideoFrame(Frame):
                     width,
                     height,
                     format,
-                    16)
+                    16
+                )
 
 
         if res:
@@ -121,21 +128,25 @@ cdef class VideoFrame(Frame):
 
         self._init_user_attributes()
 
+
     cdef _init_user_attributes(self):
         self.format = get_video_format(<AVPixelFormat>self.ptr.format, self.ptr.width, self.ptr.height)
+
 
     def __dealloc__(self):
         # The `self._buffer` member is only set if *we* allocated the buffer in `_init`,
         # as opposed to a buffer allocated by a decoder.
-        av_freep(<char*>self._buffer[0])
+        av_freep(&self._buffer)
         # Let go of the reference from the numpy buffers if we made one
         self._np_buffer = None
+
 
     def __repr__(self):
         return (
             f"<pylibav.{self.__class__.__name__} #{self.index}, pts={self.pts} "
             f"{self.format.name} {self.width}x{self.height} at 0x{id(self):x}>"
         )
+
 
     @property
     def planes(self):
@@ -159,6 +170,7 @@ cdef class VideoFrame(Frame):
             plane_count += 1
         return tuple([VideoPlane(self, i) for i in range(plane_count)])
 
+
     @property
     def width(self):
         """Width of the image, in pixels."""
@@ -173,22 +185,12 @@ cdef class VideoFrame(Frame):
 
     @property
     def key_frame(self):
-        """Is this frame a key frame?
-
-        Wraps :ffmpeg:`AVFrame.key_frame`.
-
-        """
-        return self.ptr.key_frame
+        return (self.ptr.flags & libav.AV_FRAME_FLAG_KEY) != 0
 
 
     @property
     def interlaced_frame(self):
-        """Is this frame an interlaced or progressive?
-
-        Wraps :ffmpeg:`AVFrame.interlaced_frame`.
-
-        """
-        return self.ptr.interlaced_frame
+        return (self.ptr.flags & libav.AV_FRAME_FLAG_INTERLACED) != 0
 
 
     @property
@@ -200,9 +202,11 @@ cdef class VideoFrame(Frame):
         """
         return PictureType.get(self.ptr.pict_type, create=True)
 
+
     @pict_type.setter
     def pict_type(self, value):
         self.ptr.pict_type = PictureType[value].value
+
 
     @property
     def colorspace(self):
@@ -213,9 +217,11 @@ cdef class VideoFrame(Frame):
         """
         return self.ptr.colorspace
 
+
     @colorspace.setter
     def colorspace(self, value):
         self.ptr.colorspace = value
+
 
     @property
     def color_range(self):
@@ -226,9 +232,11 @@ cdef class VideoFrame(Frame):
         """
         return self.ptr.color_range
 
+
     @color_range.setter
     def color_range(self, value):
         self.ptr.color_range = value
+
 
     def reformat(self, *args, **kwargs):
         """reformat(width=None, height=None, format=None, src_colorspace=None, dst_colorspace=None, interpolation=None)
@@ -241,6 +249,7 @@ cdef class VideoFrame(Frame):
         if not self.reformatter:
             self.reformatter = VideoReformatter()
         return self.reformatter.reformat(self, *args, **kwargs)
+
 
     def to_rgb(self, **kwargs):
         """Get an RGB version of this frame.
@@ -255,6 +264,7 @@ cdef class VideoFrame(Frame):
 
         """
         return self.reformat(format="rgb24", **kwargs)
+
 
     def to_ndarray(self, **kwargs):
         """Get a numpy array of this frame.
@@ -345,6 +355,7 @@ cdef class VideoFrame(Frame):
                 f"Conversion to numpy array with format `{frame.format.name}` is not yet supported"
             )
 
+
     @staticmethod
     def from_image(img):
         """
@@ -357,6 +368,7 @@ cdef class VideoFrame(Frame):
         copy_array_to_plane(img, frame.planes[0], 3)
 
         return frame
+
 
     @staticmethod
     def from_numpy_buffer(array, format="rgb24"):
@@ -382,6 +394,7 @@ cdef class VideoFrame(Frame):
         frame = alloc_video_frame()
         frame._image_fill_pointers_numpy(array, width, height, format)
         return frame
+
 
     def _image_fill_pointers_numpy(self, buffer, width, height, format):
         cdef AVPixelFormat c_format
@@ -437,6 +450,7 @@ cdef class VideoFrame(Frame):
         if res:
             err_check(res)
         self._init_user_attributes()
+
 
     @staticmethod
     def from_ndarray(array, format="rgb24"):
@@ -556,6 +570,7 @@ cdef class VideoFrame(Frame):
         copy_array_to_plane(array, frame.planes[0], 1 if array.ndim == 2 else array.shape[2])
 
         return frame
+
 
     def __getattribute__(self, attribute):
         # This method should be deleted when `frame.index` is removed

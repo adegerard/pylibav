@@ -1,5 +1,6 @@
 from .enum_type import EnumFlag, EnumItem
 
+
 class OptionType(EnumItem):
     FLAGS: int
     INT: int
@@ -20,6 +21,7 @@ class OptionType(EnumItem):
     CHANNEL_LAYOUT: int
     BOOL: int
 
+
 class OptionFlags(EnumFlag):
     ENCODING_PARAM: int
     DECODING_PARAM: int
@@ -29,6 +31,7 @@ class OptionFlags(EnumFlag):
     EXPORT: int
     READONLY: int
     FILTERING_PARAM: int
+
 
 class BaseOption:
     name: str
@@ -43,12 +46,14 @@ class BaseOption:
     is_readonly: bool
     is_filtering_param: bool
 
+
 class Option(BaseOption):
     type: OptionType
     offset: int
     default: int
     min: int
     max: int
+
 
 class OptionChoice(BaseOption):
     value: int

@@ -1,6 +1,6 @@
 from pylibav.enum_type import EnumItem
-
 from .frame import VideoFrame
+
 
 class Interpolation(EnumItem):
     FAST_BILINEAER: int

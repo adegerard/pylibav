@@ -4,7 +4,7 @@ from typing import Any, Literal
 from pylibav.packet import Packet
 from pylibav.stream import Stream
 
-from .codeccontext import VideoCodecContext
+from .codec_context import VideoCodecContext
 from .format import VideoFormat
 from .frame import VideoFrame
 

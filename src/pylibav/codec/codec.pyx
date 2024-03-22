@@ -1,6 +1,11 @@
+from pylibav.descriptor cimport wrap_avclass
+from pylibav.enum_type cimport define_enum
+from pylibav.utils cimport avrational_to_fraction
+from pylibav.video.format cimport get_video_format
 from pylibav.libav cimport (
     libav,
     AVCodec,
+    AVCodecID,
     av_codec_is_encoder,
     avcodec_find_encoder_by_name,
     avcodec_descriptor_get_by_name,
@@ -13,14 +18,9 @@ from pylibav.libav cimport (
     av_get_media_type_string,
     av_codec_iterate,
 )
-from pylibav.descriptor cimport wrap_avclass
-from pylibav.enum_type cimport define_enum
-from pylibav.utils cimport avrational_to_fraction
-from pylibav.video.format cimport get_video_format
+
 
 cdef object _cinit_sentinel = object()
-
-
 
 
 Properties = define_enum("Properties", "pylibav.codec", (
@@ -146,7 +146,6 @@ class UnknownCodecError(ValueError):
 
 
 cdef class Codec:
-
     """Codec(name, mode='r')
 
     :param str name: The codec name.
@@ -166,7 +165,6 @@ cdef class Codec:
         False
 
     """
-
     def __cinit__(self, name, mode="r"):
 
         if name is _cinit_sentinel:
@@ -197,13 +195,14 @@ cdef class Codec:
         if (mode == "w") != self.is_encoder:
             raise RuntimeError("Found codec does not match mode.", name, mode)
 
+
     cdef _init(self, name=None):
 
         if not self.ptr:
             raise UnknownCodecError(name)
 
         if not self.desc:
-            self.desc = avcodec_descriptor_get(self.ptr.id)
+            self.desc = avcodec_descriptor_get(<AVCodecID>self.ptr.id)
             if not self.desc:
                 raise RuntimeError("No codec descriptor for %r." % name)
 
@@ -213,22 +212,29 @@ cdef class Codec:
         if self.is_encoder and av_codec_is_decoder(self.ptr):
             raise RuntimeError("%s is both encoder and decoder.")
 
+
     def create(self):
         """Create a :class:`.CodecContext` for this codec."""
         from .context import CodecContext
         return CodecContext.create(self)
 
+
     @property
     def is_decoder(self):
         return not self.is_encoder
 
+
     @property
     def descriptor(self): return wrap_avclass(self.ptr.priv_class)
 
+
     @property
     def name(self): return self.ptr.name or ""
+
+
     @property
     def long_name(self): return self.ptr.long_name or ""
+
 
     @property
     def type(self):
@@ -240,8 +246,10 @@ cdef class Codec:
         """
         return av_get_media_type_string(self.ptr.type)
 
+
     @property
     def id(self): return self.ptr.id
+
 
     @property
     def frame_rates(self):
@@ -256,6 +264,7 @@ cdef class Codec:
             i += 1
         return ret
 
+
     @property
     def audio_rates(self):
         """A list of supported audio sample rates (``int``), or ``None``."""
@@ -268,6 +277,7 @@ cdef class Codec:
             ret.append(self.ptr.supported_samplerates[i])
             i += 1
         return ret
+
 
     @property
     def video_formats(self):
@@ -299,10 +309,12 @@ cdef class Codec:
     # handles them (by prefering the capablity to the property).
     # Also, LOSSLESS and LOSSY don't have to agree.
 
+
     @Properties.property
     def properties(self):
         """Flag property of :class:`.Properties`"""
         return self.desc.props
+
 
     intra_only = properties.flag_property("INTRA_ONLY")
     lossy = properties.flag_property("LOSSY")  # Defer to capability.
@@ -311,10 +323,12 @@ cdef class Codec:
     bitmap_sub = properties.flag_property("BITMAP_SUB")
     text_sub = properties.flag_property("TEXT_SUB")
 
+
     @Capabilities.property
     def capabilities(self):
         """Flag property of :class:`.Capabilities`"""
         return self.ptr.capabilities
+
 
     draw_horiz_band = capabilities.flag_property("DRAW_HORIZ_BAND")
     dr1 = capabilities.flag_property("DR1")
@@ -352,7 +366,8 @@ cdef get_codec_names():
             break
     return names
 
-codecs_available = get_codec_names()
+
+supported_codecs = get_codec_names()
 
 
 codec_descriptor = wrap_avclass(avcodec_get_class())
@@ -374,7 +389,7 @@ def dump_codecs():
  ------"""
     )
 
-    for name in sorted(codecs_available):
+    for name in sorted(supported_codecs):
         try:
             e_codec = Codec(name, "w")
         except ValueError:
