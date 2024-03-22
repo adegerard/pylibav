@@ -47,36 +47,3 @@ license-files = ["LICENSE"]
 
 [tool.setuptools.dynamic]
 version = {attr = "pylibav.__version__"}
-
-
-[tool.setuptools.package-data]
-pylibav = ["*.so*", "*.dll"]
-
-# exclude = [
-#   "tests/**",
-# ]
-
-
-
-# [tool.setuptools]
-# packages = "pylibav"
-# package-dir = {"" = "src"}
-
-
-# [tool.setuptools.packages.find]
-# where = ["."]
-# include = ["pylibav"]
-# exclude = ["build", "patches"]
-# namespaces = false
-
-# [tool.hatch.build]
-# include = [
-#     "pylibav.libs",
-# ]
-
-
-# [tool.isort]
-# profile = "black"
-# known_first_party = ["pylibav"]
-# skip = ["pylibav/__init__.py"]
-
