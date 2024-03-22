@@ -214,7 +214,7 @@ cdef class Container:
         cdef bytes name_obj = os.fsencode(self.name)
         cdef char *name = name_obj
 
-        cdef AVOutputFormat *ofmt
+        cdef const AVOutputFormat *ofmt
         if self.writeable:
             ofmt = self.format.optr if self.format else av_guess_format(NULL, name, NULL)
             if ofmt == NULL:

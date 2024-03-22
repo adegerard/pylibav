@@ -1,6 +1,7 @@
 import os
 import platform
 from enum import IntEnum
+from pprint import pprint
 import re
 import shutil
 import struct
@@ -62,20 +63,24 @@ def get_platform_tag() -> str:
     else:
         raise Exception(f"Unsupported platform {sys.platform}")
 
-ffmpeg_workdir = f"build/tmp/deploy/ffmpeg-{get_platform_tag()}"
-ffmpeg_lib_dir = os.path.join(ffmpeg_workdir, "lib")
-ffmpeg_include_dir = os.path.join(ffmpeg_workdir, "include")
+root_dir = os.path.dirname(os.path.realpath(__file__))
+relative_deploydir = os.path.join(
+    "build", "tmp", "deploy", f"ffmpeg-{get_platform_tag()}")
 
-package_dir = "src/pylibav"
-package_lib_dir = os.path.join(package_dir, "lib")
-package_include_dir = os.path.join(package_dir, "include")
+relative_workdir = os.path.join(
+    "build", "tmp", "work", f"ffmpeg-{get_platform_tag()}")
 
+ffmpeg_lib_dir = os.path.join(root_dir, relative_workdir, "lib")
+ffmpeg_include_dir = os.path.join(relative_workdir, "include")
+
+source_dir = os.path.join("src", "pylibav")
+source_lib_dir = os.path.join(source_dir, "lib")
 
 if rebuild:
     # Copy FFmpeg AV libraries to package source
-    if os.path.exists(package_lib_dir):
-        shutil.rmtree(package_lib_dir)
-    os.makedirs(package_lib_dir)
+    if os.path.exists(source_lib_dir):
+        shutil.rmtree(source_lib_dir)
+    os.makedirs(source_lib_dir)
 
     lib_pattern = f"[^.]+.so.*" if IS_PLATFORM_LINUX else f"[^.]+.dll"
     for f in os.listdir(ffmpeg_lib_dir):
@@ -84,43 +89,56 @@ if rebuild:
             not os.path.islink(fp)
             and (match := re.match(re.compile(lib_pattern), f))
         ):
-            shutil.copy2(fp, package_lib_dir)
+            shutil.copy2(fp, relative_workdir)
 
 
-LIBAV_LIBRARIES = (
-    "libavformat",
-    "libavcodec",
-    "libavdevice",
-    "libavutil",
-    "libavfilter",
-    "libswscale",
-    "libswresample",
-)
 
-LIBAV_LIBRARIES = [
-    os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        package_dir,
-        f
-    )
-    for f in os.listdir(package_lib_dir)
-    if f.split('.')[0] in LIBAV_LIBRARIES
+
+# FFmpeg libav libraries
+libav_include_dir = os.path.join(relative_deploydir, "include")
+libav_library_dir = os.path.join(root_dir, relative_deploydir, "lib")
+LIBAV_LIBRARY_NAMES = [
+    "avformat",
+    "avcodec",
+    "avdevice",
+    "avutil",
+    "avfilter",
+    "swscale",
+    "swresample"
 ]
+if IS_PLATFORM_WINDOWS:
+    libav_libraries = LIBAV_LIBRARY_NAMES
+
+elif IS_PLATFORM_LINUX:
+    libav_libraries = [
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            source_lib_dir,
+            f
+        )
+        for f in os.listdir(relative_workdir)
+        if f.split('.')[0] in LIBAV_LIBRARY_NAMES
+    ]
+
 
 
 # Debug: to be removed
-print(ffmpeg_workdir)
-print(ffmpeg_include_dir)
-print(ffmpeg_lib_dir)
-print(package_dir)
-print(package_include_dir)
-print(package_lib_dir)
-print()
+# print(lightgreen("------------------------------------------------------------"))
+# print(f"ffmpeg_workdir: {ffmpeg_workdir}")
+# print(f"ffmpeg_include_dir: {ffmpeg_include_dir}")
+# print(f"ffmpeg_lib_dir: {ffmpeg_lib_dir}")
+# print(f"package_dir: {package_dir}")
+# print(f"package_include_dir: {package_include_dir}")
+# print(f"package_lib_dir: {package_lib_dir}")
+# print(lightgreen("------------------------------------------------------------"))
+# print("libraries")
+# pprint(libav_libraries)
+# print()
 
 
 # Cythonize package
 ext_modules = []
-for dirpath, dirnames, filenames in os.walk(package_dir):
+for dirpath, dirnames, filenames in os.walk(source_dir):
     if "__pycache__" in dirpath:
         continue
 
@@ -143,9 +161,11 @@ for dirpath, dirnames, filenames in os.walk(package_dir):
                 Extension(
                     module_name,
                     sources=[src_filepath],
-                    include_dirs=[ffmpeg_include_dir],
-                    libraries=LIBAV_LIBRARIES,
-                    library_dirs=[package_lib_dir],
+                    include_dirs=[libav_include_dir],
+                    libraries=libav_libraries,
+                    # library_dirs=[package_lib_dir], <- linux
+                    # library dirs: must contains both dll and lib
+                    library_dirs=[libav_library_dir],
                 ),
                 compiler_directives=dict(
                     c_string_type="str",
@@ -153,7 +173,7 @@ for dirpath, dirnames, filenames in os.walk(package_dir):
                     embedsignature=False,
                     language_level=3,
                 ),
-                build_dir=os.path.join("build", "tmp", "work", "pylibav"),
+                build_dir=os.path.join("build", "tmp", "work"),
             )
         )
 
