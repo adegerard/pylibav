@@ -298,8 +298,8 @@ cdef extern from "libavutil/opt.h" nogil:
         AV_OPT_TYPE_VIDEO_RATE
         AV_OPT_TYPE_DURATION
         AV_OPT_TYPE_COLOR
-        AV_OPT_TYPE_CHANNEL_LAYOUT
         AV_OPT_TYPE_BOOL
+        AV_OPT_TYPE_CHLAYOUT
 
     cdef struct AVOption_default_val:
         int64_t i64

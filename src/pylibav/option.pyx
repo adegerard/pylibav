@@ -32,8 +32,8 @@ OptionType = define_enum("OptionType", __name__, (
     ("VIDEO_RATE", libav.AV_OPT_TYPE_VIDEO_RATE),
     ("DURATION", libav.AV_OPT_TYPE_DURATION),
     ("COLOR", libav.AV_OPT_TYPE_COLOR),
-    ("CHANNEL_LAYOUT", libav.AV_OPT_TYPE_CHANNEL_LAYOUT),
     ("BOOL", libav.AV_OPT_TYPE_BOOL),
+    ("CHANNEL_LAYOUT", libav.AV_OPT_TYPE_CHLAYOUT),
 ))
 
 cdef tuple _INT_TYPES = (
@@ -43,8 +43,8 @@ cdef tuple _INT_TYPES = (
     libav.AV_OPT_TYPE_PIXEL_FMT,
     libav.AV_OPT_TYPE_SAMPLE_FMT,
     libav.AV_OPT_TYPE_DURATION,
-    libav.AV_OPT_TYPE_CHANNEL_LAYOUT,
     libav.AV_OPT_TYPE_BOOL,
+    libav.AV_OPT_TYPE_CHLAYOUT,
 )
 
 OptionFlags = define_enum("OptionFlags", __name__, (

@@ -13,9 +13,12 @@ from setuptools import (
 from Cython.Build import cythonize
 
 
-
 rebuild: bool = False
 
+
+
+IS_PLATFORM_WINDOWS = bool(sys.platform == "win32")
+IS_PLATFORM_LINUX = bool(sys.platform == "linux")
 
 class ColorCode(IntEnum):
     red = 31
@@ -33,21 +36,18 @@ class ColorCode(IntEnum):
     pink = 95
     lightcyan = 96
 
+
 def __color_str_template(color:ColorCode) -> str:
     return "\033[%dm{}\033[00m" % (color.value)
+
 
 def lightcyan(*values: object) -> str:
     return __color_str_template(ColorCode.lightcyan).format(values[0])
 
+
 def lightgreen(*values: object) -> str:
     return __color_str_template(ColorCode.lightgreen).format(values[0])
 
-
-
-IS_PLATFORM_DARWIN = bool(sys.platform == "darwin")
-IS_PLATFORM_DARWIN_ARM = IS_PLATFORM_DARWIN and bool(platform.machine() == "arm64")
-IS_PLATFORM_WINDOWS = bool(sys.platform == "win32")
-IS_PLATFORM_LINUX = bool(sys.platform == "linux")
 
 def get_platform_tag() -> str:
     """return platform tag"""
@@ -63,15 +63,13 @@ def get_platform_tag() -> str:
     else:
         raise Exception(f"Unsupported platform {sys.platform}")
 
+
+
 root_dir = os.path.dirname(os.path.realpath(__file__))
-relative_deploydir = os.path.join(
-    "build", "tmp", "deploy", f"ffmpeg-{get_platform_tag()}")
+libav_build_dirname = os.path.join("build", f"ffmpeg-{get_platform_tag()}")
 
-relative_workdir = os.path.join(
-    "build", "tmp", "work", f"ffmpeg-{get_platform_tag()}")
-
-ffmpeg_lib_dir = os.path.join(root_dir, relative_workdir, "lib")
-ffmpeg_include_dir = os.path.join(relative_workdir, "include")
+# ffmpeg_lib_dir = os.path.join(root_dir, relative_workdir, "lib")
+# ffmpeg_include_dir = os.path.join(relative_workdir, "include")
 
 source_dir = os.path.join("src", "pylibav")
 source_lib_dir = os.path.join(source_dir, "lib")
@@ -95,8 +93,17 @@ if rebuild:
 
 
 # FFmpeg libav libraries
-libav_include_dir = os.path.join(relative_deploydir, "include")
-libav_library_dir = os.path.join(root_dir, relative_deploydir, "lib")
+libav_include_dir = os.path.join(source_dir, "include")
+libav_library_dirs = [
+    # os.path.join(libav_build_dirname, "lib")
+    # source_lib_dir
+    os.path.join("src", "pylibav", "lib")
+
+    # os.path.join(root_dir, libav_build_dirname, "lib")
+    # os.path.join(root_dir, ffmpeg_dirname, "bin")
+]
+
+
 LIBAV_LIBRARY_NAMES = [
     "avformat",
     "avcodec",
@@ -116,24 +123,21 @@ elif IS_PLATFORM_LINUX:
             source_lib_dir,
             f
         )
-        for f in os.listdir(relative_workdir)
+        for f in os.listdir(libav_build_dirname)
         if f.split('.')[0] in LIBAV_LIBRARY_NAMES
     ]
 
 
 
 # Debug: to be removed
-# print(lightgreen("------------------------------------------------------------"))
-# print(f"ffmpeg_workdir: {ffmpeg_workdir}")
-# print(f"ffmpeg_include_dir: {ffmpeg_include_dir}")
-# print(f"ffmpeg_lib_dir: {ffmpeg_lib_dir}")
-# print(f"package_dir: {package_dir}")
-# print(f"package_include_dir: {package_include_dir}")
-# print(f"package_lib_dir: {package_lib_dir}")
-# print(lightgreen("------------------------------------------------------------"))
-# print("libraries")
-# pprint(libav_libraries)
-# print()
+print(lightgreen("------------------------------------------------------------"))
+# print(f"ffmpeg_build: {ffmpeg_workdir}")
+print(f"package_include_dir: {libav_include_dir}")
+print(f"package_lib_dir: {libav_library_dirs}")
+print(lightgreen("------------------------------------------------------------"))
+print("libraries")
+pprint(libav_libraries)
+print()
 
 
 # Cythonize package
@@ -165,7 +169,8 @@ for dirpath, dirnames, filenames in os.walk(source_dir):
                     libraries=libav_libraries,
                     # library_dirs=[package_lib_dir], <- linux
                     # library dirs: must contains both dll and lib
-                    library_dirs=[libav_library_dir],
+                    # absolute path
+                    library_dirs=libav_library_dirs,
                 ),
                 compiler_directives=dict(
                     c_string_type="str",
@@ -173,7 +178,8 @@ for dirpath, dirnames, filenames in os.walk(source_dir):
                     embedsignature=False,
                     language_level=3,
                 ),
-                build_dir=os.path.join("build", "tmp", "work"),
+                # build_dir=os.path.join("build"),
+
             )
         )
 

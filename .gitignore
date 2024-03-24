@@ -38,3 +38,4 @@
 /tests/assets
 /tests/samples
 src/pylibav/lib/
+src/pylibav/include/

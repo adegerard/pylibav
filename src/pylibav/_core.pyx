@@ -1,8 +1,14 @@
+print("in CORE", flush=True)
+
 from pylibav.libav cimport libav
 
+print("start importing", flush=True)
 # Initialise libraries.
-libav.avformat_network_init()
+# libav.avformat_network_init()
 libav.avdevice_register_all()
+
+print("registered")
+
 
 # Exports.
 time_base = libav.AV_TIME_BASE
@@ -57,3 +63,6 @@ library_meta = {
 }
 
 library_versions = {name: meta["version"] for name, meta in library_meta.items()}
+
+from pprint import pprint
+pprint(library_versions)

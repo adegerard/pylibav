@@ -1,0 +1,6 @@
+cmake
+meson
+ninja
+numpy
+build
+setuptools

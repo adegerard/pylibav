@@ -1,4 +1,5 @@
 from typing import TypedDict
+print("importing _core.pyi")
 
 class _Meta(TypedDict):
     version: tuple[int, int, int]

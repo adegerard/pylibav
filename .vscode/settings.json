@@ -4,7 +4,8 @@
         "av.egg-info": true,
         "dist": true,
         "venvs": true,
-        "src/pylibav/lib": true
+        "src/pylibav/lib": true,
+        "src/pylibav/include": true,
     },
     // "python.analysis.extraPaths": [
     //     "src/pylibav",

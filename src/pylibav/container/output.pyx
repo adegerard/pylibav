@@ -127,8 +127,9 @@ cdef class OutputContainer(Container):
             codec_context.bit_rate = 128000
             codec_context.bit_rate_tolerance = 32000
             codec_context.sample_rate = rate or 48000
-            codec_context.channels = 2
-            codec_context.channel_layout = libav.AV_CH_LAYOUT_STEREO
+            codec_context.ch_layout.nb_channels = 2
+            codec_context.ch_layout.order = libav.AV_CHANNEL_ORDER_NATIVE
+            codec_context.ch_layout.u.mask = libav.AV_CH_LAYOUT_STEREO
 
         # Some formats want stream headers to be separate
         if self.ptr.oformat.flags & libav.AVFMT_GLOBALHEADER:

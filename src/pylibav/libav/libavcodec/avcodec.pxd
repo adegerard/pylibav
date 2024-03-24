@@ -206,7 +206,7 @@ cdef extern from "libavcodec/avcodec.h" nogil:
         int global_quality
         int compression_level
 
-        int frame_number
+        int64_t frame_num
 
         int qmin
         int qmax
@@ -246,10 +246,9 @@ cdef extern from "libavcodec/avcodec.h" nogil:
 
         # Audio.
         AVSampleFormat sample_fmt
+        AVChannelLayout ch_layout
         int sample_rate
-        int channels
         int frame_size
-        int channel_layout
 
         #: .. todo:: ``get_buffer`` is deprecated for get_buffer2 in newer versions of FFmpeg.
         int get_buffer(AVCodecContext *ctx, AVFrame *frame)

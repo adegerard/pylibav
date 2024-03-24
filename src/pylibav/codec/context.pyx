@@ -582,7 +582,7 @@ cdef class CodecContext:
         if packet is not None:
             frame._time_base = packet._time_base
 
-        frame.index = self.ptr.frame_number - 1
+        frame.index = self.ptr.frame_num - 1
 
 
     @property

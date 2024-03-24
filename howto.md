@@ -1,4 +1,7 @@
 
+
+
+
 This project is a fork of [PyAV](https://github.com/PyAV-Org/PyAV).
 
 What differs from the original branch
@@ -69,14 +72,19 @@ What differs from the original branch
     ```
 
 - Windows  11, python 3.11.8, MSYS2(mingw64)
+
+
+curl
+gperf
+nasm
+
+
+
     ```sh
     pacman -Suy
     pacman -S make
-    pacman -S diffutils
     pacman -S yasm
     pacman -S pkg-config
-    pacman -S mingw-w64-x86_64-python
-    pacman -S mingw-w64-x86_64-python-pip
     ~~pacman -S mingw-w64-x86_64-zlib-devel~~
     ~~base-devel zlib-devel~~
     pacman -S base-devel
@@ -93,3 +101,13 @@ What differs from the original branch
 
 
 `python -m build --wheel`
+
+
+
+1. Build FFmpeg
+```
+conda activate pylibav
+conda install -r requirements.txt
+python ./scripts/build_ffmpeg.py
+
+```
